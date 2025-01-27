@@ -28,40 +28,45 @@ const AddCRP = () => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        const formErrors = validateForm();
-        setErrors(formErrors);
-    
-        if (Object.keys(formErrors).length === 0) {
-            // Log formData to verify its contents before sending
-            console.log("Sending data:", formData);
-    
-            try {
-                const response = await axios.post(
-                    "http://localhost:5000/api/admin/create-crp",  // Ensure the correct API endpoint
-                    formData,  // Send the formData object
-                    {
-                        headers: {
-                            "Content-Type": "application/json",  // Ensure the correct Content-Type
-                        },
-                    }
-                );
-    
-                alert("CRP Member added successfully!");
-                console.log(response.data);
-                setFormData({
-                    name: "",
-                    username: "",
-                    email: "",
-                    mobile: "",
-                    password: "",
-                });
-            } catch (error) {
-                console.error("Error adding CRP Member:", error);
-                alert("Failed to add CRP Member. Please try again.");
-            }
+    e.preventDefault();
+    const formErrors = validateForm();
+    setErrors(formErrors);
+
+    if (Object.keys(formErrors).length === 0) {
+        // Log formData to verify its contents before sending
+        console.log("Sending data:", formData);
+
+        try {
+            // Get token from local storage
+            const token = localStorage.getItem("admin_token");
+
+            const response = await axios.post(
+                "http://localhost:5000/api/admin/create-crp",  // Ensure the correct API endpoint
+                formData, // Send the formData object
+                {
+                    headers: {
+                        "Content-Type": "application/json",  // Ensure the correct Content-Type
+                        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
+                    },
+                }
+            );
+
+            alert("CRP Member added successfully!");
+            console.log(response.data);
+            setFormData({
+                name: "",
+                username: "",
+                email: "",
+                mobile: "",
+                password: "",
+            });
+        } catch (error) {
+            console.error("Error adding CRP Member:", error);
+            alert("Failed to add CRP Member. Please try again.");
         }
-    };
+    }
+};
+
     
     return (
         <div className="min-h-screen bg-gradient-to-r pt-4 from-gray-50 to-gray-100 flex items-center justify-center px-4">
