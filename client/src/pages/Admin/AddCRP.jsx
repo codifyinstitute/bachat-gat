@@ -4,6 +4,7 @@ import axios from "axios";
 const AddCRP = () => {
     const [formData, setFormData] = useState({
         name: "",
+        username: "",
         email: "",
         phone: "",
         password: "",
@@ -19,6 +20,7 @@ const AddCRP = () => {
     const validateForm = () => {
         let formErrors = {};
         if (!formData.name) formErrors.name = "Name is required";
+        if (!formData.username) formErrors.username = "Username is required";
         if (!formData.email) formErrors.email = "Email is required";
         if (!formData.phone) formErrors.phone = "Phone is required";
         if (!formData.password) formErrors.password = "Password is required";
@@ -32,11 +34,12 @@ const AddCRP = () => {
 
         if (Object.keys(formErrors).length === 0) {
             try {
-                const response = await axios.post("https://your-api-endpoint.com/api/addCRP", formData);
+                const response = await axios.post("http://localhost:5000/api/admin/create-crp", formData);
                 alert("CRP Member added successfully!");
                 console.log(response.data);
                 setFormData({
                     name: "",
+                    username: "",
                     email: "",
                     phone: "",
                     password: "",
@@ -49,8 +52,8 @@ const AddCRP = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 flex items-center justify-center px-4">
-            <div className="max-w-lg w-full bg-white shadow-lg rounded-lg p-8">
+        <div className="min-h-screen bg-gradient-to-r pt-4 from-gray-50 to-gray-100 flex items-center justify-center px-4">
+            <div className="max-w-lg w-full bg-white shadow-lg mt-4 rounded-lg p-8">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
                     Add CRP Member
                 </h2>
@@ -70,6 +73,22 @@ const AddCRP = () => {
                             } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                         />
                         {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                    </div>
+                    <div>
+                        <label htmlFor="username" className="block text-sm font-medium text-gray-600">
+                            Username
+                        </label>
+                        <input
+                            type="text"
+                            name="username"
+                            id="username"
+                            value={formData.username}
+                            onChange={handleInputChange}
+                            className={`w-full mt-2 p-3 border ${
+                                errors.username ? "border-red-500" : "border-gray-300"
+                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                        />
+                        {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
                     </div>
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-600">
