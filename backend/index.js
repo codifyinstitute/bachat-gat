@@ -1,36 +1,3 @@
-// require("dotenv").config();
-// const express = require("express");
-// const cors = require("cors");
-// const connectDB = require("./config/database");
-// const adminRoutes = require("./routes/adminRoutes");
-// const crpRoutes = require("./routes/crpRoutes");
-// const fs = require("fs");
-// const path = require("path");
-// // ... other route imports
-
-// const app = express();
-
-// // Middleware
-// app.use(cors());
-// app.use(express.json());
-// app.use("/uploads", express.static("uploads"));
-
-// // Routes
-// app.use("/api/admin", adminRoutes);
-// app.use("/api/crp", crpRoutes);
-// app.use("/api/member", require("./routes/memberRoutes"));
-
-// // ... other routes
-
-// // Connect to database
-// connectDB();
-
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => {
-//   console.log(`Server running on port ${PORT}`);
-// });
-
-// Import required modules
 const fs = require("fs");
 const path = require("path");
 
@@ -45,6 +12,7 @@ if (!fs.existsSync(uploadDir)) {
 
 // Rest of your setup
 require("dotenv").config();
+const groupRoutes = require("./routes/groupRoutes");
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/database");
@@ -63,7 +31,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/admin", adminRoutes);
 app.use("/api/crp", crpRoutes);
 app.use("/api/member", require("./routes/memberRoutes"));
-
+app.use("/api/groups", groupRoutes);
 // Connect to database
 connectDB();
 
