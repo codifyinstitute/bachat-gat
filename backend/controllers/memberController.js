@@ -1,77 +1,7 @@
 const Member = require("../models/Member");
 
 const memberController = {
-  // Create new member
-  // createMember: async (req, res) => {
-  //   try {
-  //     const {
-  //       name,
-  //       address,
-  //       dateOfBirth,
-  //       aadharNo,
-  //       panNo,
-  //       mobileNumber,
-  //       guarantor,
-  //     } = req.body;
 
-  //     // Handle file uploads
-  //     let photo = "";
-  //     let guarantorPhoto = "";
-  //     let guarantorCheque = "";
-  //     let extraDocuments = [];
-
-  //     if (req.files) {
-  //       // Check if files are provided and set them
-  //       if (req.files.photo) {
-  //         photo = req.files.photo[0].path;
-  //       }
-  //       if (req.files.guarantorPhoto) {
-  //         guarantorPhoto = req.files.guarantorPhoto[0].path;
-  //       }
-  //       if (req.files.guarantorCheque) {
-  //         guarantorCheque = req.files.guarantorCheque[0].path;
-  //       }
-  //       if (req.files.extraDocuments) {
-  //         extraDocuments = req.files.extraDocuments.map((file) => file.path);
-  //       }
-  //     }
-
-  //     // Ensure req.user has necessary data from JWT
-  //     const referredBy = {
-  //       crpName: req.user.name,
-  //       crpMobile: req.user.mobile,
-  //       crpId: req.user.id,
-  //     };
-
-  //     // Create new member
-  //     const member = new Member({
-  //       name,
-  //       address,
-  //       dateOfBirth,
-  //       referredBy,
-  //       photo,
-  //       aadharNo,
-  //       panNo,
-  //       mobileNumber,
-  //       guarantor: {
-  //         ...guarantor,
-  //         photo: guarantorPhoto,
-  //         chequePhoto: guarantorCheque,
-  //         extraDocuments,
-  //       },
-  //       createdBy: req.user.id,
-  //     });
-
-  //     await member.save();
-  //     res.status(201).json({
-  //       message: "Member created successfully",
-  //       member,
-  //     });
-  //   } catch (error) {
-  //     console.error(error);
-  //     res.status(500).json({ message: error.message });
-  //   }
-  // },
   createMember: async (req, res) => {
     try {
       const {
