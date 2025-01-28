@@ -1,145 +1,248 @@
-import React, { useState } from 'react';
-import Modal from 'react-modal';
+// import React, { useState, useEffect } from "react";
+// import AOS from "aos";
+// import "aos/dist/aos.css";
 
-Modal.setAppElement('#root'); // Ensures screen readers handle the modal correctly
+// const AllMembers = () => {
+//   const [expandedMemberId, setExpandedMemberId] = useState(null);
+
+//   useEffect(() => {
+//     AOS.init({ duration: 500 });
+//   }, []);
+
+//   const members = [
+//     {
+//       _id: "67976dadd0b95e0d78a2e947",
+//       name: "Shubham Doe Updated",
+//       address: "456 Updated Street",
+//       dateOfBirth: "1990-01-01T00:00:00.000+00:00",
+//       referredBy: {
+//         crpName: "John Doe",
+//         crpMobile: "1234567890",
+//         crpId: "67973b222d4bd6c8d0898869",
+//       },
+//       aadharNo: "123456789012",
+//       panNo: "ABCDE1234F",
+//       mobileNumber: "9876543210",
+//       guarantor: {
+//         name: "Jane Doe",
+//         mobileNo: "1234567890",
+//         relation: "Mother",
+//         photo: "uploads/guarantor-photo.png",
+//       },
+//       chequePhoto: "uploads/cheque-photo.png",
+//       extraDocuments: ["uploads/document1.png", "uploads/document2.png"],
+//       status: "Active",
+//       createdAt: "2025-01-27T11:27:41.305+00:00",
+//       updatedAt: "2025-01-27T11:27:41.305+00:00",
+//     },
+//     {
+//       _id: "67976dadd0b95e0d78a2e947",
+//       name: "Shubham Doe Updated",
+//       address: "456 Updated Street",
+//       dateOfBirth: "1990-01-01T00:00:00.000+00:00",
+//       referredBy: {
+//         crpName: "John Doe",
+//         crpMobile: "1234567890",
+//         crpId: "67973b222d4bd6c8d0898869",
+//       },
+//       aadharNo: "123456789012",
+//       panNo: "ABCDE1234F",
+//       mobileNumber: "9876543210",
+//       guarantor: {
+//         name: "Jane Doe",
+//         mobileNo: "1234567890",
+//         relation: "Mother",
+//         photo: "uploads/guarantor-photo.png",
+//       },
+//       chequePhoto: "uploads/cheque-photo.png",
+//       extraDocuments: ["uploads/document1.png", "uploads/document2.png"],
+//       status: "Inactive",
+//       createdAt: "2025-01-27T11:27:41.305+00:00",
+//       updatedAt: "2025-01-27T11:27:41.305+00:00",
+//     },
+//   ];
+
+//   const toggleDropdown = (id) => {
+//     setExpandedMemberId((prevId) => (prevId === id ? null : id));
+//   };
+
+//   return (
+//     <div className="flex flex-col items-center mt-14 min-h-screen bg-gray-100 p-4">
+//       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
+//         <h1 className="text-2xl font-semibold text-gray-700 mb-4">All Members</h1>
+
+//         <div className="overflow-x-auto">
+//           <table className="min-w-full bg-white">
+//             <thead>
+//               <tr className="text-gray-600 text-left border-b">
+//                 <th className="py-3 px-4">Member Name</th>
+//                 <th className="py-3 px-4">Mobile</th>
+//                 <th className="py-3 px-4">Email</th>
+//                 <th className="py-3 px-4">Status</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {members.map((member) => (
+//                 <React.Fragment key={member._id}>
+//                   <tr
+//                     onClick={() => toggleDropdown(member._id)}
+//                     className="border-b hover:bg-gray-100 cursor-pointer transition"
+//                   >
+//                     <td className="py-3 px-4">{member.name}</td>
+//                     <td className="py-3 px-4">{member.mobileNumber}</td>
+//                     <td className="py-3 px-4">{member.referredBy?.crpName}@example.com</td>
+//                     <td className="py-3 px-4">
+//                       <span
+//                         className={`px-3 py-1 text-sm font-medium rounded-full ${
+//                           member.status === "Active"
+//                             ? "bg-green-200 text-green-700"
+//                             : "bg-red-200 text-red-700"
+//                         }`}
+//                       >
+//                         {member.status}
+//                       </span>
+//                     </td>
+//                   </tr>
+
+//                   {/* Dropdown Content */}
+//                   {expandedMemberId === member._id && (
+//                     <tr data-aos="fade-down">
+//                       <td colSpan="4" className="p-4 bg-gray-50">
+//                         <div className="p-4 bg-white shadow-md rounded-lg">
+//                           <h3 className="text-lg font-semibold text-gray-700">Member Details</h3>
+//                           <p className="text-gray-600"><strong>ID:</strong> {member._id}</p>
+//                           <p className="text-gray-600"><strong>Name:</strong> {member.name}</p>
+//                           <p className="text-gray-600"><strong>Address:</strong> {member.address}</p>
+//                           <p className="text-gray-600"><strong>Date of Birth:</strong> {new Date(member.dateOfBirth).toLocaleDateString()}</p>
+//                           <p className="text-gray-600"><strong>Aadhar No:</strong> {member.aadharNo}</p>
+//                           <p className="text-gray-600"><strong>PAN No:</strong> {member.panNo}</p>
+//                           <p className="text-gray-600"><strong>Mobile Number:</strong> {member.mobileNumber}</p>
+
+//                           {/* Referred By */}
+//                           {member.referredBy && (
+//                             <div className="mt-2">
+//                               <h3 className="font-semibold">Referred By</h3>
+//                               <p><strong>Name:</strong> {member.referredBy.crpName}</p>
+//                               <p><strong>Mobile:</strong> {member.referredBy.crpMobile}</p>
+//                               <p><strong>ID:</strong> {member.referredBy.crpId}</p>
+//                             </div>
+//                           )}
+
+//                           {/* Guarantor Details */}
+//                           {member.guarantor && (
+//                             <div className="mt-2">
+//                               <h3 className="font-semibold">Guarantor</h3>
+//                               <p><strong>Name:</strong> {member.guarantor.name}</p>
+//                               <p><strong>Mobile No:</strong> {member.guarantor.mobileNo}</p>
+//                               <p><strong>Relation:</strong> {member.guarantor.relation}</p>
+//                               <img src={member.guarantor.photo} alt="Guarantor" className="mt-2 w-24 rounded-md" />
+//                             </div>
+//                           )}
+
+//                           {/* Cheque & Extra Documents */}
+//                           {member.chequePhoto && (
+//                             <div className="mt-2">
+//                               <h3 className="font-semibold">Cheque Photo</h3>
+//                               <img src={member.chequePhoto} alt="Cheque" className="mt-2 w-24 rounded-md" />
+//                             </div>
+//                           )}
+
+//                           {member.extraDocuments && member.extraDocuments.length > 0 && (
+//                             <div className="mt-2">
+//                               <h3 className="font-semibold">Extra Documents</h3>
+//                               {member.extraDocuments.map((doc, index) => (
+//                                 <img key={index} src={doc} alt={`Document ${index + 1}`} className="mt-2 w-24 rounded-md" />
+//                               ))}
+//                             </div>
+//                           )}
+
+//                           <p className="text-gray-600"><strong>Created At:</strong> {new Date(member.createdAt).toLocaleDateString()}</p>
+//                           <p className="text-gray-600"><strong>Updated At:</strong> {new Date(member.updatedAt).toLocaleDateString()}</p>
+//                         </div>
+//                       </td>
+//                     </tr>
+//                   )}
+//                 </React.Fragment>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default AllMembers;
+
+
+
+
+
+import React from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+import "aos/dist/aos.css";
 
 const AllMembers = () => {
-  const [members] = useState([
+  const navigate = useNavigate(); // Get navigate function
+
+  const members = [
     {
       _id: "67976dadd0b95e0d78a2e947",
       name: "Shubham Doe Updated",
-      address: "456 Updated Street",
-      dateOfBirth: "1990-01-01T00:00:00.000+00:00",
-      referredBy: {
-        crpName: "John Doe",
-        crpMobile: "1234567890",
-        crpId: "67973b222d4bd6c8d0898869",
-      },
-      aadharNo: "123456789012",
-      panNo: "ABCDE1234F",
       mobileNumber: "9876543210",
-      guarantor: {
-        name: "Jane Doe",
-        mobileNo: "1234567890",
-        relation: "Mother",
-        photo: "uploads/guarantor-photo.png",
-      },
-      chequePhoto: "uploads/cheque-photo.png",
-      extraDocuments: ["uploads/document1.png", "uploads/document2.png"],
-      status: "active",
-      createdAt: "2025-01-27T11:27:41.305+00:00",
-      updatedAt: "2025-01-27T11:27:41.305+00:00",
+      referredBy: { crpName: "John Doe" },
+      status: "Active",
     },
-  ]);
-
-  const [selectedMember, setSelectedMember] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const openModal = (member) => {
-    setSelectedMember(member);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setSelectedMember(null);
-    setIsModalOpen(false);
-  };
+    {
+      _id: "67976dadd0b95e0d78a2e948",
+      name: "John Doe",
+      mobileNumber: "9876543211",
+      referredBy: { crpName: "Jane Doe" },
+      status: "Inactive",
+    },
+  ];
 
   return (
-    <div className=" flex justify-center items-center flex-col">
+    <div className="flex flex-col items-center mt-14 min-h-screen bg-gray-100 p-4">
+      <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
+        <h1 className="text-2xl font-semibold text-gray-700 mb-4">All Members</h1>
 
-      {/* Main Content */}
-      <div className="flex-1">
-        <div className="container mx-auto p-4">
-          <ul className="flex flex-col bg-gray-300 p-4">
-            {members.map((member) => (
-              <li key={member._id} className="border-gray-400 flex flex-row mb-2">
-                <div
-                  onClick={() => openModal(member)}
-                  className="select-none cursor-pointer bg-gray-200 rounded-md flex flex-1 items-center p-4 transition duration-500 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white">
+            <thead>
+              <tr className="text-gray-600 text-left border-b">
+                <th className="py-3 px-4">Member Name</th>
+                <th className="py-3 px-4">Mobile</th>
+                <th className="py-3 px-4">Email</th>
+                <th className="py-3 px-4">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {members.map((member) => (
+                <tr
+                  key={member._id}
+                  onClick={() => navigate(`/admin/member/${member._id}`)} // Navigate to details page
+                  className="border-b hover:bg-gray-100 cursor-pointer transition"
                 >
-                  <div className="flex flex-col rounded-md w-10 h-10 bg-gray-300 justify-center items-center mr-4">
-                    👤
-                  </div>
-                  <div className="flex-1 pl-1">
-                    <div className="font-medium">
-                      <p>{member.name}</p>
-                      <p className="text-gray-600 text-xs">ID: {member._id}</p>
-                    </div>
-                  </div>
-                  <div className="text-gray-600 text-sm">
-                    <p>Ref: {member.referredBy?.crpName || "N/A"}</p>
-                    <p>ID: {member.referredBy?.crpId || "N/A"}</p>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+                  <td className="py-3 px-4">{member.name}</td>
+                  <td className="py-3 px-4">{member.mobileNumber}</td>
+                  <td className="py-3 px-4">{member.referredBy.crpName}@example.com</td>
+                  <td className="py-3 px-4">
+                    <span
+                      className={`px-3 py-1 text-sm font-medium rounded-full ${
+                        member.status === "Active"
+                          ? "bg-green-200 text-green-700"
+                          : "bg-red-200 text-red-700"
+                      }`}
+                    >
+                      {member.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-
-        {/* Modal */}
-        <Modal
-          isOpen={isModalOpen}
-          onRequestClose={closeModal}
-          contentLabel="Member Details"
-          className="bg-white rounded-lg w-[100%] shadow-lg p-6 max-w-[50%] h-[90vh] mx-auto mt-10 outline-none overflow-y-auto mb-10"
-          overlayClassName="fixed inset-0 w-full z-3 bg-gray-100 bg-opacity-50 flex justify-center items-start"
-        >
-          {selectedMember && (
-            <div>
-              <h2 className="text-xl font-bold mb-4">Member Details</h2>
-              <p><strong>ID:</strong> {selectedMember._id}</p>
-              {selectedMember.name && <p><strong>Name:</strong> {selectedMember.name}</p>}
-              {selectedMember.address && <p><strong>Address:</strong> {selectedMember.address}</p>}
-              {selectedMember.dateOfBirth && <p><strong>Date of Birth:</strong> {new Date(selectedMember.dateOfBirth).toLocaleDateString()}</p>}
-              {selectedMember.referredBy && (
-                <div>
-                  <h3 className="font-semibold mt-2">Referred By</h3>
-                  {selectedMember.referredBy.crpName && <p><strong>Name:</strong> {selectedMember.referredBy.crpName}</p>}
-                  {selectedMember.referredBy.crpMobile && <p><strong>Mobile:</strong> {selectedMember.referredBy.crpMobile}</p>}
-                  {selectedMember.referredBy.crpId && <p><strong>ID:</strong> {selectedMember.referredBy.crpId}</p>}
-                </div>
-              )}
-              {selectedMember.aadharNo && <p><strong>Aadhar No:</strong> {selectedMember.aadharNo}</p>}
-              {selectedMember.panNo && <p><strong>PAN No:</strong> {selectedMember.panNo}</p>}
-              {selectedMember.mobileNumber && <p><strong>Mobile Number:</strong> {selectedMember.mobileNumber}</p>}
-              {selectedMember.guarantor && (
-                <div>
-                  <h3 className="font-semibold mt-2">Guarantor</h3>
-                  {selectedMember.guarantor.name && <p><strong>Name:</strong> {selectedMember.guarantor.name}</p>}
-                  {selectedMember.guarantor.mobileNo && <p><strong>Mobile No:</strong> {selectedMember.guarantor.mobileNo}</p>}
-                  {selectedMember.guarantor.relation && <p><strong>Relation:</strong> {selectedMember.guarantor.relation}</p>}
-                  {selectedMember.guarantor.photo && (
-                    <div>
-                      <strong>Photo:</strong>
-                      <img src={selectedMember.guarantor.photo} alt="Guarantor" className="mt-2 max-w-xs" />
-                    </div>
-                  )}
-                </div>
-              )}
-              {selectedMember.chequePhoto && (
-                <div>
-                  <strong>Cheque Photo:</strong>
-                  <img src={selectedMember.chequePhoto} alt="Cheque" className="mt-2 max-w-xs" />
-                </div>
-              )}
-              {selectedMember.extraDocuments && selectedMember.extraDocuments.length > 0 && (
-                <div>
-                  <h3 className="font-semibold mt-2">Extra Documents</h3>
-                  {selectedMember.extraDocuments.map((doc, index) => (
-                    <div key={index}>
-                      <img src={doc} alt={`Document ${index + 1}`} className="mt-2 max-w-xs" />
-                    </div>
-                  ))}
-                </div>
-              )}
-              {selectedMember.status && <p><strong>Status:</strong> {selectedMember.status}</p>}
-              {selectedMember.createdAt && <p><strong>Created At:</strong> {new Date(selectedMember.createdAt).toLocaleDateString()}</p>}
-              {selectedMember.updatedAt && <p><strong>Updated At:</strong> {new Date(selectedMember.updatedAt).toLocaleDateString()}</p>}
-              <button onClick={closeModal} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Close</button>
-            </div>
-          )}
-        </Modal>
       </div>
     </div>
   );

@@ -20,6 +20,7 @@ const Sidebar = ({ role }) => {
       { name: "Home", path: "/crp/home", icon: <Users /> },
       { name: "All Members", path: "/crp/all-members", icon: <Users /> },
       { name: "Add Members", path: "/crp/add-members", icon: <UserPlus /> },
+      { name: "Add Groups", path: "/crp/add-groups", icon: <UserPlus /> },
       { name: "Approval List", path: "/crp/approval-list", icon: <CheckCircle /> },
       { name: "Approved List", path: "/crp/approved-list", icon: <CheckCircle /> },
     ],
