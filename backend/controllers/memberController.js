@@ -1,7 +1,6 @@
 const Member = require("../models/Member");
 
 const memberController = {
-
   createMember: async (req, res) => {
     try {
       const {
@@ -124,7 +123,7 @@ const memberController = {
   // Get all members
   getAllMembers: async (req, res) => {
     try {
-      const members = await Member.find({ createdBy: req.user.id });
+      const members = await Member.find();
       res.json(members);
     } catch (error) {
       console.error(error);
