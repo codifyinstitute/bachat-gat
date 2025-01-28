@@ -1,4 +1,3 @@
-// models/Group.js
 const mongoose = require("mongoose");
 
 const groupSchema = new mongoose.Schema(
@@ -36,7 +35,7 @@ const groupSchema = new mongoose.Schema(
         },
         role: {
           type: String,
-          enum: ["president", "secretary", "member"],
+          enum: ["member"], // Only "member" role for users
           required: true,
         },
         joinedAt: {
@@ -58,27 +57,5 @@ const groupSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-// Middleware to validate group constraints
-groupSchema.pre("save", async function (next) {
-  // Check maximum members limit
-  if (this.members.length > 10) {
-    throw new Error("Group cannot have more than 10 members");
-  }
-
-  // Ensure there is exactly one president and one secretary
-  const presidentCount = this.members.filter(
-    (m) => m.role === "president"
-  ).length;
-  const secretaryCount = this.members.filter(
-    (m) => m.role === "secretary"
-  ).length;
-
-  if (presidentCount !== 1 || secretaryCount !== 1) {
-    throw new Error("Group must have exactly one president and one secretary");
-  }
-
-  next();
-});
 
 module.exports = mongoose.model("Group", groupSchema);

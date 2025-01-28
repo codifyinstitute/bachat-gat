@@ -2,10 +2,16 @@ const Group = require("../models/Group");
 const Member = require("../models/Member");
 
 const groupController = {
-  // Create new group
   createGroup: async (req, res) => {
     try {
       const { name, address, members } = req.body;
+      console.log("User :", req.user);
+      // Ensure that the user creating the group is a CRP
+      if (req.user.role !== "crp") {
+        return res.status(403).json({
+          message: "Only CRPs can create groups",
+        });
+      }
 
       // Validate member IDs and check if they're already in other groups
       for (const memberData of members) {
@@ -36,6 +42,12 @@ const groupController = {
         }
       }
 
+      // Ensure all roles are set to 'member' as per requirement
+      const validatedMembers = members.map((m) => ({
+        ...m,
+        role: "member", // Only 'member' role for users
+      }));
+
       const group = new Group({
         name,
         address,
@@ -44,7 +56,7 @@ const groupController = {
           crpMobile: req.user.mobile,
           crpId: req.user.id,
         },
-        members,
+        members: validatedMembers,
         createdBy: req.user.id,
       });
 
