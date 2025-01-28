@@ -28,12 +28,14 @@ const Sidebar = ({ role }) => {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Mobile Toggle Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="absolute top-4 left-65 z-15 p-2 bg-gray-800 text-white rounded-md md:hidden"
-      >
-        {isOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
+      <div className=" absolute flex justify-end p-4 w-full">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className=" top-4 left-65 z-15 p-2 bg-gray-800 text-white rounded-md md:hidden"
+        >
+          {isOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+      </div>
 
       {/* Sidebar */}
       <aside

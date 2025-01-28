@@ -83,6 +83,7 @@ const adminController = {
       });
 
       await crp.save();
+      console.log(req.body);
       res.status(201).json({ message: "CRP created successfully", crp });
     } catch (error) {
       res.status(500).json({ message: error.message });

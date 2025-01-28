@@ -4,6 +4,7 @@ import Sidebar from "./pages/Layout/Sidebar";
 // import Sidebar from './components/Sidebar'
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AddCRP from "./pages/Admin/AddCRP";
+import AllMembers from "./pages/Admin/AllMembers";
 // import from "./pages/Admin/AdminDashboard";
 function App() {
 
@@ -16,8 +17,8 @@ function App() {
       <Route path="admin/*" element={<Sidebar role="admin" />}>
           <Route path="AdminDashboard" element={<AdminDashboard />} />
           <Route path="add-crp" element={<AddCRP />} />
-          {/* <Route path="all-members" element={<AllMembers />} />
-          <Route path="group-members" element={<GroupMembers />} />
+          <Route path="all-members" element={<AllMembers />} />
+          {/*<Route path="group-members" element={<GroupMembers />} />
           <Route path="approval-list" element={<ApprovalList />} />
           <Route path="approved-list" element={<ApprovedList />} /> */}
         </Route>
