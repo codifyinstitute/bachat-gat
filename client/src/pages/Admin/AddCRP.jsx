@@ -39,6 +39,7 @@ const AddCRP = () => {
         try {
             // Get token from local storage
             const token = localStorage.getItem("admin_token");
+            console.log("Token:", token);
 
             const response = await axios.post(
                 "http://localhost:5000/api/admin/create-crp",  // Ensure the correct API endpoint
