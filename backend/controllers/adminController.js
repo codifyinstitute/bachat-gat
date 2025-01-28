@@ -1,7 +1,7 @@
 const Admin = require("../models/Admin");
 const CRP = require("../models/CRP");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 
 const adminController = {
   // Login Controller
@@ -69,15 +69,16 @@ const adminController = {
     try {
       const { name, mobile, email, username, password } = req.body;
 
-      // Hash the password before saving
-      const hashedPassword = await bcrypt.hash(password, 10);
+      // Hash the password using bcrypt before saving it to the database
+      // const hashedPassword = await bcrypt.hash(password, 10); // 10 is the saltRounds (default recommended)
 
+      // Create a new CRP document with hashed password
       const crp = new CRP({
         name,
         mobile,
         email,
         username,
-        password: hashedPassword, // Save hashed password
+        password, // Store the hashed password
         createdBy: req.user.id,
       });
 
