@@ -164,11 +164,25 @@ const groupController = {
   },
 
   // Get all groups
+  // getAllGroups: async (req, res) => {
+  //   try {
+  //     const groups = await Group.find({ createdBy: req.user.id })
+  //       .populate("members.member", "name mobileNumber")
+  //       .populate("createdBy", "name");
+  //     console.log("reqID :", req.user.id);
+  //     res.json(groups);
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
   getAllGroups: async (req, res) => {
     try {
-      const groups = await Group.find({ createdBy: req.user.id })
+
+      // If the user is an admin, get all groups without filtering by createdBy
+      const groups = await Group.find()
         .populate("members.member", "name mobileNumber")
         .populate("createdBy", "name");
+
 
       res.json(groups);
     } catch (error) {
