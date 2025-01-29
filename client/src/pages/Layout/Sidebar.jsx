@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { UserPlus, Users, List, CheckCircle, Menu, X } from "lucide-react";
-import logo from '../../assets/Images/logo.png';
+import logo from "../../assets/Images/logo.png";
 
 const Sidebar = ({ role }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,19 +13,40 @@ const Sidebar = ({ role }) => {
       { name: "Add CRP", path: "/admin/add-crp", icon: <UserPlus /> },
       { name: "All Members", path: "/admin/all-members", icon: <Users /> },
       { name: "Group-wise Members", path: "/admin/groups", icon: <List /> },
-      { name: "Approval List", path: "/admin/approvallist", icon: <CheckCircle /> },
-      { name: "Approved List", path: "/admin/approvedlist", icon: <CheckCircle /> },
+      {
+        name: "Approval List",
+        path: "/admin/approvallist",
+        icon: <CheckCircle />,
+      },
+      {
+        name: "Approved List",
+        path: "/admin/approvedlist",
+        icon: <CheckCircle />,
+      },
     ],
     crp: [
       { name: "Home", path: "/crp/home", icon: <Users /> },
       { name: "All Members", path: "/crp/Crp-members", icon: <Users /> },
       { name: "Add Members", path: "/crp/add-members", icon: <UserPlus /> },
       { name: "Add Groups", path: "/crp/add-groups", icon: <UserPlus /> },
-      { name: "Loan Sanction", path: "/crp/Crp-loansanction", icon: <CheckCircle /> },
-      { name: "Approved List", path: "/crp/crpapprovedlist", icon: <CheckCircle /> },
-      { name: "Pending Loans", path: "/crp/pending-loans", icon: <CheckCircle /> },
+      {
+        name: "Loan Sanction",
+        path: "/crp/Crp-loansanction",
+        icon: <CheckCircle />,
+      },
+      {
+        name: "Approved List",
+        path: "/crp/crpapprovedlist",
+        icon: <CheckCircle />,
+      },
+      {
+        name: "Pending Loans",
+        path: "/crp/pending-loans",
+        icon: <CheckCircle />,
+      },
       { name: "Collections", path: "/crp/collection", icon: <CheckCircle /> },
-      { name: "Payments", path: "/crp/payment", icon: <CheckCircle /> },
+      // { name: "Payments", path: "/crp/payment", icon: <CheckCircle /> },
+      { name: "PaymentPage", path: "/crp/PaymentPage", icon: <CheckCircle /> },
     ],
   };
 
