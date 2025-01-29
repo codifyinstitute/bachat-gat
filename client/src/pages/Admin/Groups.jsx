@@ -1,115 +1,99 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
-import { Users, User } from "lucide-react"; // Importing specific Lucide icons
-import AOS from "aos";
-import "aos/dist/aos.css"; // Import AOS CSS for animations
+import { Eye } from "lucide-react"; // For eye icon
 
 const GroupsList = () => {
-  const [groups, setGroups] = useState([]);
-  const [loading, setLoading] = useState(false);
+    const [groups, setGroups] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Initialize AOS for animations
-    AOS.init();
+    useEffect(() => {
+        fetchGroups();
+    }, []);
 
     const fetchGroups = async () => {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem("admin_token");
+        try {
+            const token = localStorage.getItem("admin_token");
+            console.log(token)
 
-        if (!token) {
-          alert("Authorization token is missing.");
-          return;
+            const response = await axios.get("http://localhost:5000/api/groups", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+
+            console.log("API Response:", response.data); // Debugging the API response
+
+            setGroups(response.data);
+            setLoading(false);
+        } catch (error) {
+            console.error("Error fetching groups:", error);
+            setLoading(false);
+            alert("Failed to fetch groups.");
         }
-
-        const response = await axios.get("http://localhost:5000/api/groups", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        setGroups(response.data);
-      } catch (error) {
-        console.error("Error fetching groups:", error);
-        alert("Failed to fetch groups. Please try again.");
-      } finally {
-        setLoading(false);
-      }
     };
 
-    fetchGroups();
-  }, []);
+    return (
+        <div className="p-4 sm:p-6 max-w-7xl mx-auto bg-gray-100 min-h-screen">
+            <h1 className="text-xl sm:text-2xl font-bold text-center mb-6">Groups List</h1>
+            {loading ? (
+                <div className="text-center text-gray-500">Loading groups...</div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {groups.length === 0 ? (
+                        <div className="text-center text-gray-500">No groups available</div>
+                    ) : (
+                        groups.map((group) => (
+                            <div
+                                key={group._id}
+                                className="group-card bg-white shadow-lg rounded-lg p-6 hover:shadow-2xl transform transition-all duration-300"
+                            >
+                                <div className="group-header flex justify-between items-center">
+                                    <h3 className="text-lg font-semibold text-gray-800">{group.name}</h3>
+                                    <p className="text-sm text-gray-500">{group.status}</p>
+                                </div>
+                                <p className="text-sm text-gray-600">Address: {group.address}</p>
 
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-6">Groups</h1>
-
-      {loading ? (
-        <p>Loading groups...</p>
-      ) : (
-        <div>
-          {groups.map((group) => (
-            <div
-              key={group._id}
-              className="bg-white shadow-md rounded p-4 mb-4"
-              data-aos="fade-up"
-              data-aos-duration="500"
-            >
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  {/* Group Icon with fallback */}
-                  <img
-                    src={group.icon || "https://via.placeholder.com/40"} // Placeholder icon URL
-                    alt={group.name}
-                    className="w-10 h-10 rounded-full mr-4"
-                  />
-                  <h2 className="text-xl font-semibold">{group.name}</h2>
+                                <div className="hidden-details mt-4 group-hover:block hidden opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    {group.referredBy && (
+                                        <div className="text-sm text-gray-600 mt-2">
+                                            <strong>Referred By:</strong> {group.referredBy.crpName}
+                                        </div>
+                                    )}
+                                    {group.referredBy && group.referredBy.crpMobile && (
+                                        <div className="text-sm text-gray-600 mt-1">
+                                            <strong>Referred Mobile:</strong> {group.referredBy.crpMobile}
+                                        </div>
+                                    )}
+                                    {group.members && group.members.length > 0 && (
+                                        <div className="text-sm text-gray-600 mt-1">
+                                            <strong>Members:</strong>{" "}
+                                            {group.members.map((member, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs mr-2"
+                                                >
+                                                    {member.member}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="text-center mt-4">
+                                    <button
+                                        className="bg-blue-500 text-white px-3 py-1 text-sm rounded flex items-center justify-center"
+                                        onClick={() => alert(`View more details for group: ${group.name}`)}
+                                    >
+                                        <Eye className="w-4 h-4 mr-1" /> View
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
-                <p>{group.members.length} Members</p>
-              </div>
-
-              {/* AOS animation for showing the dropdown */}
-              <div
-                className="group-dropdown cursor-pointer text-blue-500 hover:underline mt-2"
-                data-aos="fade-down"
-                data-aos-duration="300"
-              >
-                <span>View Members</span>
-                {/* Dropdown List */}
-                <div className="dropdown-content mt-2 p-2 bg-gray-100 rounded">
-                  {group.members.length > 0 ? (
-                    group.members.map((member) => (
-                      <div
-                        key={member._id}
-                        className="flex justify-between items-center p-2 hover:bg-gray-200"
-                      >
-                        <div className="flex items-center">
-                          {/* Lucide User Icon */}
-                          <User className="w-5 h-5 mr-2 text-gray-600" />
-                          <span>{member.name}</span>
-                        </div>
-                        <span>{member.mobileNumber}</span>
-                        <Link
-                          to={`/admin/member/${member._id}`}
-                          className="text-blue-500"
-                        >
-                          View Details
-                        </Link>
-                      </div>
-                    ))
-                  ) : (
-                    <p>No members available.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default GroupsList;

@@ -17,6 +17,7 @@ import Groups from "./pages/Admin/Groups";
 import LoanSanctionForm from "./pages/Crp/LoanSanctionForm";
 import ApprovalList from "./pages/Admin/Approvallist";
 import PendingLoans from "./pages/Crp/PendingLoans"
+import ApprovedList from "./pages/Admin/ApprovedList";
 
 AOS.init();
 
@@ -36,6 +37,7 @@ function App() {
           <Route path="groups" element={<Groups/>}/>
           <Route path="member/:id" element={<MemberDetails />} />
           <Route path="approvallist" element={<ApprovalList/>}/>
+          <Route path="approvedlist" element={<ApprovedList/>}/>
         </Route>
 
         <Route path="crp/*" element={<Sidebar role="crp" />}>
@@ -44,7 +46,7 @@ function App() {
         <Route path="Crp-members" element={<CrpMembers/>}/>
         <Route path="Crp-memdetails/:id" element={<CrpMemdetails/>}/>
         <Route path="Crp-loansanction" element={<LoanSanctionForm/>}/>
-          <Route path="pending-loans" element={<PendingLoans/>}/>
+        <Route path="pending-loans" element={<PendingLoans/>}/>
         </Route>
     </Routes>
 

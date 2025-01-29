@@ -23,7 +23,7 @@ const AdminApprovalList = () => {
                 },
             });
 
-            const pendingLoans = response.data.filter((loan) => loan.status === "pending");
+            const pendingLoans = response.data.filter((loan) => loan.status === "approved");
             setLoans(pendingLoans);
         } catch (error) {
             console.error("Error fetching loans:", error);
@@ -31,34 +31,34 @@ const AdminApprovalList = () => {
         }
     };
 
-    const approveLoan = async (loanId) => {
-        setLoading(true);
-        setMessage("");
+    // const approveLoan = async (loanId) => {
+    //     setLoading(true);
+    //     setMessage("");
 
-        try {
-            const token = localStorage.getItem("admin_token");
+    //     try {
+    //         const token = localStorage.getItem("admin_token");
 
-            // Sending POST request to approve the loan
-            await axios.post(
-                `http://localhost:5000/api/loan/${loanId}/approve`,
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+    //         // Sending POST request to approve the loan
+    //         await axios.post(
+    //             `http://localhost:5000/api/loan/${loanId}/approve`,
+    //             {},
+    //             {
+    //                 headers: {
+    //                     Authorization: `Bearer ${token}`,
+    //                     "Content-Type": "application/json",
+    //                 },
+    //             }
+    //         );
 
-            setMessage("Loan approved successfully!");
-            fetchLoans(); // Refresh loan list after approval
-        } catch (error) {
-            console.error("Error approving loan:", error);
-            setMessage("Error approving loan.");
-        } finally {
-            setLoading(false);
-        }
-    };
+    //         setMessage("Loan approved successfully!");
+    //         fetchLoans(); // Refresh loan list after approval
+    //     } catch (error) {
+    //         console.error("Error approving loan:", error);
+    //         setMessage("Error approving loan.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     return (
         <div className="p-4 sm:p-6 max-w-7xl mx-auto bg-gray-100 min-h-screen">
@@ -84,13 +84,13 @@ const AdminApprovalList = () => {
                                     >
                                         <Eye className="w-4 h-4 sm:w-5 sm:h-5 mr-1" /> {expandedLoanId === loan._id ? "Hide" : "View"}
                                     </button>
-                                    <button
+                                    {/* <button
                                         onClick={() => approveLoan(loan._id)}
                                         disabled={loading}
                                         className="bg-green-500 text-white px-3 py-1 text-sm rounded flex items-center justify-center"
                                     >
                                         <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1" /> {loading ? "Approving..." : "Approve"}
-                                    </button>
+                                    </button> */}
                                 </div>
 
                                 {/* Expanded Loan Details */}
