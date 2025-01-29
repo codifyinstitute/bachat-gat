@@ -95,10 +95,9 @@ const AddMember = () => {
             });
             console.log('Member data submitted successfully', response.data);
         } catch (error) {
-            console.error('Error submitting member data', error);
+            console.error('Error submitting member data', error.response || error);
         }
     };
-    
 
     return (
         <div className="flex justify-center items-center h-[100vh] bg-gray-100">
@@ -213,7 +212,7 @@ const AddMember = () => {
                             name="guarantorCheque"
                             onChange={handleFileChange}
                         />
-                    </div>
+                    </div>  
 
                     {/* Guarantor Information */}
                     <div className="mb-6">
@@ -264,18 +263,18 @@ const AddMember = () => {
                         </div>
                     </div>
 
+                    </div>
                     <div className="flex justify-center mb-4">
                         <button
                             type="submit"
-                            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                            className=" bg-blue-500 hover:bg-blue-700 w-20 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                         >
                             Submit
                         </button>
-                    </div>
-                    </div>
-                </form>
-            </div>
-        );
-    };
+                </div>
+            </form>
+        </div>
+    );
+};
 
 export default AddMember;

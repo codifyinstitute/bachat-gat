@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { Eye, EyeOff, Copy } from "lucide-react";
 
 const AddCRP = () => {
     const [formData, setFormData] = useState({
@@ -11,10 +12,19 @@ const AddCRP = () => {
     });
 
     const [errors, setErrors] = useState({});
+    const [showPassword, setShowPassword] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({ ...prevData, [name]: value }));
+    };
+
+    const handleCopy = () => {
+        const textToCopy = `Email: ${formData.email}\nPassword: ${formData.password}`;
+        navigator.clipboard.writeText(textToCopy);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1000);
     };
 
     const validateForm = () => {
@@ -28,47 +38,44 @@ const AddCRP = () => {
     };
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formErrors = validateForm();
-    setErrors(formErrors);
+        e.preventDefault();
+        const formErrors = validateForm();
+        setErrors(formErrors);
 
-    if (Object.keys(formErrors).length === 0) {
-        // Log formData to verify its contents before sending
-        console.log("Sending data:", formData);
-
-        try {
-            // Get token from local storage
-            const token = localStorage.getItem("admin_token");
-            console.log("Token:", token);
-
-            const response = await axios.post(
-                "http://localhost:5000/api/admin/create-crp",  // Ensure the correct API endpoint
-                formData, // Send the formData object
-                {
-                    headers: {
-                        "Content-Type": "application/json",  // Ensure the correct Content-Type
-                        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-                    },
+        if (Object.keys(formErrors).length === 0) {
+            try {
+                const token = localStorage.getItem("admin_token");
+                if (!token) {
+                    alert("Authorization token is missing.");
+                    return;
                 }
-            );
 
-            alert("CRP Member added successfully!");
-            console.log(response.data);
-            setFormData({
-                name: "",
-                username: "",
-                email: "",
-                mobile: "",
-                password: "",
-            });
-        } catch (error) {
-            console.error("Error adding CRP Member:", error);
-            alert("Failed to add CRP Member. Please try again.");
+                await axios.post(
+                    "http://localhost:5000/api/admin/create-crp",
+                    formData,
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+
+                alert("CRP Member added successfully!");
+                setFormData({
+                    name: "",
+                    username: "",
+                    email: "",
+                    mobile: "",
+                    password: "",
+                });
+            } catch (error) {
+                console.error("Error adding CRP Member:", error);
+                alert("Failed to add CRP Member. Please try again.");
+            }
         }
-    }
-};
+    };
 
-    
     return (
         <div className="min-h-screen bg-gradient-to-r pt-4 from-gray-50 to-gray-100 flex items-center justify-center px-4">
             <div className="max-w-lg w-full bg-white shadow-lg mt-4 rounded-lg p-8">
@@ -92,6 +99,7 @@ const AddCRP = () => {
                         />
                         {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                     </div>
+
                     <div>
                         <label htmlFor="username" className="block text-sm font-medium text-gray-600">
                             Username
@@ -108,6 +116,7 @@ const AddCRP = () => {
                         />
                         {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
                     </div>
+
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-600">
                             Email
@@ -124,6 +133,7 @@ const AddCRP = () => {
                         />
                         {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                     </div>
+
                     <div>
                         <label htmlFor="mobile" className="block text-sm font-medium text-gray-600">
                             Phone
@@ -140,24 +150,45 @@ const AddCRP = () => {
                         />
                         {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>}
                     </div>
+
                     <div>
                         <label htmlFor="password" className="block text-sm font-medium text-gray-600">
                             Password
                         </label>
-                        <input
-                            type="password"
-                            name="password"
-                            id="password"
-                            value={formData.password}
-                            onChange={handleInputChange}
-                            className={`w-full mt-2 p-3 border ${
-                                errors.password ? "border-red-500" : "border-gray-300"
-                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
-                        />
-                        {errors.password && (
-                            <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-                        )}
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                id="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                className={`w-full mt-2 p-3 border ${
+                                    errors.password ? "border-red-500" : "border-gray-300"
+                                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute top-6 right-10 text-gray-500 hover:text-gray-700"
+                            >
+                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
+                        {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
                     </div>
+
+                    <div className="relative">
+                        <button
+                            type="button"
+                            onClick={handleCopy}
+                            className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                            <Copy className="w-5 h-5" />
+                            <span>Copy Email & Password</span>
+                        </button>
+                        {copied && <p className="text-green-600 text-xs mt-1">Copied!</p>}
+                    </div>
+
                     <div>
                         <button
                             type="submit"
