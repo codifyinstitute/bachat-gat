@@ -366,9 +366,30 @@ const loanController = {
   },
 
   // Get all loans
+  // getAllLoans: async (req, res) => {
+  //   try {
+  //     const loans = await Loan.find({ createdBy: req.user.id })
+  //       .populate("groupId", "name")
+  //       .populate("repaymentSchedules.memberId", "name mobileNumber")
+  //       .populate("approvedBy", "username")
+  //       .populate("createdBy", "name");
+
+  //     res.json(loans);
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   getAllLoans: async (req, res) => {
     try {
-      const loans = await Loan.find({ createdBy: req.user.id })
+      let query = {};
+
+      // If the user is a CRP, show only their loans
+      if (req.user.role === "crp") {
+        query = { createdBy: req.user.id };
+      }
+
+      const loans = await Loan.find(query)
         .populate("groupId", "name")
         .populate("repaymentSchedules.memberId", "name mobileNumber")
         .populate("approvedBy", "username")

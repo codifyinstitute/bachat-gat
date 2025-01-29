@@ -73,11 +73,12 @@ exports.updateProfile = async (req, res) => {
 exports.getAllMembersCreatedByCRP = async (req, res) => {
   try {
     // Find all groups created by the logged-in CRP
-    const groups = await Group.find({ createdBy: req.user.id }).populate(
+    id = "6799c7ffc4fd319b633b29b7";
+    const groups = await Group.find({ createdBy: id }).populate(
       "members.member",
       "name mobileNumber"
     );
-    console.log(req.user.id);
+    console.log("id shit " + req.user.id);
     if (!groups.length) {
       return res.status(404).json({ message: "No groups found for this CRP" });
     }
