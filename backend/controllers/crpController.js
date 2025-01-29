@@ -70,15 +70,53 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+// exports.getAllMembersCreatedByCRP = async (req, res) => {
+//   try {
+//     // Find all groups created by the logged-in CRP
+
+//     const groups = await Group.find({ createdBy: id }).populate(
+//       "members.member",
+//       "name mobileNumber"
+//     );
+//     console.log("id shit " + req.user.id);
+//     if (!groups.length) {
+//       return res.status(404).json({ message: "No groups found for this CRP" });
+//     }
+
+//     // Collect all members from the groups
+//     let allMembers = [];
+//     groups.forEach((group) => {
+//       allMembers = [...allMembers, ...group.members];
+//     });
+
+//     // Ensure unique members in case of duplicates
+//     allMembers = Array.from(
+//       new Set(allMembers.map((m) => m.member.toString()))
+//     ).map((id) => allMembers.find((m) => m.member.toString() === id));
+
+//     // Return the members
+//     res.json({
+//       message: "Members fetched successfully",
+//       members: allMembers,
+//     });
+//   } catch (err) {
+//     console.error("Fetch Members Error:", err.message);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+// Get all CRPs
+
 exports.getAllMembersCreatedByCRP = async (req, res) => {
   try {
+    const crpId = req.user.id; // Get the CRP ID from the authenticated user
+
     // Find all groups created by the logged-in CRP
-    id = "6799c7ffc4fd319b633b29b7";
-    const groups = await Group.find({ createdBy: id }).populate(
+    const groups = await Group.find({ createdBy: crpId }).populate(
       "members.member",
       "name mobileNumber"
     );
-    console.log("id shit " + req.user.id);
+
     if (!groups.length) {
       return res.status(404).json({ message: "No groups found for this CRP" });
     }
@@ -105,7 +143,6 @@ exports.getAllMembersCreatedByCRP = async (req, res) => {
   }
 };
 
-// Get all CRPs
 exports.getAllCRPs = async (req, res) => {
   try {
     const crps = await CRP.find();
