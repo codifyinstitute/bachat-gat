@@ -13,7 +13,7 @@ const Sidebar = ({ role }) => {
       { name: "Add CRP", path: "/admin/add-crp", icon: <UserPlus /> },
       { name: "All Members", path: "/admin/all-members", icon: <Users /> },
       { name: "Group-wise Members", path: "/admin/groups", icon: <List /> },
-      { name: "Approval List", path: "/admin/approval-list", icon: <CheckCircle /> },
+      { name: "Approval List", path: "/admin/approvallist", icon: <CheckCircle /> },
       { name: "Approved List", path: "/admin/approved-list", icon: <CheckCircle /> },
     ],
     crp: [
@@ -23,6 +23,7 @@ const Sidebar = ({ role }) => {
       { name: "Add Groups", path: "/crp/add-groups", icon: <UserPlus /> },
       { name: "Loan Sanction", path: "/crp/Crp-loansanction", icon: <CheckCircle /> },
       { name: "Approved List", path: "/crp/approved-list", icon: <CheckCircle /> },
+      { name: "Pending Loans", path: "/crp/pending-loans", icon: <CheckCircle /> },
     ],
   };
 
