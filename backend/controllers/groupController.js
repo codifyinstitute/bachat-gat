@@ -162,6 +162,25 @@ const groupController = {
       res.status(500).json({ message: error.message });
     }
   },
+  getGroupsCreatedByCrp: async (req, res) => {
+    try {
+      // Ensure that the user is a CRP
+      if (req.user.role !== "crp") {
+        return res.status(403).json({
+          message: "Only CRPs can access their created groups",
+        });
+      }
+
+      // Find groups created by the logged-in CRP
+      const groups = await Group.find({ createdBy: req.user.id })
+        .populate("members.member", "name mobileNumber")
+        .populate("createdBy", "name");
+
+      res.json(groups);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
 
   // Get all groups
   // getAllGroups: async (req, res) => {
@@ -177,12 +196,10 @@ const groupController = {
   // },
   getAllGroups: async (req, res) => {
     try {
-
       // If the user is an admin, get all groups without filtering by createdBy
       const groups = await Group.find()
         .populate("members.member", "name mobileNumber")
         .populate("createdBy", "name");
-
 
       res.json(groups);
     } catch (error) {
