@@ -1,25 +1,25 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import axios from "axios"; // Import axios
 import "aos/dist/aos.css";
 
-const AllMembers = () => {
+const CrpMembers = () => {
   const navigate = useNavigate(); // Get navigate function
   const [members, setMembers] = useState([]); // State to store fetched members
   // const [loading, setLoading] = useState(true); // State to manage loading state
   const [error, setError] = useState(null); // State to store any error
 
   // Assuming the admin_token is stored in localStorage
-  const adminToken = localStorage.getItem("admin_token");
-  console.log(adminToken)
+  const crpToken = localStorage.getItem("crp_token");
+  console.log(crpToken)
   useEffect(() => {
     // Fetch members data from backend API
     const fetchMembers = async () => {
       try {
         // Add Authorization header with Bearer token
-        const response = await axios.get("http://localhost:5000/api/member", {
+        const response = await axios.get("hhttp://localhost:5000/api/crp/membycrp", {
           headers: {
-            Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
+            Authorization: `Bearer ${crpToken}`, // Pass the token in the Authorization header
           },
         });
         console.log("API Response:", response.data);
@@ -39,7 +39,7 @@ const AllMembers = () => {
     };
 
     fetchMembers();
-  },[adminToken]); // Ensure the token is passed into useEffect (can also use session storage, cookies, etc.)
+  },[crpToken]); // Ensure the token is passed into useEffect (can also use session storage, cookies, etc.)
 
   // if (loading) {
   //   return <div>Loading...</div>; // Display loading message while data is being fetched
@@ -68,7 +68,7 @@ const AllMembers = () => {
               {members.map((member) => (
                 <tr
                   key={member._id}
-                  onClick={() => navigate(`/admin/member/${member._id}`)} // Navigate to details page
+                  onClick={() => navigate(`/crp/Crp-memdetails/${member._id}`)} // Navigate to details page
                   className="border-b hover:bg-gray-100 cursor-pointer transition"
                 >
                   <td className="py-3 px-4">{member.name}</td>
@@ -95,4 +95,4 @@ const AllMembers = () => {
   );
 };
 
-export default AllMembers;
+export default CrpMembers;
