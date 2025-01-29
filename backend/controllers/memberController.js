@@ -1,69 +1,6 @@
 const Member = require("../models/Member");
 
 const memberController = {
-  // createMember: async (req, res) => {
-  //   try {
-  //     const {
-  //       name,
-  //       address,
-  //       dateOfBirth,
-  //       aadharNo,
-  //       panNo,
-  //       mobileNumber,
-  //       guarantor,
-  //     } = req.body;
-
-  //     console.log(req.user);
-
-  //     // Handle file uploads
-  //     const photo = req.files.photo[0].path;
-  //     const guarantorPhoto = req.files.guarantorPhoto[0].path;
-  //     const guarantorCheque = req.files.guarantorCheque[0].path;
-
-  //     let extraDocuments = [];
-  //     if (req.files.extraDocuments) {
-  //       extraDocuments = req.files.extraDocuments.map((file) => file.path);
-  //     }
-
-  //     // Ensure the `referredBy` and `createdBy` fields are populated from `req.user`
-  //     const referredBy = {
-  //       crpName: req.user.name,
-  //       crpMobile: req.user.mobile,
-  //       crpId: req.user.id,
-  //     };
-
-  //     const member = new Member({
-  //       name,
-  //       address,
-  //       dateOfBirth,
-  //       photo,
-  //       aadharNo,
-  //       panNo,
-  //       mobileNumber,
-  //       guarantor: {
-  //         ...guarantor,
-  //         photo: guarantorPhoto,
-  //         chequePhoto: guarantorCheque,
-  //         extraDocuments,
-  //       },
-  //       referredBy, // Attach referredBy object
-  //       createdBy: req.user.id, // Attach createdBy field
-  //     });
-
-  //     await member.save();
-
-  //     res.status(201).json({
-  //       message: "Member created successfully",
-  //       member,
-  //     });
-  //   } catch (error) {
-  //     res.status(500).json({
-  //       message: error.message,
-  //     });
-  //   }
-  // },
-
-  // Update member
 
   createMember: async (req, res) => {
     try {
