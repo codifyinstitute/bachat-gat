@@ -1,35 +1,32 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios"
 
 const CollectionForm = () => {
   const [groups, setGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [collectionDate, setCollectionDate] = useState("");
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
 
   // Fetch groups data
   useEffect(() => {
     const fetchGroups = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/groups", {
-          method: "GET",
+        const token = localStorage.getItem("crp_token");
+  
+        const response = await axios.get("http://localhost:5000/api/groups/created-by-crp", {
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
   
-        if (!response.ok) {
-          throw new Error("Failed to fetch groups");
-        }
-  
-        const data = await response.json();
-        console.log(data); // Log the fetched data
-        setGroups(data); // Assuming data is an array of groups
+        setGroups(response.data);
       } catch (error) {
-        console.error("Error fetching groups:", error); // Log the error
-        setError("Error fetching groups");
+        console.error("Error fetching groups:", error);
+        // setMessage("Failed to fetch groups.");
       }
     };
-  
+
     fetchGroups();
   }, []);
 
@@ -52,7 +49,7 @@ const CollectionForm = () => {
       const response = await fetch("http://localhost:5000/api/collection", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${crpToken}`,
+          Authorization: `Bearer ${crpToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
@@ -75,7 +72,7 @@ const CollectionForm = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Submit Collection</h1>
 
-      {error && <p className="text-red-500">{error}</p>}
+      {/* {error && <p className="text-red-500">{error}</p>} */}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

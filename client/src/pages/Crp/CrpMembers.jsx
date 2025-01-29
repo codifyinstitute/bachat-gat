@@ -1,35 +1,29 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import axios from "axios"; // Import axios
 import "aos/dist/aos.css";
 
-const CrpMembers = () => {
+const AllMembers = () => {
   const navigate = useNavigate(); // Get navigate function
   const [members, setMembers] = useState([]); // State to store fetched members
+  // const [loading, setLoading] = useState(true); // State to manage loading state
   const [error, setError] = useState(null); // State to store any error
 
-  // Assuming the crp_token is stored in localStorage
-  const crpToken = localStorage.getItem("crp_token");
-  console.log("CRP Token:", crpToken); // Debugging the token
-
+  // Assuming the admin_token is stored in localStorage
+  const adminToken = localStorage.getItem("crp_token");
+  console.log(adminToken)
   useEffect(() => {
     // Fetch members data from backend API
     const fetchMembers = async () => {
       try {
-        if (!crpToken) {
-          setError("No CRP token found. Please log in.");
-          return;
-        }
-
-        const response = await axios.get("http://localhost:5000/api/crp/membycrp", {
+        // Add Authorization header with Bearer token
+        const response = await axios.get("http://localhost:5000/api/member", {
           headers: {
-            Authorization: `Bearer ${crpToken}`, // Pass the token in the Authorization header
+            Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
           },
         });
+        console.log("API Response:", response.data);
 
-        console.log("API Response:", response); // Log the entire response object
-
-        // Check if response contains the expected data
         if (Array.isArray(response.data)) {
           setMembers(response.data); // Set members to the response data
         } else {
@@ -37,14 +31,20 @@ const CrpMembers = () => {
         }
       } catch (err) {
         setError("Failed to fetch members data.");
-        console.error("Error fetching members:", err);
-      }
+        console.error(err);
+      } 
+      // finally {
+      //   setLoading(false); // Stop loading once data is fetched
+      // }
     };
 
     fetchMembers();
-  }, [crpToken]); // Ensure the token is passed into useEffect (can also use session storage, cookies, etc.)
+  },[adminToken]); // Ensure the token is passed into useEffect (can also use session storage, cookies, etc.)
 
-  // Error handling
+  // if (loading) {
+  //   return <div>Loading...</div>; // Display loading message while data is being fetched
+  // }
+
   if (error) {
     return <div>{error}</div>; // Display error message if there's an issue
   }
@@ -73,7 +73,7 @@ const CrpMembers = () => {
                 >
                   <td className="py-3 px-4">{member.name}</td>
                   <td className="py-3 px-4">{member.mobileNumber}</td>
-                  <td className="py-3 px-4">{member.referredBy?.crpName}@example.com</td>
+                  <td className="py-3 px-4">{member.referredBy.crpName}@example.com</td>
                   <td className="py-3 px-4">
                     <span
                       className={`px-3 py-1 text-sm font-medium rounded-full ${
@@ -95,4 +95,4 @@ const CrpMembers = () => {
   );
 };
 
-export default CrpMembers;
+export default AllMembers;

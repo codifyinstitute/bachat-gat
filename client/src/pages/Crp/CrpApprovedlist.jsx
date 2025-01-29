@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { CheckCircle, Eye } from "lucide-react";
 
-const AdminApprovalList = () => {
+const CrpApprovedlist = () => {
     const [loans, setLoans] = useState([]);
     const [expandedLoanId, setExpandedLoanId] = useState(null);
-    const [loading, setLoading] = useState(false);
+    // const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
     useEffect(() => {
@@ -14,7 +14,7 @@ const AdminApprovalList = () => {
 
     const fetchLoans = async () => {
         try {
-            const token = localStorage.getItem("admin_token");
+            const token = localStorage.getItem("crp_token");
 
             const response = await axios.get("http://localhost:5000/api/loan", {
                 headers: {
@@ -31,43 +31,14 @@ const AdminApprovalList = () => {
         }
     };
 
-    // const approveLoan = async (loanId) => {
-    //     setLoading(true);
-    //     setMessage("");
-
-    //     try {
-    //         const token = localStorage.getItem("admin_token");
-
-    //         // Sending POST request to approve the loan
-    //         await axios.post(
-    //             `http://localhost:5000/api/loan/${loanId}/approve`,
-    //             {},
-    //             {
-    //                 headers: {
-    //                     Authorization: `Bearer ${token}`,
-    //                     "Content-Type": "application/json",
-    //                 },
-    //             }
-    //         );
-
-    //         setMessage("Loan approved successfully!");
-    //         fetchLoans(); // Refresh loan list after approval
-    //     } catch (error) {
-    //         console.error("Error approving loan:", error);
-    //         setMessage("Error approving loan.");
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
     return (
         <div className="p-4 sm:p-6 max-w-7xl mx-auto bg-gray-100 min-h-screen">
-            <h1 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">Admin Approval List</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">Total Approved List</h1>
             {message && <p className="text-green-600 text-center mb-4">{message}</p>}
 
             <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6">
                 {loans.length === 0 ? (
-                    <p className="text-center text-gray-500">Approved loans.</p>
+                    <p className="text-center text-gray-500">No Loans Approved.</p>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 gap-4">
                         {loans.map((loan) => (
@@ -123,4 +94,4 @@ const AdminApprovalList = () => {
     );
 };
 
-export default AdminApprovalList;
+export default CrpApprovedlist;

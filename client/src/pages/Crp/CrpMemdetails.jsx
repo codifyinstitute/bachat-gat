@@ -11,7 +11,7 @@ const MemberDetails = () => {
   useEffect(() => {
     const fetchMember = async () => {
       try {
-        const token = localStorage.getItem("crp_token");
+        const token = localStorage.getItem("admin_token");
         const response = await fetch(`http://localhost:5000/api/member/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -38,23 +38,27 @@ const MemberDetails = () => {
 
   if (!member) return <p className="text-center mt-10">Loading member details...</p>;
 
+  // Replace backslashes with forward slashes and prepend the full backend URL
+  const getFullImageUrl = (imagePath) => {
+    return imagePath ? `http://localhost:5000/${imagePath.replace(/\\/g, '/')}` : "";
+  };
+
   return (
     <div className="w-full p-0 bg-gradient-to-r from-blue-50 to-purple-100 min-h-screen">
       <div className="w-full bg-white shadow-lg rounded-lg px-2 py-3 md:px-4 lg:px-6 mx-auto">
         <div className="flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-800 mb-4 mt-4 ml-4">Member Details</h1>
-        <button className="mb-4 mt-4 ml-4 py-2 px-4 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-300">
-          Add to group
-        </button>
+          <h1 className="text-xl font-bold text-gray-800 mb-4 mt-4 ml-4">Member Details</h1>
+          <button className="mb-4 mt-4 ml-4 py-2 px-4 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-300">
+            Add to group
+          </button>
         </div>
-
 
         {/* Personal Information */}
         <div className="overflow-x-auto bg-gradient-to-r from-indigo-100 to-blue-50 p-6 rounded-xl shadow-lg border-2 border-indigo-300">
           <h2 className="text-lg font-semibold text-gray-700 mb-4">Personal Information</h2>
           <table className="min-w-full table-auto border-separate border-spacing-0">
             <tbody className="divide-y divide-gray-200">
-              {[
+              {[  
                 { label: "ID", value: member._id },
                 { label: "Name", value: member.name },
                 { label: "Address", value: member.address },
@@ -110,12 +114,12 @@ const MemberDetails = () => {
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Guarantor Information</h2>
             <table className="min-w-full table-auto border-separate border-spacing-0">
               <tbody className="divide-y divide-gray-200">
-                {[
+                {[  
                   { label: "Name", value: member.guarantor.name },
                   { label: "Mobile", value: member.guarantor.mobileNo },
                   { label: "Relation", value: member.guarantor.relation },
-                  { label: "Photo", value: <img src={member.guarantor.photo} alt="Guarantor" className="h-16 w-16 rounded-full" /> },
-                  { label: "Cheque Photo", value: <img src={member.guarantor.chequePhoto} alt="Cheque" className="h-16 w-16 rounded-md" /> },
+                  { label: "Photo", value: <img src={getFullImageUrl(member.guarantor.photo)} alt="Guarantor" className="h-16 w-16 rounded-full" /> },
+                  { label: "Cheque Photo", value: <img src={getFullImageUrl(member.guarantor.chequePhoto)} alt="Cheque" className="h-16 w-16 rounded-md" /> },
                 ].map((item) => (
                   <tr key={item.label}>
                     <td className="py-3 px-4 font-semibold text-gray-900 border-b border-gray-300">{item.label}</td>
@@ -132,7 +136,7 @@ const MemberDetails = () => {
           <h2 className="text-lg font-semibold text-gray-700 mb-4">Account Activity</h2>
           <table className="min-w-full table-auto border-separate border-spacing-0">
             <tbody className="divide-y divide-gray-200">
-              {[
+              {[  
                 { label: "Created At", value: new Date(member.createdAt).toLocaleDateString() },
                 { label: "Updated At", value: new Date(member.updatedAt).toLocaleDateString() },
               ].map((item) => (
