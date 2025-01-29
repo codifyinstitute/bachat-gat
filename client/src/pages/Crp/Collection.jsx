@@ -21,6 +21,7 @@ const CollectionForm = () => {
         });
   
         setGroups(response.data);
+      
       } catch (error) {
         console.error("Error fetching groups:", error);
         // setMessage("Failed to fetch groups.");
@@ -29,6 +30,7 @@ const CollectionForm = () => {
 
     fetchGroups();
   }, []);
+  console.log(groups)
 
   // Handle form submission
   const handleSubmit = async (e) => {

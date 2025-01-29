@@ -20,6 +20,7 @@ import PendingLoans from "./pages/Crp/PendingLoans"
 import ApprovedList from "./pages/Admin/ApprovedList";
 import  Collection  from "./pages/Crp/Collection";
 import CrpApprovedlist from "./pages/Crp/CrpApprovedlist"
+import Payment from "./pages/Crp/Payment";
 
 AOS.init();
 
@@ -50,6 +51,7 @@ function App() {
         <Route path="pending-loans" element={<PendingLoans/>}/>
         <Route path="collection" element={<Collection/>}/>
         <Route path="crpapprovedlist" element={<CrpApprovedlist/>}/>
+        <Route path="payment" element={<Payment/>}/>
         </Route>
     </Routes>
 

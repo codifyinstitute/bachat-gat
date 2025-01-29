@@ -25,6 +25,7 @@ const Sidebar = ({ role }) => {
       { name: "Approved List", path: "/crp/crpapprovedlist", icon: <CheckCircle /> },
       { name: "Pending Loans", path: "/crp/pending-loans", icon: <CheckCircle /> },
       { name: "Collections", path: "/crp/collection", icon: <CheckCircle /> },
+      { name: "Payments", path: "/crp/payment", icon: <CheckCircle /> },
     ],
   };
 
