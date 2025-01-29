@@ -33,51 +33,6 @@ const repaymentScheduleSchema = new mongoose.Schema({
   },
 });
 
-// const loanSchema = new mongoose.Schema({
-//     groupId: {
-//         type: mongoose.Schema.Types.ObjectId,
-//         ref: 'Group',
-//         required: true
-//     },
-//     totalAmount: {
-//         type: Number,
-//         required: true
-//     },
-//     perMemberAmount: {
-//         type: Number,
-//         required: true
-//     },
-//     interestRate: {
-//         type: Number,
-//         required: true
-//     },
-//     termMonths: {
-//         type: Number,
-//         required: true
-//     },
-//     startDate: {
-//         type: Date,
-//         required: true
-//     },
-//     repaymentSchedules: [repaymentScheduleSchema],
-//     status: {
-//         type: String,
-//         enum: ['pending', 'approved', 'active', 'completed', 'defaulted'],
-//         default: 'pending'
-//     },
-//     approvedBy: {
-//         type: mongoose.Schema.Types.ObjectId,
-//         ref: 'Admin'
-//     },
-//     approvedDate: Date,
-//     createdBy: {
-//         type: mongoose.Schema.Types.ObjectId,
-//         ref: 'CRP',
-//         required: true
-//     }
-// }, { timestamps: true });
-
-// Middleware to validate loan constraints
 
 const loanSchema = new mongoose.Schema(
   {
