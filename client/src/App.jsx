@@ -18,10 +18,10 @@ import LoanSanctionForm from "./pages/Crp/LoanSanctionForm";
 import ApprovalList from "./pages/Admin/Approvallist";
 import PendingLoans from "./pages/Crp/PendingLoans"
 import ApprovedList from "./pages/Admin/ApprovedList";
+import  Collection  from "./pages/Crp/Collection";
 
 AOS.init();
 
-// import from "./pages/Admin/AdminDashboard";
 function App() {
 
   return (
@@ -47,6 +47,7 @@ function App() {
         <Route path="Crp-memdetails/:id" element={<CrpMemdetails/>}/>
         <Route path="Crp-loansanction" element={<LoanSanctionForm/>}/>
         <Route path="pending-loans" element={<PendingLoans/>}/>
+        <Route path="collection" element={<Collection/>}/>
         </Route>
     </Routes>
 

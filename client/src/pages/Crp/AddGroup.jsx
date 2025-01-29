@@ -29,7 +29,7 @@ const CreateGroupForm = () => {
         });
 
         // Filter members to only include inactive ones
-        const inactiveMembers = response.data.filter((member) => member.status === "inactive");
+        const inactiveMembers = response.data.filter((member) => member.status === "active");
 
         const memberOptions = inactiveMembers.map((member) => ({
           value: member._id,
