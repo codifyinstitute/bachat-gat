@@ -15,6 +15,7 @@ const Sidebar = ({ role }) => {
       { name: "Group-wise Members", path: "/admin/groups", icon: <List /> },
       { name: "Approval List", path: "/admin/approvallist", icon: <CheckCircle /> },
       { name: "Approved List", path: "/admin/approvedlist", icon: <CheckCircle /> },
+      { name: "Approve Collection", path: "/admin/approvecollection", icon: <CheckCircle /> },
     ],
     crp: [
       { name: "Home", path: "/crp/home", icon: <Users /> },
