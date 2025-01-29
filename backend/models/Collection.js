@@ -35,7 +35,7 @@ const paymentSchema = new mongoose.Schema({
   paymentMethod: {
     type: String,
     enum: ["cash", "upi", "bank_transfer", "cheque"],
-    required: true,
+    // required: true,
   },
   transactionId: String,
   status: {
