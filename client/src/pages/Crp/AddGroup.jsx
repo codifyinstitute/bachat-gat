@@ -50,52 +50,33 @@ const CreateGroupForm = () => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-  
+
     if (selectedMembers.length !== 10) {
       setMessage("You must select exactly 10 members to create a group.");
       setLoading(false);
       return;
     }
-  
+
     const token = localStorage.getItem("crp_token");
-  
+
     const groupData = {
       name,
       address,
       members: selectedMembers.map((m) => ({ member: m.value })),
     };
-  
+
     try {
-      // Step 1: Create the group
       const response = await axios.post("http://localhost:5000/api/groups", groupData, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // Authorization header with crp_token
           "Content-Type": "application/json",
         },
       });
-  
-      // Step 2: Update the status of selected members to inactive
-      const memberUpdates = selectedMembers.map(async (member) => {
-        await axios.patch(
-          `http://localhost:5000/api/member/${member.value}`,
-          { status: "inactive" },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      });
-  
-      // Wait for all member status updates to finish
-      await Promise.all(memberUpdates);
-  
-      setMessage("Group created and members updated to inactive successfully!");
+      setMessage("Group created successfully!");
       console.log("Response:", response.data);
     } catch (error) {
       setMessage(
-        error.response?.data?.message || "Error creating group or updating members. Please try again."
+        error.response?.data?.message || "Error creating group. Please try again."
       );
       console.error("Error:", error);
     } finally {
