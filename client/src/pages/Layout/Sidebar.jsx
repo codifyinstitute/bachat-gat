@@ -47,6 +47,7 @@ const Sidebar = ({ role }) => {
       { name: "Collections", path: "/crp/collection", icon: <CheckCircle /> },
       // { name: "Payments", path: "/crp/payment", icon: <CheckCircle /> },
       { name: "PaymentPage", path: "/crp/PaymentPage", icon: <CheckCircle /> },
+      { name: "GroupByCrp", path: "/crp/GroupByCrp", icon: <CheckCircle /> },
     ],
   };
 

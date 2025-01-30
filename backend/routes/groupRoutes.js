@@ -24,8 +24,6 @@ router.get("/:id", auth(["admin", "crp"]), groupController.getGroup);
 
 router.get("/", auth(["admin"]), groupController.getAllGroups);
 
-
-
 router.delete(
   "/:groupId/members/:memberId",
   auth(["crp"]),
