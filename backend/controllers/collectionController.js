@@ -65,8 +65,8 @@ const collectionController = {
           loanId: loan._id,
           installmentNumber: currentInstallment.installmentNumber,
           emiAmount: currentInstallment.amount,
-          savingsAmount: 500, // Default savings amount
-          totalAmount: currentInstallment.amount + 500,
+          savingsAmount, // Default savings amount
+          totalAmount: currentInstallment.amount + savingsAmount,
           status: "pending",
         };
       });

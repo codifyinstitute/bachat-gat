@@ -74,6 +74,54 @@ const groupController = {
     }
   },
 
+  // // Add member to group
+  // addMember: async (req, res) => {
+  //   try {
+  //     const { groupId } = req.params;
+  //     const { memberId, role } = req.body;
+
+  //     const group = await Group.findById(groupId);
+  //     if (!group) {
+  //       return res.status(404).json({ message: "Group not found" });
+  //     }
+
+  //     // Check member exists and has guarantor
+  //     const member = await Member.findById(memberId);
+  //     if (!member) {
+  //       return res.status(404).json({ message: "Member not found" });
+  //     }
+
+  //     if (!member.guarantor) {
+  //       return res.status(400).json({
+  //         message: "Member must have guarantor details before joining a group",
+  //       });
+  //     }
+
+  //     // Check if member is already in the group
+  //     if (group.members.some((m) => m.member.toString() === memberId)) {
+  //       return res.status(400).json({
+  //         message: "Member is already in this group",
+  //       });
+  //     }
+
+  //     // Add member to group
+  //     group.members.push({
+  //       member: memberId,
+  //       role,
+  //     });
+
+  //     await group.save();
+  //     await group.populate("members.member", "name mobileNumber");
+
+  //     res.json({
+  //       message: "Member added successfully",
+  //       group,
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   // Add member to group
   addMember: async (req, res) => {
     try {
@@ -85,7 +133,7 @@ const groupController = {
         return res.status(404).json({ message: "Group not found" });
       }
 
-      // Check member exists and has guarantor
+      // Check if member exists and has guarantor
       const member = await Member.findById(memberId);
       if (!member) {
         return res.status(404).json({ message: "Member not found" });
@@ -110,11 +158,15 @@ const groupController = {
         role,
       });
 
+      // Change member status to "inactive"
+      member.status = "inactive";
+      await member.save(); // Save updated member status
+
       await group.save();
       await group.populate("members.member", "name mobileNumber");
 
       res.json({
-        message: "Member added successfully",
+        message: "Member added successfully, status set to inactive",
         group,
       });
     } catch (error) {
