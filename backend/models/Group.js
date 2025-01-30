@@ -54,6 +54,10 @@ const groupSchema = new mongoose.Schema(
       ref: "CRP",
       required: true,
     },
+    whatsappGroupLink: {
+      type: String,
+      required: false,
+    },
   },
   { timestamps: true }
 );
