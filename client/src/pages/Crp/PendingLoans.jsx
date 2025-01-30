@@ -14,7 +14,7 @@ const PendingLoans = () => {
 
     const fetchLoans = async () => {
         try {
-            const token = localStorage.getItem("admin_token");
+            const token = localStorage.getItem("crp_token");
 
             const response = await axios.get("http://localhost:5000/api/loan", {
                 headers: {
@@ -30,10 +30,11 @@ const PendingLoans = () => {
             alert("Failed to fetch loans.");
         }
     };
+    console.log(loans)
 
     return (
         <div className="p-4 sm:p-6 max-w-7xl mx-auto bg-gray-100 min-h-screen">
-            <h1 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">Admin Approval List</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">Pending Loans</h1>
             {message && <p className="text-green-600 text-center mb-4">{message}</p>}
 
             <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6">

@@ -26,6 +26,8 @@ router.get(
 
 router.get("/:id", auth(["admin", "crp"]), collectionController.getCollection);
 
+router.get("/", collectionController.getAllCollections);
+
 router.post(
   "/:id/approve",
   auth(["admin"]),

@@ -1,5 +1,3 @@
-
-
 const Collection = require("../models/Collection");
 const Group = require("../models/Group");
 const Loan = require("../models/Loan");
@@ -155,6 +153,26 @@ const collectionController = {
         message: "Payment recorded successfully",
         collection,
       });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  getAllCollections: async (req, res) => {
+    try {
+      const { groupId } = req.query;
+
+      const query = {};
+      if (groupId) {
+        query.groupId = groupId;
+      }
+
+      const collections = await Collection.find(query)
+        .populate("groupId", "name")
+        .populate("payments.memberId", "name mobileNumber")
+        .sort({ collectionDate: -1 });
+
+      res.json(collections);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
