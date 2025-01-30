@@ -155,7 +155,7 @@ const LoanSanctionForm = () => {
           />
         </div>
 
-        <div className="mb-3">
+        {/* <div className="mb-3">
           <h2 className="text-lg font-bold mb-2">Bank Details</h2>
 
           <label className="block text-sm font-medium">Bank Name</label>
@@ -193,7 +193,7 @@ const LoanSanctionForm = () => {
             onChange={(e) => handleChange("bankDetails.interestRate", e.target.value)}
             required
           />
-        </div>
+        </div> */}
 
         <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full" disabled={loading}>
           {loading ? "Processing..." : "Sanction Loan"}
