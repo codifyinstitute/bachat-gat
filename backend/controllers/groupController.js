@@ -158,9 +158,8 @@ const groupController = {
         role,
       });
 
-      // Change member status to "inactive"
-      member.status = "inactive";
-      await member.save(); // Save updated member status
+      // Change member status to "inactive" using findByIdAndUpdate
+      await Member.findByIdAndUpdate(memberId, { status: "inactive" });
 
       await group.save();
       await group.populate("members.member", "name mobileNumber");
