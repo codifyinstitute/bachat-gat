@@ -22,6 +22,7 @@ import Collection from "./pages/Crp/Collection";
 import CrpApprovedlist from "./pages/Crp/CrpApprovedlist";
 // import Payment from "./pages/Crp/Payment";
 import PaymentPage from "./pages/Crp/PaymentPage";
+import GroupByCrp from "./pages/Crp/GroupByCrp";
 import ApproveCollection from "./pages/Admin/ApproveCollection";
 import Crpdashboard from "./pages/Crp/Crpdashboard";
 
@@ -55,6 +56,7 @@ function App() {
         <Route path="crpapprovedlist" element={<CrpApprovedlist />} />
         {/* <Route path="payment" element={<Payment />} /> */}
         <Route path="paymentPage" element={<PaymentPage />} />
+        <Route path="GroupByCrp" element={<GroupByCrp />} />
         <Route path="CrpHome" element={<Crpdashboard />} />
       </Route>
     </Routes>
