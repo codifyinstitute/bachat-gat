@@ -21,11 +21,19 @@
       type: String,
       required: true,
     },
-    extraDocuments: [
-      {
-        type: String,
-      },
-    ],
+    // extraDocuments: [String],
+    extraDocuments_0:{
+      String
+    },
+    extraDocuments_1:{
+      String
+    },
+    extraDocuments_2:{
+      String
+    },
+    extraDocuments_3:{
+      String
+    },
   });
 
   const memberSchema = new mongoose.Schema(

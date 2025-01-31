@@ -9,7 +9,15 @@ const memberUpload = upload.fields([
   { name: "photo", maxCount: 1 },
   { name: "guarantorPhoto", maxCount: 1 },
   { name: "guarantorCheque", maxCount: 1 },
-  { name: "extraDocuments", maxCount: 5 },
+  { name: "extraDocuments_0", maxCount: 1 },
+  { name: "extraDocuments_1", maxCount: 1 },
+  { name: "extraDocuments_2", maxCount: 1 },
+  { name: "extraDocuments_3", maxCount: 1 },
+
+
+
+
+  // const upload = multer({ storage: storage }).array('extraDocuments', 4);
 ]);
 
 // Member routes
