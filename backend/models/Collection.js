@@ -20,6 +20,20 @@ const paymentSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+
+  outstandingEmi: {
+    type: Number,
+  },
+
+  paidEmi: {
+    type: Number,
+  },
+
+  pendingEmi: {
+    type: Number,
+  },
+  
+
   savingsAmount: {
     type: Number,
     required: true,
