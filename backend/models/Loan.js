@@ -60,6 +60,10 @@ const loanSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+
+    bankName : {
+      type: String,
+    },
     repaymentSchedules: [repaymentScheduleSchema],
     status: {
       type: String,
