@@ -14,17 +14,10 @@ const Sidebar = ({ role }) => {
       { name: "Add CRP", path: "/admin/add-crp", icon: <UserPlus /> },
       { name: "All Members", path: "/admin/all-members", icon: <Users /> },
       { name: "Group-wise Members", path: "/admin/groups", icon: <List /> },
-      {
-        name: "Approval List",
-        path: "/admin/approvallist",
-        icon: <CheckCircle />,
-      },
-      {
-        name: "Approved List",
-        path: "/admin/approvedlist",
-        icon: <CheckCircle />,
-      },
+      { name: "Approval List", path: "/admin/approvallist", icon: <CheckCircle />,},
+      { name: "Approved List", path: "/admin/approvedlist",icon: <CheckCircle />,},
       { name: "Approve Collection", path: "/admin/approvecollection", icon: <CheckCircle /> },
+      { name: "Add Bank", path: "/admin/addbank", icon: <CheckCircle /> },
     ],
 
     crp: [

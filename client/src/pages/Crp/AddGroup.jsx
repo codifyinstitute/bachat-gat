@@ -6,13 +6,32 @@ const CreateGroupForm = () => {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [crpname, setCrpname] = useState("");
-  const [bankname, setBankname] = useState("");
+  // const [bankname, setBankname] = useState("");
   const [crpmobile, setCrpmobile] = useState("");
   const [whtslink, setWhstlink] = useState("");
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [allMembers, setAllMembers] = useState([]);
+  const [banks, setBanks] = useState([]);
+  // const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selectedBank, setSelectedBank] = useState("");
+
+
+  useEffect(() => {
+    const fetchBanks = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/banks");
+        setBanks(response.data);
+      } catch (err) {
+        setError("Failed to fetch banks.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBanks();
+  }, []);
 
   useEffect(() => {
     // Fetch inactive members when component mounts
@@ -113,15 +132,25 @@ const CreateGroupForm = () => {
           />
         </div>
         <div className="mb-3">
-          <label className="block text-sm font-medium">Bank Name</label>
-          <select
-            type="text"
-            className="w-full border p-2 rounded"
-            value={bankname}
-            onChange={(e) => setBankname(e.target.value)}
-          >
-            <option value=""></option>
-          </select>
+        <label className="block text-lg font-semibold mb-2">Select a Bank:</label>
+          {error && <p className="text-red-500">{error}</p>}
+          
+          {loading ? (
+            <p className="text-gray-600">Loading banks...</p>
+          ) : (
+            <select
+              value={selectedBank}
+              onChange={setSelectedBank}
+              className="w-full px-4 py-2 border rounded bg-white shadow-sm"
+            >
+              <option value="" disabled>Select a bank</option>
+              {banks.map((bank) => (
+                <option key={bank._id} value={bank.name}>
+                  {bank.name} - {bank.branch}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         <div className="mb-3">
           <label className="block text-sm font-medium">Crp Name</label>

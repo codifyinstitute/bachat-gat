@@ -8,9 +8,25 @@ const GroupList = () => {
   const [message, setMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredGroups, setFilteredGroups] = useState([]);
+  const [selectedBank, setSelectedBank] = useState("");
+  const [banks, setBanks] = useState([]);
 
   useEffect(() => {
     fetchGroups();
+  }, []);
+
+  useEffect(() => {
+    const fetchBanks = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/banks");
+        setBanks(response.data);
+      } catch (err) {
+        setError("Failed to fetch banks.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBanks();
   }, []);
 
   useEffect(() => {
