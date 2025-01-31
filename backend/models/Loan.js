@@ -33,7 +33,6 @@ const repaymentScheduleSchema = new mongoose.Schema({
   },
 });
 
-
 const loanSchema = new mongoose.Schema(
   {
     groupId: {
@@ -78,14 +77,6 @@ const loanSchema = new mongoose.Schema(
       required: true,
     },
     // New bank information field
-    bankDetails: [
-      {
-        bankName: { type: String, required: true },
-        branch: { type: String, required: true },
-        ifscCode: { type: String, required: true },
-        interestRate: { type: Number, required: true },
-      },
-    ],
   },
   { timestamps: true }
 );

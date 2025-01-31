@@ -7,6 +7,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const crpRoutes = require("./routes/crpRoutes");
 const loanRoutes = require("./routes/loanRoutes");
 const collectionRoutes = require("./routes/collectionRoutes");
+const bankRoutes = require("./routes/bankRoutes");
 const app = express();
 
 // Middleware
@@ -27,6 +28,7 @@ app.use("/api/member", require("./routes/memberRoutes"));
 app.use("/api/groups", groupRoutes);
 app.use("/api/loan", loanRoutes); // Use loan routes
 app.use("/api/collection", require("./routes/collectionRoutes")); // Import collection routes
+app.use("/api/banks", bankRoutes);
 // Connect to database
 connectDB();
 
