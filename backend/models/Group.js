@@ -28,7 +28,7 @@ const groupSchema = new mongoose.Schema(
 
       bankName : {
         type: String,
-        // required: true,
+        // required: true,  
       }
     },
     members: [
