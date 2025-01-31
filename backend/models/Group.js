@@ -35,7 +35,7 @@ const groupSchema = new mongoose.Schema(
         },
         role: {
           type: String,
-          enum: ["member"], // Only "member" role for users
+          enum: ["president", "vice-president", "member"], // Allow these roles
           required: true,
         },
         joinedAt: {

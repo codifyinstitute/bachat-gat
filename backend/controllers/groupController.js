@@ -125,6 +125,84 @@ const groupController = {
   //   }
   // },
 
+  // addMember: async (req, res) => {
+  //   try {
+  //     const { groupId } = req.params;
+  //     const { memberId, role } = req.body;
+
+  //     const group = await Group.findById(groupId);
+  //     if (!group) {
+  //       return res.status(404).json({ message: "Group not found" });
+  //     }
+
+  //     const member = await Member.findById(memberId);
+  //     if (!member) {
+  //       return res.status(404).json({ message: "Member not found" });
+  //     }
+
+  //     if (!member.guarantor) {
+  //       return res.status(400).json({
+  //         message: "Member must have guarantor details before joining a group",
+  //       });
+  //     }
+
+  //     // Ensure member is not already in the group
+  //     if (group.members.some((m) => m.member.toString() === memberId)) {
+  //       return res.status(400).json({
+  //         message: "Member is already in this group",
+  //       });
+  //     }
+
+  //     // Count existing roles in the group
+  //     const presidentCount = group.members.filter(
+  //       (m) => m.role === "president"
+  //     ).length;
+  //     const vicePresidentCount = group.members.filter(
+  //       (m) => m.role === "vice-president"
+  //     ).length;
+  //     const memberCount = group.members.filter(
+  //       (m) => m.role === "member"
+  //     ).length;
+
+  //     // Validate role addition
+  //     if (role === "president" && presidentCount >= 1) {
+  //       return res
+  //         .status(400)
+  //         .json({ message: "Only one President is allowed." });
+  //     }
+  //     if (role === "vice-president" && vicePresidentCount >= 1) {
+  //       return res
+  //         .status(400)
+  //         .json({ message: "Only one Vice-President is allowed." });
+  //     }
+  //     if (role === "member" && memberCount >= 8) {
+  //       return res.status(400).json({
+  //         message:
+  //           "Maximum of 8 members (excluding President & Vice-President) allowed.",
+  //       });
+  //     }
+
+  //     // Add member to the group
+  //     group.members.push({
+  //       member: memberId,
+  //       role,
+  //     });
+
+  //     // Set the member's status to "inactive" globally
+  //     await Member.findByIdAndUpdate(memberId, { status: "inactive" });
+
+  //     await group.save();
+  //     await group.populate("members.member", "name mobileNumber");
+
+  //     res.json({
+  //       message: "Member added successfully, status set to inactive",
+  //       group,
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   addMember: async (req, res) => {
     try {
       const { groupId } = req.params;
@@ -321,6 +399,40 @@ const groupController = {
   //   }
   // },
 
+  // removeMember: async (req, res) => {
+  //   try {
+  //     const { groupId, memberId } = req.params;
+
+  //     const group = await Group.findById(groupId);
+  //     if (!group) {
+  //       return res.status(404).json({ message: "Group not found" });
+  //     }
+
+  //     // Check if member exists in the group
+  //     const memberIndex = group.members.findIndex(
+  //       (m) => m.member.toString() === memberId
+  //     );
+
+  //     if (memberIndex === -1) {
+  //       return res.status(404).json({ message: "Member not found in group" });
+  //     }
+
+  //     // Remove member from the group
+  //     group.members.splice(memberIndex, 1);
+  //     await group.save();
+
+  //     // Optionally, update member's status to "active" when removed from the group
+  //     await Member.findByIdAndUpdate(memberId, { status: "active" });
+
+  //     res.json({
+  //       message: "Member removed successfully",
+  //       group,
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   removeMember: async (req, res) => {
     try {
       const { groupId, memberId } = req.params;
@@ -354,7 +466,6 @@ const groupController = {
       res.status(500).json({ message: error.message });
     }
   },
-
   // Deactivate group
   deactivateGroup: async (req, res) => {
     try {
