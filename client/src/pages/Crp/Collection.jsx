@@ -1,44 +1,41 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios"
+import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const CollectionForm = () => {
   const [groups, setGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [collectionDate, setCollectionDate] = useState("");
-  // const [error, setError] = useState(null);
 
-  // Fetch groups data
   useEffect(() => {
     const fetchGroups = async () => {
       try {
         const token = localStorage.getItem("crp_token");
-  
+
         const response = await axios.get("http://localhost:5000/api/groups/created-by-crp", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
-  
+
         setGroups(response.data);
-      
       } catch (error) {
+        toast.error("Failed to fetch groups");
         console.error("Error fetching groups:", error);
-        // setMessage("Failed to fetch groups.");
       }
     };
 
     fetchGroups();
   }, []);
-  console.log(groups)
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const crpToken = localStorage.getItem("crp_token");
     if (!crpToken) {
-      alert("No CRP token found!");
+      toast.error("No CRP token found!");
       return;
     }
 
@@ -57,25 +54,27 @@ const CollectionForm = () => {
         body: JSON.stringify(payload),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to submit collection");
+        if (result.message === "Loan already sanctioned") {
+          toast.warning("This loan has already been sanctioned.");
+        } else {
+          toast.error("Failed to submit collection");
+        }
+        throw new Error(result.message || "Failed to submit collection");
       }
 
-      const result = await response.json();
-      alert("Collection submitted successfully!");
+      toast.success("Collection submitted successfully!");
       console.log(result);
     } catch (error) {
       console.error("Error submitting collection:", error);
-      alert("Error submitting collection");
     }
   };
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Submit Collection</h1>
-
-      {/* {error && <p className="text-red-500">{error}</p>} */}
-
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="group" className="block text-gray-700">Select Group:</label>

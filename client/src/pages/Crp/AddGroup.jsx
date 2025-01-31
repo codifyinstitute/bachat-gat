@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Select from "react-select";
 
 const CreateGroupForm = () => {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
+  const [crpname, setCrpname] = useState("");
+  const [bankname, setBankname] = useState("");
+  const [crpmobile, setCrpmobile] = useState("");
+  const [whtslink, setWhstlink] = useState("");
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -51,8 +55,8 @@ const CreateGroupForm = () => {
     setLoading(true);
     setMessage("");
 
-    if (selectedMembers.length !== 10) {
-      setMessage("You must select exactly 10 members to create a group.");
+    if (selectedMembers.length !== 1) {
+      setMessage("You must select exactly 1 members to create a group.");
       setLoading(false);
       return;
     }
@@ -85,7 +89,7 @@ const CreateGroupForm = () => {
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto bg-white shadow-md rounded">
+    <div className="p-4 max-w-md mx-auto bg-white shadow-md rounded  h-[90vh] overflow-y-auto mt-16">
       <h1 className="text-xl font-bold mb-4">Create Group</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
@@ -109,6 +113,47 @@ const CreateGroupForm = () => {
           />
         </div>
         <div className="mb-3">
+          <label className="block text-sm font-medium">Bank Name</label>
+          <select
+            type="text"
+            className="w-full border p-2 rounded"
+            value={bankname}
+            onChange={(e) => setBankname(e.target.value)}
+          >
+            <option value=""></option>
+          </select>
+        </div>
+        <div className="mb-3">
+          <label className="block text-sm font-medium">Crp Name</label>
+          <input
+            type="text"
+            className="w-full border p-2 rounded"
+            value={crpname}
+            onChange={(e) => setCrpname(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label className="block text-sm font-medium">Crp Mobile</label>
+          <input
+            type="text"
+            className="w-full border p-2 rounded"
+            value={crpmobile}
+            onChange={(e) => setCrpmobile(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label className="block text-sm font-medium">Whatsapp link</label>
+          <input
+            type="text"
+            className="w-full border p-2 rounded"
+            value={whtslink}
+            onChange={(e) => setWhstlink(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
           <label className="block text-sm font-medium">Members</label>
           <Select
             isMulti
@@ -124,10 +169,10 @@ const CreateGroupForm = () => {
             noOptionsMessage={() => "No members available"}
             isClearable
           />
-          {selectedMembers.length > 10 && (
+          {selectedMembers.length > 1 && (
             <p className="text-red-500 mt-2">You can only select up to 10 members.</p>
           )}
-          {selectedMembers.length < 10 && selectedMembers.length > 0 && (
+          {selectedMembers.length < 1 && selectedMembers.length > 0 && (
             <p className="text-red-500 mt-2">You need to select exactly 10 members.</p>
           )}
         </div>

@@ -20,9 +20,11 @@ import PendingLoans from "./pages/Crp/PendingLoans";
 import ApprovedList from "./pages/Admin/ApprovedList";
 import Collection from "./pages/Crp/Collection";
 import CrpApprovedlist from "./pages/Crp/CrpApprovedlist";
-import Payment from "./pages/Crp/Payment";
+// import Payment from "./pages/Crp/Payment";
 import PaymentPage from "./pages/Crp/PaymentPage";
 import GroupByCrp from "./pages/Crp/GroupByCrp";
+import ApproveCollection from "./pages/Admin/ApproveCollection";
+import Crpdashboard from "./pages/Crp/Crpdashboard";
 
 AOS.init();
 
@@ -40,6 +42,7 @@ function App() {
         <Route path="member/:id" element={<MemberDetails />} />
         <Route path="approvallist" element={<ApprovalList />} />
         <Route path="approvedlist" element={<ApprovedList />} />
+          <Route path="approvecollection" element={<ApproveCollection/>}/>
       </Route>
 
       <Route path="crp/*" element={<Sidebar role="crp" />}>
@@ -54,6 +57,7 @@ function App() {
         {/* <Route path="payment" element={<Payment />} /> */}
         <Route path="paymentPage" element={<PaymentPage />} />
         <Route path="GroupByCrp" element={<GroupByCrp />} />
+        <Route path="CrpHome" element={<Crpdashboard />} />
       </Route>
     </Routes>
   );

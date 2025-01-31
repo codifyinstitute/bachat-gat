@@ -9,16 +9,16 @@ const PaymentPage = () => {
   const [remarks, setRemarks] = useState("");
   const [message, setMessage] = useState("");
   const [collections, setCollections] = useState([]);
+  const [members, setMembers] = useState([]); // State to hold members of the selected group
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch collections when the component mounts
   useEffect(() => {
     const fetchCollections = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:5000/api/collection"
-        );
+        const response = await axios.get("http://localhost:5000/api/collection");
         setCollections(response.data);
+        console.log("ss",collections)
         setIsLoading(false);
       } catch (error) {
         setMessage("Failed to load collections");
@@ -28,22 +28,53 @@ const PaymentPage = () => {
     fetchCollections();
   }, []);
 
+  // Fetch members for the selected collection (group) when a group is selected
+  // useEffect(() => {
+  //   if (!collectionId) return;
+
+  //   const fetchMembers = async () => {
+  //     try {
+  //       const response = await axios.get(`http://localhost:5000/api/collection/${collectionId}`);
+  //       console.log(response.data, "kok")
+  //       setMembers(response.data.members.map((item) => item.member)); // Extract the member objects
+  //     } catch (error) {
+  //       setMessage("Failed to load members");
+  //     }
+  //   };
+
+  //   fetchMembers();
+  // }, [collectionId]);
+  // console.log("mem",members)
+
   const handlePayment = async (e) => {
     e.preventDefault();
+
     try {
+      // Retrieve CRP token from localStorage
+      const crpToken = localStorage.getItem("crp_token");
+
+      if (!crpToken) {
+        setMessage("No CRP token found");
+        return;
+      }
+
       // Check if collectionId exists
-      const collectionExists = collections.some(
-        (col) => col.id === collectionId
-      );
+      const collectionExists = collections.some((col) => col._id === collectionId);
       if (!collectionExists) {
         setMessage("Collection not found");
         return;
       }
 
+      // Make POST request to the API with the Bearer token
       const response = await axios.post(
         `http://localhost:5000/api/collection/${collectionId}/payments/${memberId}`,
         { paymentMethod, transactionId, remarks },
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${crpToken}`, // Add Bearer token
+          },
+        }
       );
       setMessage(response.data.message);
     } catch (error) {
@@ -66,20 +97,29 @@ const PaymentPage = () => {
           >
             <option value="">Select Collection</option>
             {collections.map((collection) => (
-              <option key={collection.id} value={collection.id}>
-                {collection.name} - {collection.dueDate}
+              <option key={collection._id} value={collection._id}>
+                {collection.groupId.name} - {new Date(collection.collectionDate).toLocaleDateString()}
               </option>
             ))}
           </select>
 
-          <input
-            type="text"
-            placeholder="Member ID"
-            value={memberId}
-            onChange={(e) => setMemberId(e.target.value)}
-            className="w-full p-2 border rounded"
-            required
-          />
+          {/* Dropdown to select Member based on selected Group */}
+          <select
+  value={memberId}
+  onChange={(e) => setMemberId(e.target.value)}
+  className="w-full p-2 border rounded"
+  required
+>
+  <option value="">Select Member</option>
+  {collections
+    .find((collection) => collection._id === collectionId)?.payments
+    .map((payment) => (
+      <option key={payment.memberId?._id} value={payment.memberId?._id}>
+        {payment.memberId?.name || "Unnamed Member"} {/* Display member name */}
+      </option>
+    ))}
+</select>
+
           <select
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}
@@ -87,6 +127,8 @@ const PaymentPage = () => {
           >
             <option value="bank_transfer">Bank Transfer</option>
             <option value="cash">Cash</option>
+            <option value="cheque">Cheque</option>
+            <option value="upi">UPI</option>
           </select>
           <input
             type="text"

@@ -1,280 +1,250 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import { useState } from "react";
+import axios from "axios";
 
 const AddMember = () => {
-    const [formData, setFormData] = useState({
-        name: '',
-        address: '',
-        dateOfBirth: '',
-        aadharNo: '',
-        panNo: '',
-        mobileNumber: '',
-        photo: null,
-        guarantorPhoto: null,
-        guarantorCheque: null,
-        extraDocuments: [],
-        guarantor: {
-            name: '',
-            mobileNo: '',
-            relation: '',
-            extraDocuments: [],
-        },
+  const [formData, setFormData] = useState({
+    name: "",
+    address: "",
+    dateOfBirth: "",
+    aadharNo: "",
+    panNo: "",
+    mobileNumber: "",
+    photo: null,
+    guarantor: {
+      name: "",
+      mobileNo: "",
+      relation: "",
+      guarantorPhoto: null,
+      guarantorCheque: null,
+      extraDocuments_0: null,
+      extraDocuments_1: null,
+      extraDocuments_2: null,
+      extraDocuments_3: null,
+    },
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleGuarantorChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      guarantor: { ...formData.guarantor, [name]: value },
+    });
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (name.startsWith("extraDocuments")) {
+      const index = name.split("_")[1];
+      setFormData({
+        ...formData,
+        [name]: files[0],
+      });
+    } else {
+      setFormData({ ...formData, [name]: files[0] });
+    }
+  };
+
+  const validateForm = () => {
+    if (!/^[0-9]{12}$/.test(formData.aadharNo)) {
+      alert("Aadhar number must be 12 digits.");
+      return false;
+    }
+    if (!/^[A-Z0-9]{10}$/.test(formData.panNo)) {
+      alert("PAN number must be 10 uppercase alphanumeric characters.");
+      return false;
+    }
+    if (!/^[0-9]{10}$/.test(formData.mobileNumber)) {
+      alert("Mobile number must be 10 digits.");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    const token = localStorage.getItem("crp_token");
+    const formDataToSend = new FormData();
+
+    Object.keys(formData).forEach((key) => {
+      if (key === "guarantor") {
+        Object.keys(formData.guarantor).forEach((gKey) => {
+          formDataToSend.append(`guarantor[${gKey}]`, formData.guarantor[gKey]);
+        });
+      } else if (key.startsWith("extraDocuments")) {
+        formDataToSend.append(key, formData[key]);
+      } else {
+        formDataToSend.append(key, formData[key]);
+      }
     });
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
+    try {
+      const res = await axios.post("http://localhost:5000/api/member", formDataToSend, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      alert("Member added successfully");
+      console.log(res.data);
+    } catch (error) {
+      alert(error.response?.data?.message || "Error adding member");
+    }
+  };
 
-        // If it's a nested field in the 'guarantor' object, update that specific field
-        if (name.startsWith('guarantor')) {
-            const fieldName = name.split('[')[1].split(']')[0]; // Extract field name (e.g., name, mobileNo)
-            setFormData((prevData) => ({
-                ...prevData,
-                guarantor: {
-                    ...prevData.guarantor,
-                    [fieldName]: value,
-                },
-            }));
-        } else {
-            // For non-nested fields, update directly
-            setFormData((prevData) => ({
-                ...prevData,
-                [name]: value,
-            }));
-        }
-    };
+  return (
+    <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-lg space-y-4">
+      <label htmlFor="name">Name</label>
+      <input
+        type="text"
+        name="name"
+        placeholder="Name"
+        onChange={handleChange}
+        required
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
+      <label htmlFor="address">Address</label>
+      <input
+        type="text"
+        name="address"
+        placeholder="Address"
+        onChange={handleChange}
+        required
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
+      <label htmlFor="dateOfBirth">Date Of Birth</label>
+      <input
+        type="date"
+        name="dateOfBirth"
+        onChange={handleChange}
+        required
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
+      <label htmlFor="aadharNo">Aadhar No</label>
+      <input
+        type="text"
+        name="aadharNo"
+        placeholder="Aadhar No"
+        onChange={handleChange}
+        required
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
+      <label htmlFor="panNo">PAN No</label>
+      <input
+        type="text"
+        name="panNo"
+        placeholder="PAN No"
+        onChange={handleChange}
+        required
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
+      <label htmlFor="mobileNumber">Mobile Number</label>
+      <input
+        type="text"
+        name="mobileNumber"
+        placeholder="Mobile Number"
+        onChange={handleChange}
+        required
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
 
-    const handleFileChange = (e) => {
-        const { name, files } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: files.length ? files[0] : null,
-        }));
-    };
+      <h3 className="text-lg font-semibold">Guarantor Details</h3>
+      <label htmlFor="guarantorName">Guarantor Name</label>
+      <input
+        type="text"
+        name="name"
+        placeholder="Guarantor Name"
+        onChange={handleGuarantorChange}
+        required
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
+      <label htmlFor="guarantorMobileNo">Guarantor Mobile No</label>
+      <input
+        type="text"
+        name="mobileNo"
+        placeholder="Guarantor Mobile"
+        onChange={handleGuarantorChange}
+        required
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
+      <label htmlFor="guarantorRelation">Relation</label>
+      <select
+        name="relation"
+        onChange={handleGuarantorChange}
+        required
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="">Select Relation</option>
+        <option value="Father">Father</option>
+        <option value="Mother">Mother</option>
+        <option value="Sibling">Sibling</option>
+      </select>
 
-    const handleMultipleFileChange = (e) => {
-        const { name, files } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: Array.from(files),
-        }));
-    };
+      <h3 className="text-lg font-semibold">Upload Documents</h3>
+      <input
+        type="file"
+        name="photo"
+        onChange={handleFileChange}
+        required
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
+      <label htmlFor="guarantorPhoto">Guarantor Photo</label>
+      <input
+        type="file"
+        name="guarantorPhoto"
+        onChange={handleFileChange}
+        required
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
+      <label htmlFor="guarantorCheque">Guarantor Cheque</label>
+      <input
+        type="file"
+        name="guarantorCheque"
+        onChange={handleFileChange}
+        required
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-    
-        const form = new FormData();
-    
-        // Append normal fields
-        form.append('name', formData.name);
-        form.append('address', formData.address);
-        form.append('dateOfBirth', formData.dateOfBirth);
-        form.append('aadharNo', formData.aadharNo);
-        form.append('panNo', formData.panNo);
-        form.append('mobileNumber', formData.mobileNumber);
-    
-        // Append file fields
-        if (formData.photo) form.append('photo', formData.photo);
-        if (formData.guarantorPhoto) form.append('guarantorPhoto', formData.guarantorPhoto);
-        if (formData.guarantorCheque) form.append('guarantorCheque', formData.guarantorCheque);
-        formData.extraDocuments.forEach(file => form.append('extraDocuments', file));
-    
-        // Guarantor fields
-        form.append('guarantor[name]', formData.guarantor.name);
-        form.append('guarantor[mobileNo]', formData.guarantor.mobileNo);
-        form.append('guarantor[relation]', formData.guarantor.relation);
-        formData.guarantor.extraDocuments.forEach(file => form.append('guarantor[extraDocuments]', file));
-    
-        try {
-            const token = localStorage.getItem("crp_token");
-            console.log("token", token)
-            const response = await axios.post('http://localhost:5000/api/member', form, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Authorization': `Bearer ${token}`, // Assuming the token is stored in localStorage
-                },
-            });
-            console.log('Member data submitted successfully', response.data);
-        } catch (error) {
-            console.error('Error submitting member data', error.response || error);
-        }
-    };
+      <h3>Extra Documents (Images)</h3>
+      <input
+        type="file"
+        name="extraDocuments_0"
+        onChange={handleFileChange}
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
+      <input
+        type="file"
+        name="extraDocuments_1"
+        onChange={handleFileChange}
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
+      <input
+        type="file"
+        name="extraDocuments_2"
+        onChange={handleFileChange}
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
+      <input
+        type="file"
+        name="extraDocuments_3"
+        onChange={handleFileChange}
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+      />
 
-    return (
-        <div className="flex justify-center items-center h-[100vh] bg-gray-100">
-            <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 mt-35 mb-4pt-6 pb-6 mb-4 w-[95%] overflow-y-auto h-[90vh]">
-                <h2 className="text-2xl font-semibold mb-4 text-center text-gray-700">Member Information</h2>
-
-                {/* Member Details */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                    {/* Name */}
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">Name</label>
-                        <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            type="text"
-                            name="name"
-                            placeholder="Full Name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    {/* Address */}
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">Address</label>
-                        <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            type="text"
-                            name="address"
-                            placeholder="Address"
-                            value={formData.address}
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    {/* Date of Birth */}
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">Date of Birth</label>
-                        <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            type="date"
-                            name="dateOfBirth"
-                            value={formData.dateOfBirth}
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    {/* Aadhar Number */}
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">Aadhar Number</label>
-                        <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            type="text"
-                            name="aadharNo"
-                            placeholder="Aadhar Number"
-                            value={formData.aadharNo}
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    {/* PAN Number */}
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">PAN Number</label>
-                        <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            type="text"
-                            name="panNo"
-                            placeholder="PAN Number"
-                            value={formData.panNo}
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    {/* Mobile Number */}
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">Mobile Number</label>
-                        <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            type="text"
-                            name="mobileNumber"
-                            placeholder="Mobile Number"
-                            value={formData.mobileNumber}
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    {/* File Inputs */}
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">Photo</label>
-                        <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            type="file"
-                            name="photo"
-                            onChange={handleFileChange}
-                        />
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">Guarantor Photo</label>
-                        <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            type="file"
-                            name="guarantorPhoto"
-                            onChange={handleFileChange}
-                        />
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">Guarantor Cheque</label>
-                        <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            type="file"
-                            name="guarantorCheque"
-                            onChange={handleFileChange}
-                        />
-                    </div>  
-
-                    {/* Guarantor Information */}
-                    <div className="mb-6">
-                        <h3 className="text-lg font-semibold mb-4">Guarantor Information</h3>
-
-                        <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-bold mb-2">Name</label>
-                            <input
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                type="text"
-                                name="guarantor[name]"
-                                value={formData.guarantor.name}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-
-                        <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-bold mb-2">Mobile Number</label>
-                            <input
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                type="text"
-                                name="guarantor[mobileNo]"
-                                value={formData.guarantor.mobileNo}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-
-                        <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-bold mb-2">Relation</label>
-                            <input
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                type="text"
-                                name="guarantor[relation]"
-                                value={formData.guarantor.relation}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-
-                        <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-bold mb-2">Guarantor's Extra Documents</label>
-                            <input
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                type="file"
-                                name="guarantor[extraDocuments]"
-                                multiple
-                                onChange={handleMultipleFileChange}
-                            />
-                        </div>
-                    </div>
-
-                    </div>
-                    <div className="flex justify-center mb-4">
-                        <button
-                            type="submit"
-                            className=" bg-blue-500 hover:bg-blue-700 w-20 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        >
-                            Submit
-                        </button>
-                </div>
-            </form>
-        </div>
-    );
+      <button
+        type="submit"
+        className="w-full py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      >
+        Add Member
+      </button>
+    </form>
+  );
 };
 
 export default AddMember;

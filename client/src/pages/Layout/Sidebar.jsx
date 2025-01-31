@@ -9,6 +9,7 @@ const Sidebar = ({ role }) => {
   // Define links based on roles
   const links = {
     admin: [
+      
       { name: "Dashboard", path: "/admin/AdminDashboard", icon: <Users /> },
       { name: "Add CRP", path: "/admin/add-crp", icon: <UserPlus /> },
       { name: "All Members", path: "/admin/all-members", icon: <Users /> },
@@ -23,9 +24,12 @@ const Sidebar = ({ role }) => {
         path: "/admin/approvedlist",
         icon: <CheckCircle />,
       },
+      { name: "Approve Collection", path: "/admin/approvecollection", icon: <CheckCircle /> },
     ],
+
     crp: [
-      { name: "Home", path: "/crp/home", icon: <Users /> },
+      // { name: "Home", path: "/crp/home", icon: <Users /> },
+      { name: "CrpHome", path: "/crp/CrpHome", icon: <Users /> },
       { name: "All Members", path: "/crp/Crp-members", icon: <Users /> },
       { name: "Add Members", path: "/crp/add-members", icon: <UserPlus /> },
       { name: "Add Groups", path: "/crp/add-groups", icon: <UserPlus /> },
@@ -48,6 +52,7 @@ const Sidebar = ({ role }) => {
       // { name: "Payments", path: "/crp/payment", icon: <CheckCircle /> },
       { name: "PaymentPage", path: "/crp/PaymentPage", icon: <CheckCircle /> },
       { name: "GroupByCrp", path: "/crp/GroupByCrp", icon: <CheckCircle /> },
+      
     ],
   };
 
