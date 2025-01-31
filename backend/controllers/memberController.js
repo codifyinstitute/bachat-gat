@@ -20,11 +20,12 @@ const memberController = {
       const photo = req.files.photo[0].path;
       const guarantorPhoto = req.files.guarantorPhoto[0].path;
       const guarantorCheque = req.files.guarantorCheque[0].path;
+      const extraDocuments  =  req.files.extraDocuments;
 
-      let extraDocuments = [];
-      if (req.files.extraDocuments) {
-        extraDocuments = req.files.extraDocuments.map((file) => file.path);
-      }
+      // let extraDocuments = [];
+      // if (req.files.extraDocuments) {
+      //   extraDocuments = req.files.extraDocuments.map((file) => file.path);
+      // }
 
       // Ensure the `referredBy` and `createdBy` fields are populated from `req.user`
       const referredBy = {
