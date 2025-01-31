@@ -6,33 +6,13 @@ const CreateGroupForm = () => {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [crpname, setCrpname] = useState("");
-  // const [bankname, setBankname] = useState("");
   const [crpmobile, setCrpmobile] = useState("");
   const [whtslink, setWhstlink] = useState("");
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [allMembers, setAllMembers] = useState([]);
-  const [banks, setBanks] = useState([]);
-  // const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [selectedBank, setSelectedBank] = useState("");
-
-
-  useEffect(() => {
-    const fetchBanks = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/banks");
-        setBanks(response.data);
-      } catch (err) {
-        setError("Failed to fetch banks.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBanks();
-  }, []);
-
+  
   useEffect(() => {
     // Fetch inactive members when component mounts
     const fetchMembers = async () => {
@@ -71,36 +51,53 @@ const CreateGroupForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Submit button clicked!");
     setLoading(true);
     setMessage("");
-
-    if (selectedMembers.length !== 1) {
-      setMessage("You must select exactly 1 members to create a group.");
+  
+    if (selectedMembers.length < 1) {
+      setMessage("You must select at least 1 member to create a group.");
       setLoading(false);
       return;
     }
-
+  
     const token = localStorage.getItem("crp_token");
-
+  
+    if (!token) {
+      alert("Authorization token is missing.");
+      setLoading(false);
+      return;
+    }
+  
     const groupData = {
       name,
       address,
-      members: selectedMembers.map((m) => ({ member: m.value })),
+      referredBy: {
+        crpName: crpname,
+        crpMobile: crpmobile,
+        crpId: "65a123456789abcd1234efgh", // Replace with actual CRP ID
+        // bankName: selectedBank,
+      },
+      members: selectedMembers.map((m) => ({
+        member: m.value,
+        role: "member", // Default role for now (adjust as needed)
+      })),
+      createdBy: "65a123456789abcd1234efgh", // Replace with actual logged-in CRP ID
+      whatsappGroupLink: whtslink,
     };
-
+  
     try {
       const response = await axios.post("http://localhost:5000/api/groups", groupData, {
         headers: {
-          Authorization: `Bearer ${token}`, // Authorization header with crp_token
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
+  
       setMessage("Group created successfully!");
       console.log("Response:", response.data);
     } catch (error) {
-      setMessage(
-        error.response?.data?.message || "Error creating group. Please try again."
-      );
+      setMessage(error.response?.data?.message || "Error creating group. Please try again.");
       console.error("Error:", error);
     } finally {
       setLoading(false);
@@ -132,25 +129,6 @@ const CreateGroupForm = () => {
           />
         </div>
         <div className="mb-3">
-        <label className="block text-lg font-semibold mb-2">Select a Bank:</label>
-          {error && <p className="text-red-500">{error}</p>}
-          
-          {loading ? (
-            <p className="text-gray-600">Loading banks...</p>
-          ) : (
-            <select
-              value={selectedBank}
-              onChange={setSelectedBank}
-              className="w-full px-4 py-2 border rounded bg-white shadow-sm"
-            >
-              <option value="" disabled>Select a bank</option>
-              {banks.map((bank) => (
-                <option key={bank._id} value={bank.name}>
-                  {bank.name} - {bank.branch}
-                </option>
-              ))}
-            </select>
-          )}
         </div>
         <div className="mb-3">
           <label className="block text-sm font-medium">Crp Name</label>
@@ -188,7 +166,7 @@ const CreateGroupForm = () => {
             isMulti
             options={allMembers}
             value={selectedMembers}
-            onChange={setSelectedMembers}
+            onChange={(selectedOptions) => setSelectedMembers(selectedOptions || [])} 
             getOptionLabel={(e) => `${e.label}`}
             maxMenuHeight={250}
             isSearchable
@@ -197,7 +175,7 @@ const CreateGroupForm = () => {
             isDisabled={loading}
             noOptionsMessage={() => "No members available"}
             isClearable
-          />
+            />
           {selectedMembers.length > 1 && (
             <p className="text-red-500 mt-2">You can only select up to 10 members.</p>
           )}

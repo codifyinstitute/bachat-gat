@@ -22,6 +22,24 @@ const LoanSanctionForm = () => {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [banks, setBanks] = useState([]);
+  const [selectedBank, setSelectedBank] = useState("");
+  const [error, setError] = useState("");
+
+
+    useEffect(() => {
+    const fetchBanks = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/banks");
+        setBanks(response.data);
+      } catch (err) {
+        setError("Failed to fetch banks.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBanks();
+  }, []);
 
   useEffect(() => {
     fetchGroups();
@@ -120,8 +138,28 @@ const LoanSanctionForm = () => {
             required
           />
         </div>
-
-
+            
+        <div className="mb-3">
+        <label className="block text-lg font-semibold mb-2">Select a Bank:</label>
+          {error && <p className="text-red-500">{error}</p>}
+          
+          {loading ? (
+            <p className="text-gray-600">Loading banks...</p>
+          ) : (
+            <select
+              value={selectedBank}
+              onChange={setSelectedBank}
+              className="w-full px-4 py-2 border rounded bg-white shadow-sm"
+            >
+              <option value="" disabled>Select a bank</option>
+              {banks.map((bank) => (
+                <option key={bank._id} value={bank.name}>
+                  {bank.name} - {bank.branch}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
         <div className="mb-3">
           <label className="block text-sm font-medium">Interest Rate (%)</label>
           <input
