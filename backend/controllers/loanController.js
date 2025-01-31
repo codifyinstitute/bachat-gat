@@ -238,7 +238,7 @@ const loanController = {
         status: "pending",
       });
 
-      currentDate.setMonth(currentDate.getMonth() + 1);
+      currentDate.setMonth(currentDate.getMonth() + 1); 
     }
 
     return {
