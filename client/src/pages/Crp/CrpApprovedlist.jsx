@@ -5,7 +5,6 @@ import { CheckCircle, Eye } from "lucide-react";
 const CrpApprovedlist = () => {
     const [loans, setLoans] = useState([]);
     const [expandedLoanId, setExpandedLoanId] = useState(null);
-    // const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
     useEffect(() => {

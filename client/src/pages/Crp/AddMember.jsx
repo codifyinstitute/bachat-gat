@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const AddMember = () => {
     const [errors, setErrors] = useState({});
+
     const [formData, setFormData] = useState({
         name: '',
         address: '',
@@ -17,12 +18,7 @@ const AddMember = () => {
             name: '',
             mobileNo: '',
             relation: '',
-            extraDocuments: [{
-                extraDoc1: null,
-                extraDoc2: null,
-                extraDoc3: null,
-                extraDoc4:null
-            }],
+            extraDocuments: [],
             
         },
     });
@@ -47,8 +43,7 @@ const AddMember = () => {
             case 'address':
                 return value.trim().length < 10 ? 'Address must be at least 10 characters long' : '';
             case 'dateOfBirth': 
-                const age = calculateAge(value);
-                return age < 18 ? 'Member must be at least 18 years old' : '';
+                return value.trim().length < 0 ? 'Member must be at least 18 years old' : '';
             case 'aadharNo':
                 return !/^\d{12}$/.test(value) ? 'Aadhar number must be 12 digits' : '';
             case 'panNo':
@@ -61,129 +56,88 @@ const AddMember = () => {
         }
     };
 
-    const calculateAge = (birthDate) => {
-        const today = new Date();
-        const birth = new Date(birthDate);
-        let age = today.getFullYear() - birth.getFullYear();
-        const monthDiff = today.getMonth() - birth.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-            age--;
-        }
-        return age;
-    };
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        
-        if (name.startsWith('guarantor')) {
-            const fieldName = name.split('[')[1].split(']')[0];
-            setFormData(prevData => ({
-                ...prevData,
+    
+        if (name.startsWith("guarantor.")) {
+            const field = name.split(".")[1];
+            setFormData((prev) => ({
+                ...prev,
                 guarantor: {
-                    ...prevData.guarantor,
-                    [fieldName]: value,
+                    ...prev.guarantor,
+                    [field]: value,
                 },
             }));
-            // Validate guarantor fields
-            const error = validateField(name, value);
-            setErrors(prev => ({
-                ...prev,
-                [name]: error
-            }));
         } else {
-            setFormData(prevData => ({
-                ...prevData,
+            setFormData((prev) => ({
+                ...prev,
                 [name]: value,
             }));
-            // Validate main fields
-            const error = validateField(name, value);
-            setErrors(prev => ({
-                ...prev,
-                [name]: error
-            }));
         }
+    
+        const error = validateField(name, value);
+        setErrors((prev) => ({
+            ...prev,
+            [name]: error,
+        }));
     };
+    
 
     const handleFileChange = (e) => {
         const { name, files } = e.target;
+        if (!files[0]) return;
+    
         const file = files[0];
-        
-        if (file && !['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
-            setErrors(prev => ({
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    
+        if (!allowedTypes.includes(file.type)) {
+            setErrors((prev) => ({
                 ...prev,
-                [name]: 'Please upload only JPG, JPEG or PNG files'
+                [name]: 'Please upload only JPG, JPEG, or PNG files',
             }));
             return;
         }
-
-        if (file && file.size > 5 * 1024 * 1024) {
-            setErrors(prev => ({
+    
+        if (file.size > maxSize) {
+            setErrors((prev) => ({
                 ...prev,
-                [name]: 'File size should not exceed 5MB'
+                [name]: 'File size should not exceed 5MB',
             }));
             return;
         }
-
-        if (name.startsWith('guarantor')) {
-            const fieldName = name.split('[')[1].split(']')[0];
-            setFormData(prevData => ({
-                ...prevData,
-                guarantor: {
-                    ...prevData.guarantor,
-                    [fieldName]: file
-                }
-            }));
+    
+        if (name.startsWith('guarantor.extraDocuments')) {
+            const index = parseInt(name.split('.')[2].replace('extraDoc', ''), 10) - 1;
+            setFormData((prev) => {
+                const updatedDocs = [...prev.guarantor.extraDocuments];
+                updatedDocs[index] = file;  // Correct file assignment
+                return {
+                    ...prev,
+                    guarantor: {
+                        ...prev.guarantor,
+                        extraDocuments: updatedDocs,
+                    },
+                };
+            });
         } else {
-            setFormData(prevData => ({
-                ...prevData,
-                [name]: file
-            }));
-        }
-
-        // Clear error if file is valid
-        setErrors(prev => ({
-            ...prev,
-            [name]: ''
-        }));
-    };
-
-    const handleMultipleFileChange = (e) => {
-        const { name, files } = e.target;
-        const fileList = Array.from(files);
-        
-        // Validate each file
-        const invalidFiles = fileList.filter(file => 
-            !['image/jpeg', 'image/png', 'image/jpg'].includes(file.type) || 
-            file.size > 5 * 1024 * 1024
-        );
-
-        if (invalidFiles.length > 0) {
-            setErrors(prev => ({
+            setFormData((prev) => ({
                 ...prev,
-                [name]: 'Some files are invalid. Please check file types and sizes'
+                [name]: file,
             }));
-            return;
         }
-
-        setFormData(prevData => ({
-            ...prevData,
-            guarantor: {
-                ...prevData.guarantor,
-                extraDocuments: [...prevData.guarantor.extraDocuments, ...fileList]
-            }
-        }));
-
-        // Clear error if all files are valid
-        setErrors(prev => ({
+    
+        setErrors((prev) => ({
             ...prev,
-            [name]: ''
+            [name]: '',
         }));
     };
+    
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        // Validate all fields before submission
+    
         let newErrors = {};
         Object.entries(formData).forEach(([key, value]) => {
             if (typeof value === 'string') {
@@ -191,46 +145,44 @@ const AddMember = () => {
                 if (error) newErrors[key] = error;
             }
         });
-
+    
         Object.entries(formData.guarantor).forEach(([key, value]) => {
             if (typeof value === 'string') {
-                const error = validateField(`guarantor[${key}]`, value);
-                if (error) newErrors[`guarantor[${key}]`] = error;
+                const error = validateField(`guarantor.${key}`, value);
+                if (error) newErrors[`guarantor.${key}`] = error;
             }
         });
-
-        // Required file validations
-        if (!formData.photo) newErrors.photo = 'Photo is required';
-        if (!formData.guarantorPhoto) newErrors.guarantorPhoto = 'Guarantor photo is required';
-        if (!formData.guarantorCheque) newErrors.guarantorCheque = 'Guarantor cheque is required';
-
+    
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
         }
-
+    
         const form = new FormData();
-
-        // Append normal fields
-        Object.entries(formData).forEach(([key, value]) => {
-            if (!key.startsWith('guarantor')) {
-                if (Array.isArray(value)) {
-                    value.forEach(file => form.append(key, file));
-                } else {
-                    form.append(key, value);
-                }
-            }
-        });
-
+    
+        // Append member fields
+        form.append('name', formData.name);
+        form.append('address', formData.address);
+        form.append('dateOfBirth', formData.dateOfBirth);
+        form.append('aadharNo', formData.aadharNo);
+        form.append('panNo', formData.panNo);
+        form.append('mobileNumber', formData.mobileNumber);
+    
+        // Append member files
+        if (formData.photo) form.append('photo', formData.photo);
+        if (formData.guarantorPhoto) form.append('guarantorPhoto', formData.guarantorPhoto);
+        if (formData.guarantorCheque) form.append('guarantorCheque', formData.guarantorCheque);
+    
         // Append guarantor fields
-        Object.entries(formData.guarantor).forEach(([key, value]) => {
-            if (key === 'extraDocuments') {
-                value.forEach(file => form.append(`guarantor[${key}]`, file));
-            } else {
-                form.append(`guarantor[${key}]`, value);
-            }
+        form.append('guarantor.name', formData.guarantor.name);
+        form.append('guarantor.mobileNo', formData.guarantor.mobileNo);
+        form.append('guarantor.relation', formData.guarantor.relation);
+    
+        // Append guarantor extra documents
+        formData.guarantor.extraDocuments.forEach((doc, index) => {
+            if (doc) form.append(`guarantor.extraDocuments[${index}]`, doc);
         });
-
+    
         try {
             const token = localStorage.getItem("crp_token");
             const response = await axios.post('http://localhost:5000/api/member', form, {
@@ -239,12 +191,16 @@ const AddMember = () => {
                     'Authorization': `Bearer ${token}`,
                 },
             });
-            console.log('Member data submitted successfully', response.data);
+            console.log('Member added successfully:', response.data);
+            // Add success message or redirect here
         } catch (error) {
-            console.error('Error submitting member data', error.response || error);
+            console.error('Error adding member:', error);
+            setErrors((prev) => ({
+                ...prev,
+                submit: 'Failed to add member. Please try again.',
+            }));
         }
     };
-
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100 py-6">
             <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-[95%] max-w-6xl">
@@ -252,7 +208,7 @@ const AddMember = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Member Details */}
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Name *</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors.name ? 'border-red-500' : ''}`}
@@ -266,7 +222,7 @@ const AddMember = () => {
                         {errors.name && <p className="text-red-500 text-xs italic">{errors.name}</p>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Address *</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors.address ? 'border-red-500' : ''}`}
@@ -280,7 +236,7 @@ const AddMember = () => {
                         {errors.address && <p className="text-red-500 text-xs italic">{errors.address}</p>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Date of Birth *</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors.dateOfBirth ? 'border-red-500' : ''}`}
@@ -293,7 +249,7 @@ const AddMember = () => {
                         {errors.dateOfBirth && <p className="text-red-500 text-xs italic">{errors.dateOfBirth}</p>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Aadhar Number *</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors.aadharNo ? 'border-red-500' : ''}`}
@@ -307,7 +263,7 @@ const AddMember = () => {
                         {errors.aadharNo && <p className="text-red-500 text-xs italic">{errors.aadharNo}</p>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">PAN Number *</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors.panNo ? 'border-red-500' : ''}`}
@@ -321,7 +277,7 @@ const AddMember = () => {
                         {errors.panNo && <p className="text-red-500 text-xs italic">{errors.panNo}</p>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Mobile Number *</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors.mobileNumber ? 'border-red-500' : ''}`}
@@ -335,7 +291,7 @@ const AddMember = () => {
                         {errors.mobileNumber && <p className="text-red-500 text-xs italic">{errors.mobileNumber}</p>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Photo *</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors.photo ? 'border-red-500' : ''}`}
@@ -348,7 +304,7 @@ const AddMember = () => {
                         {errors.photo && <p className="text-red-500 text-xs italic">{errors.photo}</p>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Guarantor Photo *</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors.guarantorPhoto ? 'border-red-500' : ''}`}
@@ -361,7 +317,7 @@ const AddMember = () => {
                         {errors.guarantorPhoto && <p className="text-red-500 text-xs italic">{errors.guarantorPhoto}</p>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Guarantor Cheque *</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors.guarantorCheque ? 'border-red-500' : ''}`}
@@ -379,39 +335,39 @@ const AddMember = () => {
                         <h3 className="text-xl font-semibold mb-4 text-gray-700 mt-6">Guarantor Information</h3>
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Guarantor Name *</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors['guarantor[name]'] ? 'border-red-500' : ''}`}
                             type="text"
-                            name="guarantor[name]"
+                            name="guarantor.name"
                             placeholder="Guarantor's Full Name"
                             value={formData.guarantor.name}
                             onChange={handleInputChange}
                             required
                         />
-                        {errors['guarantor[name]'] && <p className="text-red-500 text-xs italic">{errors['guarantor[name]']}</p>}
+                        {errors['guarantor.name'] && <p className="text-red-500 text-xs italic">{errors['guarantor.name']}</p>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Guarantor Mobile Number *</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors['guarantor[mobileNo]'] ? 'border-red-500' : ''}`}
                             type="text"
-                            name="guarantor[mobileNo]"
+                            name="guarantor.mobileNo"
                             placeholder="10-digit Mobile Number"
                             value={formData.guarantor.mobileNo}
                             onChange={handleInputChange}
                             required
                         />
-                        {errors['guarantor[mobileNo]'] && <p className="text-red-500 text-xs italic">{errors['guarantor[mobileNo]']}</p>}
+                        {errors['guarantor.mobileNo'] && <p className="text-red-500 text-xs italic">{errors['guarantor.mobileNo']}</p>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Relation *</label>
                         <select
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors['guarantor[relation]'] ? 'border-red-500' : ''}`}
-                            name="guarantor[relation]"
+                            name="guarantor.relation"
                             value={formData.guarantor.relation}
                             onChange={handleInputChange}
                             required
@@ -423,56 +379,56 @@ const AddMember = () => {
                                 </option>
                             ))}
                         </select>
-                        {errors['guarantor[relation]'] && <p className="text-red-500 text-xs italic">{errors['guarantor[relation]']}</p>}
+                        {errors['guarantor.relation'] && <p className="text-red-500 text-xs italic">{errors['guarantor.relation']}</p>}
                     </div>
 
                     {/* Guarantor Extra Documents */}
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Extra Document 1</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors['guarantor[extraDoc1]'] ? 'border-red-500' : ''}`}
                             type="file"
-                            name="guarantor[extraDoc1]"
+                            name="guarantor.extraDocuments"
                             onChange={handleFileChange}
                             accept="image/*"
                         />
-                        {errors['guarantor[extraDoc1]'] && <p className="text-red-500 text-xs italic">{errors['guarantor[extraDoc1]']}</p>}
+                        {errors['guarantor.extraDocuments'] && <p className="text-red-500 text-xs italic">{errors['guarantor.extraDoc1']}</p>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Extra Document 2</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors['guarantor[extraDoc2]'] ? 'border-red-500' : ''}`}
                             type="file"
-                            name="guarantor[extraDoc2]"
+                            name="guarantor.extraDoc2"
                             onChange={handleFileChange}
                             accept="image/*"
                         />
-                        {errors['guarantor[extraDoc2]'] && <p className="text-red-500 text-xs italic">{errors['guarantor[extraDoc2]']}</p>}
+                        {errors['guarantor.extraDocuments'] && <p className="text-red-500 text-xs italic">{errors['guarantor.extraDoc2']}</p>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Extra Document 3</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors['guarantor[extraDoc3]'] ? 'border-red-500' : ''}`}
                             type="file"
-                            name="guarantor[extraDoc3]"
+                            name="guarantor.extraDocuments"
                             onChange={handleFileChange}
                             accept="image/*"
                         />
-                        {errors['guarantor[extraDoc3]'] && <p className="text-red-500 text-xs italic">{errors['guarantor[extraDoc3]']}</p>}
+                        {errors['guarantor.extraDocuments'] && <p className="text-red-500 text-xs italic">{errors['guarantor.extraDoc3']}</p>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-0 sm:mb-2 md:mb-2 lg:mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Extra Document 4</label>
                         <input
                             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors['guarantor[extraDoc3]'] ? 'border-red-500' : ''}`}
                             type="file"
-                            name="guarantor[extraDoc4]"
+                            name="guarantor.extraDocuments"
                             onChange={handleFileChange}
                             accept="image/*"
                         />
-                        {errors['guarantor[extraDoc4]'] && <p className="text-red-500 text-xs italic">{errors['guarantor[extraDoc4]']}</p>}
+                        {errors['guarantor.extraDoc4'] && <p className="text-red-500 text-xs italic">{errors['guarantor.extraDoc4']}</p>}
                     </div>
                 </div>
 
