@@ -25,6 +25,11 @@ const groupSchema = new mongoose.Schema(
         ref: "CRP",
         required: true,
       },
+
+      bankName : {
+        type: String,
+        required: true,
+      }
     },
     members: [
       {
