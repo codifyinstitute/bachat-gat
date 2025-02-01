@@ -31,10 +31,10 @@ const CreateGroupForm = () => {
           },
         });
 
-        // Filter members to only include inactive ones
-        const inactiveMembers = response.data.filter((member) => member.status === "active");
+        // Filter members to only include active ones
+        const activeMembers = response.data.filter((member) => member.status === "inactive");
 
-        const memberOptions = inactiveMembers.map((member) => ({
+        const memberOptions = activeMembers.map((member) => ({
           value: member._id,
           label: `${member.name} - ${member.mobileNumber}`, // Showing both name and mobile number
         }));
@@ -55,8 +55,8 @@ const CreateGroupForm = () => {
     setLoading(true);
     setMessage("");
   
-    if (selectedMembers.length < 1) {
-      setMessage("You must select at least 1 member to create a group.");
+    if (selectedMembers.length !== 10) {
+      setMessage("You must select exactly 10 members to create a group.");
       setLoading(false);
       return;
     }
@@ -76,7 +76,6 @@ const CreateGroupForm = () => {
         crpName: crpname,
         crpMobile: crpmobile,
         crpId: "65a123456789abcd1234efgh", // Replace with actual CRP ID
-        // bankName: selectedBank,
       },
       members: selectedMembers.map((m) => ({
         member: m.value,
@@ -105,7 +104,7 @@ const CreateGroupForm = () => {
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto bg-white shadow-md rounded  h-[90vh] overflow-y-auto mt-16">
+    <div className="p-4 max-w-md mx-auto bg-white shadow-md rounded h-[90vh] overflow-y-auto mt-16">
       <h1 className="text-xl font-bold mb-4">Create Group</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
@@ -129,9 +128,7 @@ const CreateGroupForm = () => {
           />
         </div>
         <div className="mb-3">
-        </div>
-        <div className="mb-3">
-          <label className="block text-sm font-medium">Crp Name</label>
+          <label className="block text-sm font-medium">CRP Name</label>
           <input
             type="text"
             className="w-full border p-2 rounded"
@@ -141,7 +138,7 @@ const CreateGroupForm = () => {
           />
         </div>
         <div className="mb-3">
-          <label className="block text-sm font-medium">Crp Mobile</label>
+          <label className="block text-sm font-medium">CRP Mobile</label>
           <input
             type="text"
             className="w-full border p-2 rounded"
@@ -151,7 +148,7 @@ const CreateGroupForm = () => {
           />
         </div>
         <div className="mb-3">
-          <label className="block text-sm font-medium">Whatsapp link</label>
+          <label className="block text-sm font-medium">WhatsApp Link</label>
           <input
             type="text"
             className="w-full border p-2 rounded"
@@ -166,7 +163,7 @@ const CreateGroupForm = () => {
             isMulti
             options={allMembers}
             value={selectedMembers}
-            onChange={(selectedOptions) => setSelectedMembers(selectedOptions || [])} 
+            onChange={(selectedOptions) => setSelectedMembers(selectedOptions || [])}
             getOptionLabel={(e) => `${e.label}`}
             maxMenuHeight={250}
             isSearchable
@@ -175,11 +172,8 @@ const CreateGroupForm = () => {
             isDisabled={loading}
             noOptionsMessage={() => "No members available"}
             isClearable
-            />
-          {selectedMembers.length > 1 && (
-            <p className="text-red-500 mt-2">You can only select up to 10 members.</p>
-          )}
-          {selectedMembers.length < 1 && selectedMembers.length > 0 && (
+          />
+          {selectedMembers.length !== 10 && selectedMembers.length > 0 && (
             <p className="text-red-500 mt-2">You need to select exactly 10 members.</p>
           )}
         </div>

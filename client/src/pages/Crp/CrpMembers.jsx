@@ -57,7 +57,7 @@ const AllMembers = () => {
               <tr className="text-gray-600 text-left border-b">
                 <th className="py-3 px-4">Member Name</th>
                 <th className="py-3 px-4">Mobile</th>
-                <th className="py-3 px-4">Date of Birth</th>
+                <th className="py-3 px-4">Pan No</th>
                 <th className="py-3 px-4">Status</th>
               </tr>
             </thead>
@@ -71,7 +71,7 @@ const AllMembers = () => {
                   <td className="py-3 px-4">{member.name}</td>
                   <td className="py-3 px-4">{member.mobileNumber}</td>
                   <td className="py-3 px-4">
-                    {member.dob ? new Date(member.dob).toLocaleDateString() : "N/A"}
+                    {member.panNo}
                   </td>
                   <td className="py-3 px-4">
                     <span
