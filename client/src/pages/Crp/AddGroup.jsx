@@ -54,39 +54,38 @@ const CreateGroupForm = () => {
     console.log("Submit button clicked!");
     setLoading(true);
     setMessage("");
-
+  
     console.log("Selected Members:", selectedMembers.length);
-    if (selectedMembers.length !== 1) {
+    if (selectedMembers.length !== 1) { // Correcting the validation to exactly 10 members
       setMessage("You must select exactly 10 members to create a group.");
       setLoading(false);
       return;
     }
-
+  
     const token = localStorage.getItem("crp_token");
     if (!token) {
       alert("Authorization token is missing.");
       setLoading(false);
       return;
     }
-
+  
     const groupData = {
       name,
       address,
       referredBy: {
         crpName: crpname,
         crpMobile: crpmobile,
-        crpId: "", // Replace with actual CRP ID
       },
       members: selectedMembers.map((m) => ({
         member: m.value,
         role: "member",
       })),
-      createdBy: "", // Replace with actual logged-in CRP ID
       whatsappGroupLink: whtslink,
+      status: "inactive", // Added this line to set status as 'inactive'
     };
-
+  
     console.log("Group Data:", groupData); // Debugging log
-
+  
     try {
       const response = await axios.post("http://localhost:5000/api/groups", groupData, {
         headers: {
@@ -94,7 +93,7 @@ const CreateGroupForm = () => {
           "Content-Type": "application/json",
         },
       });
-
+  
       console.log("API Response:", response.data);
       setMessage("Group created successfully!");
     } catch (error) {
@@ -136,16 +135,6 @@ const CreateGroupForm = () => {
             className="w-full border p-2 rounded"
             value={crpname}
             onChange={(e) => setCrpname(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="block text-sm font-medium">CRP Mobile</label>
-          <input
-            type="text"
-            className="w-full border p-2 rounded"
-            value={crpmobile}
-            onChange={(e) => setCrpmobile(e.target.value)}
             required
           />
         </div>
