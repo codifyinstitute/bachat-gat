@@ -79,9 +79,9 @@ const CreateGroupForm = () => {
       members: selectedMembers.map((m) => ({
         member: m.value,
         role: "member",
+        status: "inactive", // Added this line to set status as 'inactive'
       })),
       whatsappGroupLink: whtslink,
-      status: "inactive", // Added this line to set status as 'inactive'
     };
   
     console.log("Group Data:", groupData); // Debugging log
