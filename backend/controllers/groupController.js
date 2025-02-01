@@ -202,17 +202,9 @@ const groupController = {
   //     res.status(500).json({ message: error.message });
   //   }
   // },
-
   createGroup: async (req, res) => {
     try {
-      const {
-        name,
-        address,
-        members,
-        whatsappGroupLink,
-        savingsBalance,
-        referredBy,
-      } = req.body;
+      const { name, address, members, whatsappGroupLink, savingsBalance, referredBy } = req.body;
       console.log("User:", req.user);
 
       // Ensure that the user creating the group is a CRP
@@ -257,34 +249,44 @@ const groupController = {
         role: "member", // Only 'member' role for users
       }));
 
+      // const group = new Group({
+      //   name,
+      //   address,
+      //   referredBy: referredBy || {
+      //     crpName: req.user.name,
+      //     crpMobile: req.user.mobile,
+      //     crpId: req.user.id,
+      //   },
+      //   members: validatedMembers,
+      //   createdBy: req.user.id,
+      //   whatsappGroupLink: whatsappGroupLink || "",
+      //   savingsBalance: savingsBalance || 0,
+      // });
       const group = new Group({
-        name,
-        address,
-        referredBy: referredBy || {
-          crpName: req.user.name,
-          crpMobile: req.user.mobile,
-          crpId: req.user.id,
-        },
-        members: validatedMembers,
-        createdBy: req.user.id,
-        whatsappGroupLink: whatsappGroupLink || "",
-        savingsBalance: savingsBalance || 0,
-      });
+               name,
+               address,
+               referredBy: {
+                 crpName: req.user.name,
+                crpMobile: req.user.mobile,
+                 crpId: req.user.id,
+              },
+              members: validatedMembers,
+               createdBy: req.user.id,
+               whatsappGroupLink: whatsappGroupLink || "",
+                savingsBalance: savingsBalance || 0,
+             });
 
       await group.save();
 
-      // Populate member details in response
-      await group.populate("members.member", "name mobileNumber");
-
+      // Send the full group data in response (no need to populate)
       res.status(201).json({
         message: "Group created successfully",
-        group,
+        group: group.toObject(),
       });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   },
-
   addMember: async (req, res) => {
     try {
       const { groupId } = req.params;
