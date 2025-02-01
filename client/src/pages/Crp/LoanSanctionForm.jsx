@@ -161,6 +161,17 @@ const LoanSanctionForm = () => {
         </div>
 
         <div className="mb-3">
+          <label className="block text-sm font-medium">Start Date</label>
+          <input
+            type="date"
+            className="w-full border p-2 rounded"
+            value={loanDetails.startDate}
+            onChange={(e) => handleChange("startDate", e.target.value)}
+            required
+          />
+        </div>
+        
+        <div className="mb-3">
           <label className="block text-lg font-semibold mb-2">Select a Bank:</label>
           {error && <p className="text-red-500">{error}</p>}
           {loading ? (
@@ -182,18 +193,6 @@ const LoanSanctionForm = () => {
           )}
         </div>
 
-        {/* ✅ Interest Rate - Read-Only */}
-        <div className="mb-3">
-          <label className="block text-sm font-medium">Interest Rate (%)</label>
-          <input
-            type="number"
-            className="w-full border p-2 rounded bg-gray-100"
-            value={loanDetails.interestRate}
-            readOnly // ✅ Make it read-only
-            required
-          />
-        </div>
-
         <div className="mb-3">
           <label className="block text-sm font-medium">Term (Months)</label>
           <input
@@ -205,13 +204,14 @@ const LoanSanctionForm = () => {
           />
         </div>
 
+        {/* ✅ Interest Rate - Read-Only */}
         <div className="mb-3">
-          <label className="block text-sm font-medium">Start Date</label>
+          <label className="block text-sm font-medium">Interest Rate (%)</label>
           <input
-            type="date"
-            className="w-full border p-2 rounded"
-            value={loanDetails.startDate}
-            onChange={(e) => handleChange("startDate", e.target.value)}
+            type="number"
+            className="w-full border p-2 rounded bg-gray-100"
+            value={loanDetails.interestRate}
+            readOnly // ✅ Make it read-only
             required
           />
         </div>
