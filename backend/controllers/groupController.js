@@ -366,23 +366,8 @@ const groupController = {
         createdBy: req.user.id,
         whatsappGroupLink: whatsappGroupLink || "",
         savingsBalance: savingsBalance || 0,
-        status: req.body.status,
+        status: "active", // Set the group status to 'active'
       });
-
-      // const group = new Group({
-      //   name,
-      //   address,
-      //   referredBy: referredBy || {
-      //     crpName: req.user.name,
-      //     crpMobile: req.user.mobile,
-      //     crpId: req.user.id,
-      //   },
-      //   members: validatedMembers,
-      //   createdBy: req.user.id,
-      //   whatsappGroupLink: whatsappGroupLink || "",
-      //   savingsBalance: savingsBalance || 0,
-      //   status: req.body.status,
-      // });
 
       await group.save();
 
