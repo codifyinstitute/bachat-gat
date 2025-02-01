@@ -86,7 +86,6 @@ const memberSchema = new mongoose.Schema(
     guarantor: guarantorSchema,
     status: {
       type: String,
-      enum: ["active", "inactive"],
       default: "active",
     },
     savingsBalance: { type: Number, default: 0 },

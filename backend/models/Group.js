@@ -51,8 +51,6 @@ const groupSchema = new mongoose.Schema(
     ],
     status: {
       type: String,
-      enum: ["active", "inactive"],
-      default: "active",
     },
     savingsBalance: { type: Number, default: 0 },
     createdBy: {
