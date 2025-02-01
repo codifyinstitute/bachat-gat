@@ -12,31 +12,31 @@ const CreateGroupForm = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [allMembers, setAllMembers] = useState([]);
-  
+
   useEffect(() => {
-    // Fetch inactive members when component mounts
     const fetchMembers = async () => {
       try {
         const token = localStorage.getItem("crp_token");
-
         if (!token) {
           alert("Authorization token is missing.");
           return;
         }
 
-        const response = await axios.get("http://localhost:5000/api/member", {
+        const response = await axios.get("http://localhost:5000/api/crp/membycrp", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
 
-        // Filter members to only include active ones
-        const activeMembers = response.data.filter((member) => member.status === "inactive");
+        console.log("API Response:", response.data); // Debugging log
+
+        const membersArray = Array.isArray(response.data) ? response.data : response.data.members || [];
+        const activeMembers = membersArray.filter((member) => member.status === "active");
 
         const memberOptions = activeMembers.map((member) => ({
           value: member._id,
-          label: `${member.name} - ${member.mobileNumber}`, // Showing both name and mobile number
+          label: `${member.name} - ${member.mobileNumber}`,
         }));
 
         setAllMembers(memberOptions);
@@ -54,37 +54,39 @@ const CreateGroupForm = () => {
     console.log("Submit button clicked!");
     setLoading(true);
     setMessage("");
-  
-    if (selectedMembers.length !== 10) {
+
+    console.log("Selected Members:", selectedMembers.length);
+    if (selectedMembers.length !== 1) {
       setMessage("You must select exactly 10 members to create a group.");
       setLoading(false);
       return;
     }
-  
+
     const token = localStorage.getItem("crp_token");
-  
     if (!token) {
       alert("Authorization token is missing.");
       setLoading(false);
       return;
     }
-  
+
     const groupData = {
       name,
       address,
       referredBy: {
         crpName: crpname,
         crpMobile: crpmobile,
-        crpId: "65a123456789abcd1234efgh", // Replace with actual CRP ID
+        crpId: "", // Replace with actual CRP ID
       },
       members: selectedMembers.map((m) => ({
         member: m.value,
-        role: "member", // Default role for now (adjust as needed)
+        role: "member",
       })),
-      createdBy: "65a123456789abcd1234efgh", // Replace with actual logged-in CRP ID
+      createdBy: "", // Replace with actual logged-in CRP ID
       whatsappGroupLink: whtslink,
     };
-  
+
+    console.log("Group Data:", groupData); // Debugging log
+
     try {
       const response = await axios.post("http://localhost:5000/api/groups", groupData, {
         headers: {
@@ -92,12 +94,12 @@ const CreateGroupForm = () => {
           "Content-Type": "application/json",
         },
       });
-  
+
+      console.log("API Response:", response.data);
       setMessage("Group created successfully!");
-      console.log("Response:", response.data);
     } catch (error) {
-      setMessage(error.response?.data?.message || "Error creating group. Please try again.");
       console.error("Error:", error);
+      setMessage(error.response?.data?.message || "Error creating group. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -164,7 +166,6 @@ const CreateGroupForm = () => {
             options={allMembers}
             value={selectedMembers}
             onChange={(selectedOptions) => setSelectedMembers(selectedOptions || [])}
-            getOptionLabel={(e) => `${e.label}`}
             maxMenuHeight={250}
             isSearchable
             closeMenuOnSelect={false}
@@ -173,14 +174,15 @@ const CreateGroupForm = () => {
             noOptionsMessage={() => "No members available"}
             isClearable
           />
-          {selectedMembers.length !== 10 && selectedMembers.length > 0 && (
+          {selectedMembers.length !== 1 && selectedMembers.length > 0 && (
             <p className="text-red-500 mt-2">You need to select exactly 10 members.</p>
           )}
         </div>
         <button
           type="submit"
+          style={{ pointerEvents: "auto", zIndex: 10 }}
           className="bg-blue-500 text-white p-2 rounded w-full"
-          disabled={loading || selectedMembers.length !== 10}
+          disabled={loading || selectedMembers.length !== 1}
         >
           {loading ? "Creating..." : "Create Group"}
         </button>
