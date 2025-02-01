@@ -202,6 +202,100 @@ const groupController = {
   //     res.status(500).json({ message: error.message });
   //   }
   // },
+  // createGroup: async (req, res) => {
+  //   try {
+  //     const {
+  //       name,
+  //       address,
+  //       members,
+  //       whatsappGroupLink,
+  //       savingsBalance,
+  //       referredBy,
+  //     } = req.body;
+  //     console.log("User:", req.user);
+
+  //     // Ensure that the user creating the group is a CRP
+  //     if (req.user.role !== "crp") {
+  //       return res.status(403).json({
+  //         message: "Only CRPs can create groups",
+  //       });
+  //     }
+
+  //     // Validate member IDs and check if they're already in other active groups
+  //     for (const memberData of members) {
+  //       const member = await Member.findById(memberData.member);
+  //       if (!member) {
+  //         return res.status(400).json({
+  //           message: `Member ${memberData.member} not found`,
+  //         });
+  //       }
+
+  //       // Check if member has guarantor details
+  //       if (!member.guarantor) {
+  //         return res.status(400).json({
+  //           message: `Member ${member.name} doesn't have guarantor details`,
+  //         });
+  //       }
+
+  //       // Check if member is already in another active group
+  //       const existingGroup = await Group.findOne({
+  //         "members.member": member._id,
+  //         status: "active",
+  //       });
+
+  //       if (existingGroup) {
+  //         return res.status(400).json({
+  //           message: `Member ${member.name} is already part of group ${existingGroup.name}`,
+  //         });
+  //       }
+  //     }
+
+  //     // Ensure all roles are set to 'member' as per requirement
+  //     const validatedMembers = members.map((m) => ({
+  //       ...m,
+  //       role: "member", // Only 'member' role for users
+  //     }));
+
+  //     // const group = new Group({
+  //     //   name,
+  //     //   address,
+  //     //   referredBy: referredBy || {
+  //     //     crpName: req.user.name,
+  //     //     crpMobile: req.user.mobile,
+  //     //     crpId: req.user.id,
+  //     //   },
+  //     //   members: validatedMembers,
+  //     //   createdBy: req.user.id,
+  //     //   whatsappGroupLink: whatsappGroupLink || "",
+  //     //   savingsBalance: savingsBalance || 0,
+  //     // });
+  //     const group = new Group({
+  //       name,
+  //       address,
+  //       referredBy: {
+  //         crpName: req.user.name,
+  //         crpMobile: req.user.mobile,
+  //         crpId: req.user.id,
+  //       },
+  //       members: validatedMembers,
+  //       createdBy: req.user.id,
+  //       whatsappGroupLink: whatsappGroupLink || "",
+  //       savingsBalance: savingsBalance || 0,
+  //       status: req.body.status,
+  //     });
+
+  //     await group.save();
+
+  //     // Send the full group data in response (no need to populate)
+  //     res.status(201).json({
+  //       message: "Group created successfully",
+  //       group: group.toObject(),
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   createGroup: async (req, res) => {
     try {
       const {
@@ -248,6 +342,10 @@ const groupController = {
             message: `Member ${member.name} is already part of group ${existingGroup.name}`,
           });
         }
+
+        // Update the member's status to inactive if they are part of a new group
+        member.status = "inactive"; // Change the member's status to inactive
+        await member.save(); // Save the updated member
       }
 
       // Ensure all roles are set to 'member' as per requirement
@@ -256,23 +354,10 @@ const groupController = {
         role: "member", // Only 'member' role for users
       }));
 
-      // const group = new Group({
-      //   name,
-      //   address,
-      //   referredBy: referredBy || {
-      //     crpName: req.user.name,
-      //     crpMobile: req.user.mobile,
-      //     crpId: req.user.id,
-      //   },
-      //   members: validatedMembers,
-      //   createdBy: req.user.id,
-      //   whatsappGroupLink: whatsappGroupLink || "",
-      //   savingsBalance: savingsBalance || 0,
-      // });
       const group = new Group({
         name,
         address,
-        referredBy: {
+        referredBy: referredBy || {
           crpName: req.user.name,
           crpMobile: req.user.mobile,
           crpId: req.user.id,
@@ -295,6 +380,7 @@ const groupController = {
       res.status(500).json({ message: error.message });
     }
   },
+
   addMember: async (req, res) => {
     try {
       const { groupId } = req.params;
