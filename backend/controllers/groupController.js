@@ -357,7 +357,7 @@ const groupController = {
       const group = new Group({
         name,
         address,
-        referredBy: referredBy || {
+        referredBy: {
           crpName: req.user.name,
           crpMobile: req.user.mobile,
           crpId: req.user.id,
@@ -368,6 +368,21 @@ const groupController = {
         savingsBalance: savingsBalance || 0,
         status: req.body.status,
       });
+
+      // const group = new Group({
+      //   name,
+      //   address,
+      //   referredBy: referredBy || {
+      //     crpName: req.user.name,
+      //     crpMobile: req.user.mobile,
+      //     crpId: req.user.id,
+      //   },
+      //   members: validatedMembers,
+      //   createdBy: req.user.id,
+      //   whatsappGroupLink: whatsappGroupLink || "",
+      //   savingsBalance: savingsBalance || 0,
+      //   status: req.body.status,
+      // });
 
       await group.save();
 
