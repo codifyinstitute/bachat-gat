@@ -144,15 +144,12 @@ exports.updateProfile = async (req, res) => {
 // };
 
 const Member = require("../models/Member");
-
 exports.getAllMembersCreatedByCRP = async (req, res) => {
   try {
     const crpId = req.user.id; // Get the CRP ID from authenticated user
 
     // Find all members where `createdBy` matches the logged-in CRP
-    const members = await Member.find({ createdBy: crpId }).select(
-      "name mobileNumber aadharNo panNo photo status createdAt updatedAt referredBy crpId crpName crpMobile crpId crpName crpMobile crpId crpName "
-    );
+    const members = await Member.find({ createdBy: crpId });
 
     if (!members.length) {
       return res.status(404).json({ message: "No members found for this CRP" });
