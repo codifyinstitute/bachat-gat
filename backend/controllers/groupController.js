@@ -204,7 +204,14 @@ const groupController = {
   // },
   createGroup: async (req, res) => {
     try {
-      const { name, address, members, whatsappGroupLink, savingsBalance, referredBy } = req.body;
+      const {
+        name,
+        address,
+        members,
+        whatsappGroupLink,
+        savingsBalance,
+        referredBy,
+      } = req.body;
       console.log("User:", req.user);
 
       // Ensure that the user creating the group is a CRP
@@ -263,18 +270,19 @@ const groupController = {
       //   savingsBalance: savingsBalance || 0,
       // });
       const group = new Group({
-               name,
-               address,
-               referredBy: {
-                 crpName: req.user.name,
-                crpMobile: req.user.mobile,
-                 crpId: req.user.id,
-              },
-              members: validatedMembers,
-               createdBy: req.user.id,
-               whatsappGroupLink: whatsappGroupLink || "",
-                savingsBalance: savingsBalance || 0,
-             });
+        name,
+        address,
+        referredBy: {
+          crpName: req.user.name,
+          crpMobile: req.user.mobile,
+          crpId: req.user.id,
+        },
+        members: validatedMembers,
+        createdBy: req.user.id,
+        whatsappGroupLink: whatsappGroupLink || "",
+        savingsBalance: savingsBalance || 0,
+        status: req.body.status,
+      });
 
       await group.save();
 
