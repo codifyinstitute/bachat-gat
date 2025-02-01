@@ -26,10 +26,10 @@ const groupSchema = new mongoose.Schema(
         required: true,
       },
 
-      bankName : {
+      bankName: {
         type: String,
-        // required: true,  
-      }
+        // required: true,
+      },
     },
     members: [
       {
@@ -54,6 +54,7 @@ const groupSchema = new mongoose.Schema(
       enum: ["active", "inactive"],
       default: "active",
     },
+    savingsBalance: { type: Number, default: 0 },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "CRP",
