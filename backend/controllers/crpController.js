@@ -151,7 +151,7 @@ exports.getAllMembersCreatedByCRP = async (req, res) => {
 
     // Find all members where `createdBy` matches the logged-in CRP
     const members = await Member.find({ createdBy: crpId }).select(
-      "name mobileNumber aadharNo panNo"
+      "name mobileNumber aadharNo panNo photo status createdAt updatedAt referredBy crpId crpName crpMobile crpId crpName crpMobile crpId crpName "
     );
 
     if (!members.length) {
