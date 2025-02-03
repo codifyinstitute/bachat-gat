@@ -72,6 +72,7 @@ const PendingLoans = () => {
                                         {loan.bankDetails && loan.bankDetails.length > 0 ? (
                                             <>
                                                 <h4 className="font-bold mt-2">Bank Details</h4>
+                                                {console.log()}
                                                 {loan.bankDetails.map((bank, index) => (
                                                     <div key={index} className="border p-2 rounded bg-gray-50 shadow-sm">
                                                         <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Bank Name:</strong> {bank.bankName}</p>
