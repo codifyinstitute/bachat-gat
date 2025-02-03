@@ -5,9 +5,102 @@ const Member = require("../models/Member");
 
 const collectionController = {
   // Initialize collection for a group
+  // initializeCollection: async (req, res) => {
+  //   try {
+  //     const { groupId, collectionDate, Sa } = req.body;
+
+  //     console.log("Group ID from request:", groupId);
+
+  //     // Validate group and active loan
+  //     const group = await Group.findById(groupId).populate({
+  //       path: "members.member",
+  //       select: "name mobileNumber", // Make sure this is the information you need
+  //     });
+
+  //     if (!group) {
+  //       return res.status(404).json({ message: "Group not found" });
+  //     }
+
+  //     const loan = await Loan.findOne({
+  //       groupId,
+  //       status: "approved",
+  //     });
+
+  //     if (!loan) {
+  //       return res
+  //         .status(404)
+  //         .json({ message: "No active loan found for this group" });
+  //     }
+
+  //     const date = new Date(collectionDate);
+  //     const collectionMonth = date.toLocaleString("default", { month: "long" });
+  //     const collectionYear = date.getFullYear();
+
+  //     // Check if collection already exists for this month
+  //     const existingCollection = await Collection.findOne({
+  //       groupId,
+  //       collectionMonth,
+  //       collectionYear,
+  //     });
+
+  //     if (existingCollection) {
+  //       return res.status(400).json({
+  //         message: "Collection already initialized for this month",
+  //       });
+  //     }
+
+  //     // Initialize empty payments for each member
+  //     const payments = group.members.map((member) => {
+  //       const memberSchedule = loan.repaymentSchedules.find(
+  //         (schedule) =>
+  //           schedule.memberId.toString() === member.member._id.toString()
+  //       );
+
+  //       const currentInstallment = memberSchedule.installments.find(
+  //         (inst) => !inst.paidDate && inst.status === "pending"
+  //       );
+
+  //       return {
+  //         memberId: member.member._id,
+  //         loanId: loan._id,
+  //         installmentNumber: currentInstallment.installmentNumber,
+  //         emiAmount: currentInstallment.amount,
+  //         savingsAmount, // Default savings amount
+  //         totalAmount: currentInstallment.amount + savingsAmount,
+  //         status: "pending",
+  //       };
+  //     });
+
+  //     const collection = new Collection({
+  //       groupId,
+  //       collectionDate: date,
+  //       collectionMonth,
+  //       collectionYear,
+  //       payments,
+  //       createdBy: req.user.id,
+  //     });
+
+  //     await collection.save();
+  //     await collection.populate([
+  //       { path: "groupId", select: "name" },
+  //       { path: "payments.memberId", select: "name mobileNumber" },
+  //     ]);
+
+  //     res.status(201).json({
+  //       message: "Collection initialized successfully",
+  //       collection,
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   initializeCollection: async (req, res) => {
     try {
-      const { groupId, collectionDate } = req.body;
+      const { groupId, collectionDate, savingsAmount } = req.body;
+
+      // If savingsAmount is not provided, set it to a default value (e.g., 0)
+      const savingsAmountValue = savingsAmount || 0;
 
       console.log("Group ID from request:", groupId);
 
@@ -65,8 +158,8 @@ const collectionController = {
           loanId: loan._id,
           installmentNumber: currentInstallment.installmentNumber,
           emiAmount: currentInstallment.amount,
-          savingsAmount, // Default savings amount
-          totalAmount: currentInstallment.amount + savingsAmount,
+          savingsAmount: savingsAmountValue, // Use the provided or default savings amount
+          totalAmount: currentInstallment.amount + savingsAmountValue,
           status: "pending",
         };
       });
