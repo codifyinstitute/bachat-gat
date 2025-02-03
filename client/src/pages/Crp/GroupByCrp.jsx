@@ -1,58 +1,55 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Trash2 } from "lucide-react";
 
 const GroupsList = () => {
-  const [groups, setGroups] = useState([]);
   const [loansData, setLoansData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCRP, setShowCRP] = useState(false);
   const [showWhatsApp, setShowWhatsApp] = useState(false);
-  const [expandedGroup, setExpandedGroup] = useState(null); // Track expanded group
+  const [expandedGroup, setExpandedGroup] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [deleteError, setDeleteError] = useState(null);
+
+  const fetchGroupsAndLoans = async () => {
+    try {
+      const crptoken = localStorage.getItem("crp_token");
+
+      if (!crptoken) {
+        setError("No authentication token found. Please log in.");
+        setLoading(false);
+        return;
+      }
+
+      const [groupsRes, loansRes] = await Promise.all([
+        axios.get("http://localhost:5000/api/groups/created-by-crp", {
+          headers: {
+            Authorization: `Bearer ${crptoken}`,
+            "Content-Type": "application/json",
+          },
+        }),
+        axios.get("http://localhost:5000/api/loan", {
+          headers: {
+            Authorization: `Bearer ${crptoken}`,
+            "Content-Type": "application/json",
+          },
+        }),
+      ]);
+
+      setGroups(groupsRes.data);
+      setLoansData(loansRes.data);
+      setLoading(false);
+    } catch (err) {
+      setError("Error fetching data");
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchGroupsAndLoans = async () => {
-      try {
-        const crptoken = localStorage.getItem("crp_token");
-
-        if (!crptoken) {
-          setError("No authentication token found. Please log in.");
-          setLoading(false);
-          return;
-        }
-
-        // Fetch groups and loans data concurrently
-        const [groupsRes, loansRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/groups/created-by-crp", {
-            headers: {
-              Authorization: `Bearer ${crptoken}`,
-              "Content-Type": "application/json",
-            },
-          }),
-          axios.get("http://localhost:5000/api/loan", {
-            headers: {
-              Authorization: `Bearer ${crptoken}`,
-              "Content-Type": "application/json",
-            },
-          }),
-        ]);
-
-        console.log("Groups Response:", groupsRes.data); // Debugging groups data
-        console.log("Loans Response:", loansRes.data); // Debugging loans data
-
-        setGroups(groupsRes.data);
-        setLoansData(loansRes.data);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching data:", err); // Log error
-        setError("Error fetching data");
-        setLoading(false);
-      }
-    };
-
     fetchGroupsAndLoans();
-  }, [ ]); // Empty array ensures the hook runs only once
+  }, []);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value.toLowerCase());
@@ -61,21 +58,9 @@ const GroupsList = () => {
   const toggleExpand = (groupId) => {
     setExpandedGroup(expandedGroup === groupId ? null : groupId);
   };
-  console.log(loansData,"loansdata")
 
   const getLoanDetails = (groupId) => {
-    console.log(`Fetching loan details for groupId: ${groupId}`);
-    // Log the loansData structure and groupId to check if there’s a mismatch
-    console.log("Loans Data:", loansData);
-    const loansForGroup = loansData.filter((loan) => {
-      console.log("loan", loan)
-      console.log("Loan Group ID:", loan.groupId._id); // This will show the actual groupId for each loan
-      console.log("grpname",groupId)
-      return loan.groupId._id === groupId;
-
-    });
-    console.log("Loans for group:", loansForGroup); // Check the resulting loans for the group
-    return loansForGroup;
+    return loansData.filter((loan) => loan.groupId._id === groupId);
   };
 
   const filteredGroups = groups.filter((group) => {
@@ -85,9 +70,44 @@ const GroupsList = () => {
     );
     return groupNameMatch || memberMatch;
   });
-console.log("filtere", filteredGroups)
 
-  console.log("Filtered Groups:", filteredGroups); // Debugging filtered groups
+  const handleDeleteGroup = async (groupId, e) => {
+    e.stopPropagation(); // Prevent row expansion when clicking delete
+    
+    if (!window.confirm("Are you sure you want to delete this group?")) {
+      return;
+    }
+
+    try {
+      setDeleteError(null);
+      const crptoken = localStorage.getItem("crp_token");
+      
+      // First check if the group has any active loans
+      const groupLoans = getLoanDetails(groupId);
+      if (groupLoans.length > 0) {
+        throw new Error("Cannot delete group with active loans. Please close all loans first.");
+      }
+
+      // Send delete request to backend
+      await axios.delete(`http://localhost:5000/api/groups/${groupId}`, {
+        headers: { 
+          Authorization: `Bearer ${crptoken}`,
+          "Content-Type": "application/json"
+        },
+      });
+
+      // Refresh the data after successful deletion
+      await fetchGroupsAndLoans();
+      
+      // Show success message (optional)
+      alert("Group deleted successfully");
+      
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      setDeleteError(error.response?.data?.message || error.message || "Error deleting group");
+      alert(error.response?.data?.message || error.message || "Error deleting group");
+    }
+  };
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
@@ -95,6 +115,12 @@ console.log("filtere", filteredGroups)
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-bold text-center mb-4">Your Groups</h2>
+
+      {deleteError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+          {deleteError}
+        </div>
+      )}
 
       <div className="flex justify-between md:gap-2 lg:gap-4 md:justify-center flex-wrap items-center mb-4">
         <input
@@ -135,15 +161,15 @@ console.log("filtere", filteredGroups)
                 <th className="p-3 text-left">Sr. No</th>
                 <th className="p-3 text-left">Group Name</th>
                 <th className="p-3 text-left">Address</th>
-                <th className="p-3 text-left"> Loan Amt</th>
-                {/* <th className="p-3 text-left">Bank</th> */}
+                <th className="p-3 text-left">Loan Amt</th>
                 {showCRP && <th className="p-3 text-left">CRP Name</th>}
                 {showWhatsApp && <th className="p-3 text-left">WhatsApp Link</th>}
+                <th className="p-3 text-left">Action</th>
               </tr>
             </thead>
             <tbody>
               {filteredGroups.map((group, index) => {
-                const groupLoans = getLoanDetails(group._id); // Use group._id to match loan details
+                const groupLoans = getLoanDetails(group._id);
                 return (
                   <React.Fragment key={group._id}>
                     <tr
@@ -153,29 +179,19 @@ console.log("filtere", filteredGroups)
                       <td className="p-3">{index + 1}</td>
                       <td className="p-3 font-semibold">{group.name}</td>
                       <td className="p-3">{group.address}</td>
-
-                      {/* Loan Data */}
                       <td className="p-3">
                         {groupLoans.length > 0 ? groupLoans[0].totalAmount : "N/A"}
-                        {console.log("grploan", groupLoans)}
                       </td>
-                      {/* <td className="p-3">
-                        {groupLoans.length > 0
-                          ? groupLoans[0].bankDetails?.name|| "N/A"
-                          : "N/A"}
-                          {console.log("bnkd", groupLoans[0].bankDetails)}
-                      </td> */}
-
                       {showCRP && <td className="p-3">{group.createdBy.name || "N/A"}</td>}
-
-                      {showWhatsApp && (<td className="p-3">
-                          {console.log("whts", group.whatsappGroupLink)}
-                          {showWhatsApp && <td className="p-3">{group.whatsappGroupLink || "N/A"}</td>}
-                        </td>
-                      )}
+                      {showWhatsApp && <td className="p-3">{group.whatsappGroupLink || "N/A"}</td>}
+                      <td className="p-3">
+                        <Trash2
+                          className="text-red-500 cursor-pointer"
+                          onClick={(e) => handleDeleteGroup(group._id, e)}
+                        />
+                      </td>
                     </tr>
 
-                    {/* Expandable Loan Details */}
                     {expandedGroup === group._id && (
                       <tr>
                         <td colSpan="7" className="p-4 bg-gray-50">
@@ -196,44 +212,42 @@ console.log("filtere", filteredGroups)
                                   <p><strong>Term (Months):</strong> {loan.termMonths}</p>
                                 </div>
                                 <div className="w-full flex justify-between mb-2">
-                                  <p><strong>Per Member Amount:</strong>{(loan.perMemberAmount)}</p>
+                                  <p><strong>Per Member Amount:</strong> {loan.perMemberAmount}</p>
                                   <p><strong>Ifsc code:</strong> {loan.bankDetails?.ifsc || "N/A"}</p>
                                 </div>
                                 <div className="w-full flex justify-between mb-2">
-                                  <p><strong>Bank name:</strong>{(loan.bankDetails?.name)}</p>
-
+                                  <p><strong>Bank name:</strong> {loan.bankDetails?.name}</p>
                                 </div>
                                 {loan.repaymentSchedules && loan.repaymentSchedules.length > 0 ? (
                                   loan.repaymentSchedules.map((schedule, idx) => (
                                     <div key={idx} className="p-2">
-                                      {console.log("schedule",schedule)}
                                       <p><strong>Installment Schedule:</strong></p>
-                                          <table className="w-full border-collapse border border-gray-400">
-                                            <thead>
-                                              <tr className="bg-gray-200">
-                                                <th className="border border-gray-400 px-2 py-1">#</th>
-                                                <th className="border border-gray-400 px-2 py-1">Due Date</th>
-                                                <th className="border border-gray-400 px-2 py-1">Amount (₹)</th>
-                                                <th className="border border-gray-400 px-2 py-1">Principal (₹)</th>
-                                                <th className="border border-gray-400 px-2 py-1">Interest (₹)</th>
-                                                <th className="border border-gray-400 px-2 py-1">Paid Amount (₹)</th>
-                                                <th className="border border-gray-400 px-2 py-1">Status</th>
-                                              </tr>
-                                            </thead>
-                                            <tbody>
-                                              {schedule.installments.map((inst, index) => (
-                                                <tr key={inst._id} className="text-center">
-                                                  <td className="border border-gray-400 px-2 py-1">{index + 1}</td>
-                                                  <td className="border border-gray-400 px-2 py-1">{new Date(inst.dueDate).toLocaleDateString()}</td>
-                                                  <td className="border border-gray-400 px-2 py-1">{inst.amount.toFixed(2)}</td>
-                                                  <td className="border border-gray-400 px-2 py-1">{inst.principal.toFixed(2)}</td>
-                                                  <td className="border border-gray-400 px-2 py-1">{inst.interest.toFixed(2)}</td>
-                                                  <td className="border border-gray-400 px-2 py-1">{inst.paidAmount.toFixed(2)}</td>
-                                                  <td className="border border-gray-400 px-2 py-1">{inst.status}</td>
-                                                </tr>
-                                              ))}
-                                            </tbody>
-                                        </table>
+                                      <table className="w-full border-collapse border border-gray-400">
+                                        <thead>
+                                          <tr className="bg-gray-200">
+                                            <th className="border border-gray-400 px-2 py-1">#</th>
+                                            <th className="border border-gray-400 px-2 py-1">Due Date</th>
+                                            <th className="border border-gray-400 px-2 py-1">Amount (₹)</th>
+                                            <th className="border border-gray-400 px-2 py-1">Principal (₹)</th>
+                                            <th className="border border-gray-400 px-2 py-1">Interest (₹)</th>
+                                            <th className="border border-gray-400 px-2 py-1">Paid Amount (₹)</th>
+                                            <th className="border border-gray-400 px-2 py-1">Status</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {schedule.installments.map((inst, index) => (
+                                            <tr key={inst._id} className="text-center">
+                                              <td className="border border-gray-400 px-2 py-1">{index + 1}</td>
+                                              <td className="border border-gray-400 px-2 py-1">{new Date(inst.dueDate).toLocaleDateString()}</td>
+                                              <td className="border border-gray-400 px-2 py-1">{inst.amount.toFixed(2)}</td>
+                                              <td className="border border-gray-400 px-2 py-1">{inst.principal.toFixed(2)}</td>
+                                              <td className="border border-gray-400 px-2 py-1">{inst.interest.toFixed(2)}</td>
+                                              <td className="border border-gray-400 px-2 py-1">{inst.paidAmount.toFixed(2)}</td>
+                                              <td className="border border-gray-400 px-2 py-1">{inst.status}</td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
                                     </div>
                                   ))
                                 ) : (

@@ -31,17 +31,17 @@ const ApproveCollection = () => {
           setCollections(response.data);
         }
       } catch (error) {
-        if (error.response && error.response.status === 404) {
-          setError("Collections not found (404)");
+        if (error.response) {
+          // Log the response details for debugging
+          setError(`Error: ${error.response.status} - ${error.response.data.message || "Failed to fetch collections"}`);
+          console.error("Response Error:", error.response);
         } else {
           setError("Failed to fetch collections");
         }
-        console.error(error);
       } finally {
         setLoading(false);
       }
     };
-    
 
     fetchCollections();
   }, []);
@@ -55,17 +55,30 @@ const ApproveCollection = () => {
         return;
       }
 
-      await axios.post(`http://localhost:5000/api/collection/${id}/approve`, {}, {
-        headers: {
+      const response = await axios.post(
+        `http://localhost:5000/api/collection/${id}/approve`,
+        {},
+        {
+          headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
-        },
-      });
-      alert("Collection approved successfully!");
-      setCollections(collections.filter((collection) => collection._id !== id));
+          },
+        }
+      );
+
+      // Check response status
+      if (response.status === 200) {
+        alert("Collection approved successfully!");
+        setCollections(collections.filter((collection) => collection._id !== id));
+      }
     } catch (error) {
-      console.error("Error approving collection:", error);
-      alert("Failed to approve collection");
+      if (error.response) {
+        // Log the response error for debugging
+        setError(`Error: ${error.response.status} - ${error.response.data.message || "Failed to approve collection"}`);
+        console.error("Response Error on Approve:", error.response);
+      } else {
+        setError("Failed to approve collection");
+      }
     }
   };
 
@@ -96,7 +109,7 @@ const ApproveCollection = () => {
             {collections.map((collection) => (
               <React.Fragment key={collection._id}>
                 <tr className="border-b">
-                <td className="px-4 py-2">{collection.groupId?.name || "N/A"}</td>
+                  <td className="px-4 py-2">{collection.groupId?.name || "N/A"}</td>
                   <td className="px-4 py-2">{collection.totalEmiCollected}</td>
                   <td className="px-4 py-2">{new Date(collection.collectionDate).toLocaleDateString()}</td>
                   <td className="px-4 py-2 text-center">
