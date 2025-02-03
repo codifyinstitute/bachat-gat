@@ -95,31 +95,33 @@ const AdminApprovalList = () => {
 
                                 {/* Expanded Loan Details */}
                                 {expandedLoanId === loan._id && (
-                                    <div className="mt-4 space-y-2">
+                                    <div className="mt-4 md:flex space-y-2">
+                                    <div>
                                         <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Total Amount:</strong> ₹{loan.totalAmount}</p>
                                         <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Per Member Amount:</strong> ₹{loan.perMemberAmount}</p>
                                         <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Term:</strong> {loan.termMonths} months</p>
                                         <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Start Date:</strong> {new Date(loan.startDate).toLocaleDateString()}</p>
                                         <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Status:</strong> {loan.status}</p>
                                         <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Approved By:</strong> {loan.approvedBy ? loan.approvedBy.username : "N/A"}</p>
-
-                                        {/* Bank Details */}
-                                        {loan.bankDetails && loan.bankDetails.length > 0 ? (
-                                            <>
-                                                <h4 className="font-bold mt-2">Bank Details</h4>
-                                                {loan.bankDetails.map((bank, index) => (
-                                                    <div key={index} className="border p-2 rounded bg-gray-50 shadow-sm">
-                                                        <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Bank Name:</strong> {bank.bankName}</p>
-                                                        <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Branch:</strong> {bank.branch}</p>
-                                                        <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>IFSC Code:</strong> {bank.ifscCode}</p>
-                                                        <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Bank Interest Rate:</strong> {bank.interestRate}%</p>
-                                                    </div>
-                                                ))}
-                                            </>
-                                        ) : (
-                                            <p className="text-red-500">No bank details available.</p>
-                                        )}
                                     </div>
+
+                                    {/* Bank Details */}
+                                    <div className="flex flex-col">
+                                    {loan.bankDetails ? (
+                                        <>
+                                            <h4 className="font-bold mt-2">Bank Details</h4>
+                                            <div className="border p-2 rounded bg-gray-50 shadow-sm md:shadow-[none] md:border-0">
+                                            <p><strong>Bank Name:</strong> {loan.bankDetails.name}</p>
+                                            <p><strong>Branch:</strong> {loan.bankDetails.branch}</p>
+                                            <p><strong>IFSC Code:</strong> {loan.bankDetails.ifsc}</p>
+                                            <p><strong>Interest Rate:</strong> {loan.bankDetails.interestRate}%</p>
+                                            </div>
+                                        </>
+                                        ) : (
+                                        <p className="text-red-500">No bank details available.</p>
+                                    )}
+                                    </div>
+                                </div>
                                 )}
                             </div>
                         ))}

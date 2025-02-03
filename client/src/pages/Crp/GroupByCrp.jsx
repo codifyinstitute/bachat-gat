@@ -136,7 +136,7 @@ console.log("filtere", filteredGroups)
                 <th className="p-3 text-left">Group Name</th>
                 <th className="p-3 text-left">Address</th>
                 <th className="p-3 text-left"> Loan Amt</th>
-                <th className="p-3 text-left">Bank</th>
+                {/* <th className="p-3 text-left">Bank</th> */}
                 {showCRP && <th className="p-3 text-left">CRP Name</th>}
                 {showWhatsApp && <th className="p-3 text-left">WhatsApp Link</th>}
               </tr>
@@ -159,12 +159,12 @@ console.log("filtere", filteredGroups)
                         {groupLoans.length > 0 ? groupLoans[0].totalAmount : "N/A"}
                         {console.log("grploan", groupLoans)}
                       </td>
-                      <td className="p-3">
+                      {/* <td className="p-3">
                         {groupLoans.length > 0
                           ? groupLoans[0].bankDetails?.name|| "N/A"
                           : "N/A"}
                           {console.log("bnkd", groupLoans[0].bankDetails)}
-                      </td>
+                      </td> */}
 
                       {showCRP && <td className="p-3">{group.createdBy.name || "N/A"}</td>}
 
@@ -198,6 +198,10 @@ console.log("filtere", filteredGroups)
                                 <div className="w-full flex justify-between mb-2">
                                   <p><strong>Per Member Amount:</strong>{(loan.perMemberAmount)}</p>
                                   <p><strong>Ifsc code:</strong> {loan.bankDetails?.ifsc || "N/A"}</p>
+                                </div>
+                                <div className="w-full flex justify-between mb-2">
+                                  <p><strong>Bank name:</strong>{(loan.bankDetails?.name)}</p>
+
                                 </div>
                                 {loan.repaymentSchedules && loan.repaymentSchedules.length > 0 ? (
                                   loan.repaymentSchedules.map((schedule, idx) => (

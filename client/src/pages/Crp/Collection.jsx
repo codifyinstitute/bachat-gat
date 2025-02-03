@@ -103,7 +103,7 @@ const CollectionForm = () => {
             onChange={(e) => setCollectionDate(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
             required
-          />
+          />  
         </div>
 
         <button
