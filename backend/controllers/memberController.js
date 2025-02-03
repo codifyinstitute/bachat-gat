@@ -10,6 +10,7 @@ const memberController = {
         dateOfBirth,
         aadharNo,
         panNo,
+        accNo,
         mobileNumber,
         guarantor,
       } = req.body;
@@ -20,12 +21,7 @@ const memberController = {
       const photo = req.files.photo[0].path;
       const guarantorPhoto = req.files.guarantorPhoto[0].path;
       const guarantorCheque = req.files.guarantorCheque[0].path;
-      const extraDocuments  =  req.files.extraDocuments;
-
-      // let extraDocuments = [];
-      // if (req.files.extraDocuments) {
-      //   extraDocuments = req.files.extraDocuments.map((file) => file.path);
-      // }
+      const extraDocuments = req.files.extraDocuments;
 
       // Ensure the `referredBy` and `createdBy` fields are populated from `req.user`
       const referredBy = {
@@ -41,7 +37,7 @@ const memberController = {
         photo,
         aadharNo,
         panNo,
-        accNo,
+        accNo, // Ensure accNo is included here
         mobileNumber,
         guarantor: {
           ...guarantor,
