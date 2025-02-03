@@ -347,7 +347,7 @@ const loanController = {
       if (
         !bankDetails ||
         !bankDetails.name ||
-        !bankDetails.accountNumber ||
+        
         !bankDetails.ifsc ||
         !bankDetails.branch
       ) {
