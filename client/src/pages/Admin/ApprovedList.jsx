@@ -75,8 +75,8 @@ const AdminApprovalList = () => {
                                 <h3 className="text-[14px] sm:text-sm md:text-xl lg:text-xl xl:text-xl font-semibold text-gray-800">
                                     Loan ID: {loan._id}
                                 </h3> {/* Show only the first 5 characters of the Loan ID */}
-                                <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Amount: ₹{loan.totalAmount}</p>
-                                <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Interest Rate: {loan.interestRate}%</p>
+                                <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Amount: {loan.createdBy.name}</p>
+                                <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Interest Rate: {loan.groupId.name}</p>
                                 <div className="flex justify-between items-center mt-4">
                                     <button
                                         onClick={() => setExpandedLoanId(expandedLoanId === loan._id ? null : loan._id)}

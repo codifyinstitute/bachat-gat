@@ -7,20 +7,18 @@ const CollectionForm = () => {
   const [groups, setGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [collectionDate, setCollectionDate] = useState("");
-  
+  const [savingsAmount, setSavingsAmount] = useState(""); // ✅ New state for savings amount
 
   useEffect(() => {
     const fetchGroups = async () => {
       try {
         const token = localStorage.getItem("crp_token");
-
         const response = await axios.get("http://localhost:5000/api/groups/created-by-crp", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
-
         setGroups(response.data);
       } catch (error) {
         toast.error("Failed to fetch groups");
@@ -42,7 +40,8 @@ const CollectionForm = () => {
 
     const payload = {
       groupId: selectedGroupId,
-      collectionDate: collectionDate,
+      collectionDate,
+      savingsAmount: Number(savingsAmount), // ✅ Include savingsAmount in the payload
     };
 
     try {
@@ -84,6 +83,7 @@ const CollectionForm = () => {
             value={selectedGroupId}
             onChange={(e) => setSelectedGroupId(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
+            required
           >
             <option value="">Select a group</option>
             {groups.map((group) => (
@@ -103,8 +103,21 @@ const CollectionForm = () => {
             onChange={(e) => setCollectionDate(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
             required
-          />  
+          />
         </div>
+
+        {/* <div>
+          <label htmlFor="savingsAmount" className="block text-gray-700">Savings Amount:</label> {/* ✅ New input *
+          <input
+            type="number"
+            id="savingsAmount"
+            value={savingsAmount}
+            onChange={(e) => setSavingsAmount(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
+            required
+            min="0"
+          />
+        </div> */}
 
         <button
           type="submit"

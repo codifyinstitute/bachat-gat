@@ -72,11 +72,12 @@ const AdminApprovalList = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 gap-4">
                         {loans.map((loan) => (
                             <div key={loan._id} className="bg-white p-2 md:p-4 lg:p-4 rounded-lg shadow">
+                                {console.log("object",loan)}
                                 <h3 className="text-[14px] sm:text-sm md:text-xl lg:text-xl xl:text-xl font-semibold text-gray-800">
                                     Loan ID: {loan._id}
                                 </h3> {/* Show only the first 5 characters of the Loan ID */}
-                                <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Amount: ₹{loan.totalAmount}</p>
-                                <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Interest Rate: {loan.interestRate}%</p>
+                                <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Crp Name: {loan.createdBy.name}</p>
+                                <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Group Name: {loan.groupId.name}</p>
                                 <div className="flex justify-between items-center mt-4">
                                     <button
                                         onClick={() => setExpandedLoanId(expandedLoanId === loan._id ? null : loan._id)}
@@ -95,7 +96,7 @@ const AdminApprovalList = () => {
 
                                 {/* Expanded Loan Details */}
                                 {expandedLoanId === loan._id && (
-                                    <div className="mt-4 md:flex space-y-2">
+                                    <div className="mt-4 md:flex md:justify-between space-y-2">
                                     <div>
                                         <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Total Amount:</strong> ₹{loan.totalAmount}</p>
                                         <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Per Member Amount:</strong> ₹{loan.perMemberAmount}</p>
