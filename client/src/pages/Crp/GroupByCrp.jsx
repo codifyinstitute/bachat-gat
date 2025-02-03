@@ -69,9 +69,9 @@ const GroupsList = () => {
     console.log("Loans Data:", loansData);
     const loansForGroup = loansData.filter((loan) => {
       console.log("loan", loan)
-      console.log("Loan Group ID:", loan.loan.groupId._id); // This will show the actual groupId for each loan
+      console.log("Loan Group ID:", loan.groupId._id); // This will show the actual groupId for each loan
       console.log("grpname",groupId)
-      return loan.loan.groupId._id === groupId;
+      return loan.groupId._id === groupId;
 
     });
     console.log("Loans for group:", loansForGroup); // Check the resulting loans for the group
@@ -156,13 +156,14 @@ console.log("filtere", filteredGroups)
 
                       {/* Loan Data */}
                       <td className="p-3">
-                        {groupLoans.length > 0 ? groupLoans[0].loan.totalAmount : "N/A"}
+                        {groupLoans.length > 0 ? groupLoans[0].totalAmount : "N/A"}
                         {console.log("grploan", groupLoans)}
                       </td>
                       <td className="p-3">
                         {groupLoans.length > 0
-                          ? groupLoans[0].loan.bank || "N/A"
+                          ? groupLoans[0].bankDetails?.name|| "N/A"
                           : "N/A"}
+                          {console.log("bnkd", groupLoans[0].bankDetails)}
                       </td>
 
                       {showCRP && <td className="p-3">{group.createdBy.name || "N/A"}</td>}
@@ -183,23 +184,23 @@ console.log("filtere", filteredGroups)
                             groupLoans.map((loan, i) => (
                               <div key={i} className="py-2 px-4 border-b">
                                 <div className="w-full flex justify-between mb-2">
-                                  <p className=""><strong className="w-[300%]">Loan ID:</strong> {loan.loan._id}</p>
-                                  <p><strong>Sanction Amount:</strong> {loan.loan.totalAmount}</p>
+                                  <p className=""><strong className="w-[300%]">Loan ID:</strong> {loan._id}</p>
+                                  <p><strong>Sanction Amount:</strong> {loan.totalAmount}</p>
                                 </div>
                                 <div className="w-full flex justify-between mb-2">
-                                  <p><strong>Interest Rate:</strong> {loan.loan.interestRate}%</p>
-                                  <p><strong>Status:</strong> {loan.loan.status}</p>
+                                  <p><strong>Interest Rate:</strong> {loan.interestRate}%</p>
+                                  <p><strong>Status:</strong> {loan.status}</p>
                                 </div>
                                 <div className="w-full flex justify-between mb-2">
-                                  <p><strong>Start Date:</strong> {new Date(loan.loan.startDate).toLocaleDateString()}</p>
-                                  <p><strong>Term (Months):</strong> {loan.loan.termMonths}</p>
+                                  <p><strong>Start Date:</strong> {new Date(loan.startDate).toLocaleDateString()}</p>
+                                  <p><strong>Term (Months):</strong> {loan.termMonths}</p>
                                 </div>
                                 <div className="w-full flex justify-between mb-2">
-                                  <p><strong>Per Member Amount:</strong>{(loan.loan.perMemberAmount)}</p>
-                                  {/* <p><strong>Term (Months):</strong> {loan.loan.termMonths}</p> */}
+                                  <p><strong>Per Member Amount:</strong>{(loan.perMemberAmount)}</p>
+                                  <p><strong>Ifsc code:</strong> {loan.bankDetails?.ifsc || "N/A"}</p>
                                 </div>
-                                {loan.loan.repaymentSchedules && loan.loan.repaymentSchedules.length > 0 ? (
-                                  loan.loan.repaymentSchedules.map((schedule, idx) => (
+                                {loan.repaymentSchedules && loan.repaymentSchedules.length > 0 ? (
+                                  loan.repaymentSchedules.map((schedule, idx) => (
                                     <div key={idx} className="p-2">
                                       {console.log("schedule",schedule)}
                                       <p><strong>Installment Schedule:</strong></p>

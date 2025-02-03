@@ -8,6 +8,7 @@ const AddMember = () => {
     dateOfBirth: "",
     aadharNo: "",
     panNo: "",
+    accNo:"",
     mobileNumber: "",
     photo: null,
     guarantor: {
@@ -160,6 +161,17 @@ const AddMember = () => {
               type="text"
               name="panNo"
               placeholder="PAN No"
+              onChange={handleChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="mb-4 md:w-[70%] lg:w-[50%]">
+            <label htmlFor="panNo">Acc No</label>
+            <input
+              type="text"
+              name="accNo"
+              placeholder="Acc No"
               onChange={handleChange}
               required
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"

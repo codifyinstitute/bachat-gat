@@ -1,256 +1,165 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Search } from "lucide-react";
 
-const GroupsList = () => {
+const GroupList = () => {
   const [groups, setGroups] = useState([]);
-  const [loansData, setLoansData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showCRP, setShowCRP] = useState(false);
-  const [showWhatsApp, setShowWhatsApp] = useState(false);
-  const [expandedGroup, setExpandedGroup] = useState(null); // Track expanded group
+  const [expandedGroupId, setExpandedGroupId] = useState(null);
+  const [message, setMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredGroups, setFilteredGroups] = useState([]);
+  const [selectedBank, setSelectedBank] = useState("");
+  const [banks, setBanks] = useState([]);
+  const [loading, setLoading] = useState([]);
 
   useEffect(() => {
-    const fetchGroupsAndLoans = async () => {
+    fetchGroups();
+  }, []);
+
+  useEffect(() => {
+    const fetchBanks = async () => {
       try {
-        const crptoken = localStorage.getItem("admin_token");
-
-        if (!crptoken) {
-          setError("No authentication token found. Please log in.");
-          setLoading(false);
-          return;
-        }
-
-        // Fetch groups and loans data concurrently
-        const [groupsRes, loansRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/groups", {
-            headers: {
-              Authorization: `Bearer ${crptoken}`,
-              "Content-Type": "application/json",
-            },
-          }),
-          axios.get("http://localhost:5000/api/loan", {
-            headers: {
-              Authorization: `Bearer ${crptoken}`,
-              "Content-Type": "application/json",
-            },
-          }),
-        ]);
-
-        console.log("Groups Response:", groupsRes.data); // Debugging groups data
-        console.log("Loans Response:", loansRes.data); // Debugging loans data
-
-        setGroups(groupsRes.data);
-        setLoansData(loansRes.data);
-        setLoading(false);
+        const response = await axios.get("http://localhost:5000/api/banks");
+        setBanks(response.data);
       } catch (err) {
-        console.error("Error fetching data:", err); // Log error
-        setError("Error fetching data");
+        setError("Failed to fetch banks.");
+      } finally {
         setLoading(false);
       }
     };
+    fetchBanks();
+  }, []);
 
-    fetchGroupsAndLoans();
-  }, [ ]); // Empty array ensures the hook runs only once
+  useEffect(() => {
+    filterGroups();
+  }, [searchQuery, groups]);
 
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value.toLowerCase());
+  const fetchGroups = async () => {
+    try {
+      const token = localStorage.getItem("admin_token");
+      const response = await axios.get("http://localhost:5000/api/groups", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      setGroups(response.data);
+      setFilteredGroups(response.data);
+    } catch (error) {
+      console.error("Error fetching groups:", error);
+      setMessage("Failed to fetch groups.");
+    }
   };
 
-  const toggleExpand = (groupId) => {
-    setExpandedGroup(expandedGroup === groupId ? null : groupId);
-  };
-  console.log(loansData,"loansdata")
+  const filterGroups = () => {
+    const query = searchQuery.toLowerCase().trim();
+    
+    if (!query) {
+      setFilteredGroups(groups);
+      return;
+    }
 
-  const getLoanDetails = (groupId) => {
-    console.log(`Fetching loan details for groupId: ${groupId}`);
-    // Log the loansData structure and groupId to check if there’s a mismatch
-    console.log("Loans Data:", loansData);
-    const loansForGroup = loansData.filter((loan) => {
-      console.log("loan", loan)
-      console.log("Loan Group ID:", loan.loan.groupId._id); // This will show the actual groupId for each loan
-      console.log("grpname",groupId)
-      return loan.loan.groupId._id === groupId;
+    const filtered = groups.filter(group => {
+      // Search in group details
+      const groupMatches = 
+        group.name.toLowerCase().includes(query) ||
+        group.address.toLowerCase().includes(query) ||
+        group.status.toLowerCase().includes(query) ||
+        group.referredBy.crpName.toLowerCase().includes(query) ||
+        group.referredBy.crpMobile.includes(query);
 
+      // Search in members
+      const memberMatches = group.members.some(member =>
+        member.member.name.toLowerCase().includes(query) ||
+        member.member.mobileNumber.includes(query)
+      );
+
+      return groupMatches || memberMatches;
     });
-    console.log("Loans for group:", loansForGroup); // Check the resulting loans for the group
-    return loansForGroup;
+
+    setFilteredGroups(filtered);
   };
 
-  const filteredGroups = groups.filter((group) => {
-    const groupNameMatch = group.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const memberMatch = group.members?.some((member) =>
-      member?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    return groupNameMatch || memberMatch;
-  });
-console.log("filtere", filteredGroups)
-
-  console.log("Filtered Groups:", filteredGroups); // Debugging filtered groups
-
-  if (loading) return <p className="text-center text-lg">Loading...</p>;
-  if (error) return <p className="text-center text-red-500">{error}</p>;
+  const toggleGroup = (groupId) => {
+    setExpandedGroupId(expandedGroupId === groupId ? null : groupId);
+  };
 
   return (
-    <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold text-center mb-4">Your Groups</h2>
-
-      <div className="flex justify-between md:gap-2 lg:gap-4 md:justify-center flex-wrap items-center mb-4">
-        <input
-          type="text"
-          placeholder="Search Groups or Members..."
-          value={searchTerm}
-          onChange={handleSearch}
-          className="p-2 border border-gray-400 rounded-md w-full md:w-[40%] lg:w-1/2"
-        />
-
-        <div className="flex justify-between w-full md:w-[55%] px-4 py-2">
-          <label>
-            <input
-              type="checkbox"
-              checked={showCRP}
-              onChange={() => setShowCRP(!showCRP)}
-            />{" "}
-            CRP Name
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={showWhatsApp}
-              onChange={() => setShowWhatsApp(!showWhatsApp)}
-            />{" "}
-            Get WhatsApp
-          </label>
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto bg-gray-100 min-h-screen">
+      <h1 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">Groups</h1>
+      
+      {/* Search Bar */}
+      <div className="mb-6 max-w-xl mx-auto">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search groups or members..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 pl-10 pr-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </div>
       </div>
 
-      {filteredGroups.length === 0 ? (
-        <p className="text-center text-gray-500">No groups found</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-300 shadow-md rounded-lg overflow-hidden">
-            <thead className="bg-blue-500 text-white">
-              <tr>
-                <th className="p-3 text-left">Sr. No</th>
-                <th className="p-3 text-left">Group Name</th>
-                <th className="p-3 text-left">Address</th>
-                <th className="p-3 text-left"> Loan Amt</th>
-                <th className="p-3 text-left">Bank</th>
-                {showCRP && <th className="p-3 text-left">CRP Name</th>}
-                {showWhatsApp && <th className="p-3 text-left">WhatsApp Link</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredGroups.map((group, index) => {
-                const groupLoans = getLoanDetails(group._id); // Use group._id to match loan details
-                return (
-                  <React.Fragment key={group._id}>
-                    <tr
-                      className="border-b hover:bg-gray-100 cursor-pointer"
-                      onClick={() => toggleExpand(group._id)}
-                    >
-                      <td className="p-3">{index + 1}</td>
-                      <td className="p-3 font-semibold">{group.name}</td>
-                      <td className="p-3">{group.address}</td>
+      {message && <p className="text-red-600 text-center mb-4">{message}</p>}
 
-                      {/* Loan Data */}
-                      <td className="p-3">
-                        {groupLoans.length > 0 ? groupLoans[0].loan.totalAmount : "N/A"}
-                        {console.log("grploan", groupLoans)}
-                      </td>
-                      <td className="p-3">
-                        {groupLoans.length > 0
-                          ? groupLoans[0].loan.bank || "N/A"
-                          : "N/A"}
-                      </td>
-
-                      {showCRP && <td className="p-3">{group.createdBy.name || "N/A"}</td>}
-
-                      {showWhatsApp && (<td className="p-3">
-                          {console.log("whts", group.whatsappGroupLink)}
-                          {showWhatsApp && <td className="p-3">{group.whatsappGroupLink || "N/A"}</td>}
-                        </td>
-                      )}
-                    </tr>
-
-                    {/* Expandable Loan Details */}
-                    {expandedGroup === group._id && (
-                      <tr>
-                        <td colSpan="7" className="p-4 bg-gray-50">
-                          <h4 className="font-semibold text-lg mb-2">Loan Details:</h4>
-                          {groupLoans.length > 0 ? (
-                            groupLoans.map((loan, i) => (
-                              <div key={i} className="py-2 px-4 border-b">
-                                <div className="w-full flex justify-between mb-2">
-                                  <p className=""><strong className="w-[300%]">Loan ID:</strong> {loan.loan._id}</p>
-                                  <p><strong>Sanction Amount:</strong> {loan.loan.totalAmount}</p>
-                                </div>
-                                <div className="w-full flex justify-between mb-2">
-                                  <p><strong>Interest Rate:</strong> {loan.loan.interestRate}%</p>
-                                  <p><strong>Status:</strong> {loan.loan.status}</p>
-                                </div>
-                                <div className="w-full flex justify-between mb-2">
-                                  <p><strong>Start Date:</strong> {new Date(loan.loan.startDate).toLocaleDateString()}</p>
-                                  <p><strong>Term (Months):</strong> {loan.loan.termMonths}</p>
-                                </div>
-                                <div className="w-full flex justify-between mb-2">
-                                  <p><strong>Per Member Amount:</strong>{(loan.loan.perMemberAmount)}</p>
-                                  {/* <p><strong>Term (Months):</strong> {loan.loan.termMonths}</p> */}
-                                </div>
-                                {loan.loan.repaymentSchedules && loan.loan.repaymentSchedules.length > 0 ? (
-                                  loan.loan.repaymentSchedules.map((schedule, idx) => (
-                                    <div key={idx} className="p-2">
-                                      {console.log("schedule",schedule)}
-                                      <p><strong>Installment Schedule:</strong></p>
-                                          <table className="w-full border-collapse border border-gray-400">
-                                            <thead>
-                                              <tr className="bg-gray-200">
-                                                <th className="border border-gray-400 px-2 py-1">#</th>
-                                                <th className="border border-gray-400 px-2 py-1">Due Date</th>
-                                                <th className="border border-gray-400 px-2 py-1">Amount (₹)</th>
-                                                <th className="border border-gray-400 px-2 py-1">Principal (₹)</th>
-                                                <th className="border border-gray-400 px-2 py-1">Interest (₹)</th>
-                                                <th className="border border-gray-400 px-2 py-1">Paid Amount (₹)</th>
-                                                <th className="border border-gray-400 px-2 py-1">Status</th>
-                                              </tr>
-                                            </thead>
-                                            <tbody>
-                                              {schedule.installments.map((inst, index) => (
-                                                <tr key={inst._id} className="text-center">
-                                                  <td className="border border-gray-400 px-2 py-1">{index + 1}</td>
-                                                  <td className="border border-gray-400 px-2 py-1">{new Date(inst.dueDate).toLocaleDateString()}</td>
-                                                  <td className="border border-gray-400 px-2 py-1">{inst.amount.toFixed(2)}</td>
-                                                  <td className="border border-gray-400 px-2 py-1">{inst.principal.toFixed(2)}</td>
-                                                  <td className="border border-gray-400 px-2 py-1">{inst.interest.toFixed(2)}</td>
-                                                  <td className="border border-gray-400 px-2 py-1">{inst.paidAmount.toFixed(2)}</td>
-                                                  <td className="border border-gray-400 px-2 py-1">{inst.status}</td>
-                                                </tr>
-                                              ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                  ))
-                                ) : (
-                                  <p>No repayment schedule available.</p>
-                                )}
-                              </div>
-                            ))
-                          ) : (
-                            <p>No loan details available for this group.</p>
-                          )}
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+      {filteredGroups.length === 0 && searchQuery && (
+        <p className="text-center text-gray-600 mb-4">No matching groups or members found.</p>
       )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredGroups.map((group) => (
+          <div
+            key={group._id}
+            onClick={() => toggleGroup(group._id)}
+            className={`bg-white p-4 rounded-lg shadow-lg relative transition-all duration-300 cursor-pointer hover:shadow-xl ${
+              expandedGroupId === group._id ? "h-auto" : "h-48"
+            }`}
+          >
+            <div className="mb-3">
+              <h3 className="text-lg font-semibold text-gray-800">{group.name}</h3>
+              <div className="space-y-1">
+                <p className="text-sm text-gray-600">Address: {group.address}</p>
+                <p className="text-sm text-gray-600">
+                  Status: <span className={`font-medium ${
+                    group.status.toLowerCase() === 'active' ? 'text-green-600' : 'text-red-600'
+                  }`}>{group.status}</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="text-sm text-gray-600 border-t pt-2">
+              <p className="font-medium">Referred By:</p>
+              <p>{group.referredBy.crpName}</p>
+              <p>{group.referredBy.crpMobile}</p>
+            </div>
+
+            {expandedGroupId === group._id && (
+              <div className="mt-4 space-y-2">
+                <h4 className="font-semibold border-b pb-2">Members ({group.members.length})</h4>
+                <div className="max-h-60 overflow-y-auto">
+                  {group.members.map((member, index) => (
+                    <div 
+                      key={index} 
+                      className="border p-2 rounded-lg bg-gray-50 mb-2 hover:bg-gray-100"
+                    >
+                      <p className="text-sm text-gray-800">
+                        <strong>Name:</strong> {member.member.name}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Mobile:</strong> {member.member.mobileNumber}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
 
-export default GroupsList;
+export default GroupList;
