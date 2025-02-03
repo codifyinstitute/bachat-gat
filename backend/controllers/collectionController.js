@@ -1,100 +1,11 @@
-const Collection = require("../models/Collection");
+const Collection = require
+("../models/Collection");
 const Group = require("../models/Group");
 const Loan = require("../models/Loan");
 const Member = require("../models/Member");
 
 const collectionController = {
-  // Initialize collection for a group
-  // initializeCollection: async (req, res) => {
-  //   try {
-  //     const { groupId, collectionDate, Sa } = req.body;
-
-  //     console.log("Group ID from request:", groupId);
-
-  //     // Validate group and active loan
-  //     const group = await Group.findById(groupId).populate({
-  //       path: "members.member",
-  //       select: "name mobileNumber", // Make sure this is the information you need
-  //     });
-
-  //     if (!group) {
-  //       return res.status(404).json({ message: "Group not found" });
-  //     }
-
-  //     const loan = await Loan.findOne({
-  //       groupId,
-  //       status: "approved",
-  //     });
-
-  //     if (!loan) {
-  //       return res
-  //         .status(404)
-  //         .json({ message: "No active loan found for this group" });
-  //     }
-
-  //     const date = new Date(collectionDate);
-  //     const collectionMonth = date.toLocaleString("default", { month: "long" });
-  //     const collectionYear = date.getFullYear();
-
-  //     // Check if collection already exists for this month
-  //     const existingCollection = await Collection.findOne({
-  //       groupId,
-  //       collectionMonth,
-  //       collectionYear,
-  //     });
-
-  //     if (existingCollection) {
-  //       return res.status(400).json({
-  //         message: "Collection already initialized for this month",
-  //       });
-  //     }
-
-  //     // Initialize empty payments for each member
-  //     const payments = group.members.map((member) => {
-  //       const memberSchedule = loan.repaymentSchedules.find(
-  //         (schedule) =>
-  //           schedule.memberId.toString() === member.member._id.toString()
-  //       );
-
-  //       const currentInstallment = memberSchedule.installments.find(
-  //         (inst) => !inst.paidDate && inst.status === "pending"
-  //       );
-
-  //       return {
-  //         memberId: member.member._id,
-  //         loanId: loan._id,
-  //         installmentNumber: currentInstallment.installmentNumber,
-  //         emiAmount: currentInstallment.amount,
-  //         savingsAmount, // Default savings amount
-  //         totalAmount: currentInstallment.amount + savingsAmount,
-  //         status: "pending",
-  //       };
-  //     });
-
-  //     const collection = new Collection({
-  //       groupId,
-  //       collectionDate: date,
-  //       collectionMonth,
-  //       collectionYear,
-  //       payments,
-  //       createdBy: req.user.id,
-  //     });
-
-  //     await collection.save();
-  //     await collection.populate([
-  //       { path: "groupId", select: "name" },
-  //       { path: "payments.memberId", select: "name mobileNumber" },
-  //     ]);
-
-  //     res.status(201).json({
-  //       message: "Collection initialized successfully",
-  //       collection,
-  //     });
-  //   } catch (error) {
-  //     res.status(500).json({ message: error.message });
-  //   }
-  // },
-
+  
   initializeCollection: async (req, res) => {
     try {
       const { groupId, collectionDate, savingsAmount } = req.body;
@@ -188,69 +99,7 @@ const collectionController = {
     }
   },
 
-  // // Record payment
-  // recordPayment: async (req, res) => {
-  //   try {
-  //     const { collectionId, memberId } = req.params;
-  //     const { paymentMethod, transactionId, remarks } = req.body;
-
-  //     const collection = await Collection.findById(collectionId);
-  //     if (!collection) {
-  //       return res.status(404).json({ message: "Collection not found" });
-  //     }
-
-  //     const payment = collection.payments.find(
-  //       (p) => p.memberId.toString() === memberId
-  //     );
-
-  //     if (!payment) {
-  //       return res.status(404).json({ message: "Payment record not found" });
-  //     }
-
-  //     // Update payment details
-  //     payment.paymentMethod = paymentMethod || payment.paymentMethod; // Update only if provided
-  //     payment.transactionId = transactionId || payment.transactionId;
-  //     payment.remarks = remarks || payment.remarks;
-  //     payment.status = "completed";
-  //     payment.paymentDate = new Date();
-
-  //     // Update loan repayment schedule
-  //     const loan = await Loan.findById(payment.loanId);
-  //     const memberSchedule = loan.repaymentSchedules.find(
-  //       (schedule) => schedule.memberId.toString() === memberId
-  //     );
-
-  //     const installment = memberSchedule.installments.find(
-  //       (inst) => inst.installmentNumber === payment.installmentNumber
-  //     );
-
-  //     installment.status = "paid";
-  //     installment.paidAmount = payment.emiAmount;
-  //     installment.paidDate = payment.paymentDate;
-  //     memberSchedule.paidAmount += payment.emiAmount;
-
-  //     // Update collection status
-  //     const allPaid = collection.payments.every(
-  //       (p) => p.status === "completed"
-  //     );
-  //     collection.status = allPaid ? "completed" : "partial";
-
-  //     await Promise.all([collection.save(), loan.save()]);
-
-  //     await collection.populate([
-  //       { path: "groupId", select: "name" },
-  //       { path: "payments.memberId", select: "name mobileNumber" },
-  //     ]);
-
-  //     res.json({
-  //       message: "Payment recorded successfully",
-  //       collection,
-  //     });
-  //   } catch (error) {
-  //     res.status(500).json({ message: error.message });
-  //   }
-  // },
-
+  
   recordPayment: async (req, res) => {
     try {
       const { collectionId, memberId } = req.params;
