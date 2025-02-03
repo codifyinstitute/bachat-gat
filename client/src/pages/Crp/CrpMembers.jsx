@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import axios from "axios"; // Import axios
 import "aos/dist/aos.css";
+import { Trash2 } from "lucide-react";
 
 const AllMembers = () => {
   const navigate = useNavigate(); // Get navigate function
@@ -46,6 +47,39 @@ const AllMembers = () => {
     return <div>{error}</div>; // Display error message if there's an issue
   }
 
+  const handleDelete = async (_id, event) => {
+    event.stopPropagation(); // Prevent row click event
+  
+    try {
+      const response = await axios.delete(`http://localhost:5000/api/member/${_id}`, {
+        headers: {
+          Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
+        },
+      });
+  
+      if (response.status === 200) {
+        console.log("Member deleted successfully");
+  
+        // Fetch updated members list from API after deletion
+        const updatedResponse = await axios.get("http://localhost:5000/api/crp/membycrp", {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        });
+  
+        setMembers(updatedResponse.data.members || updatedResponse.data || []); // Ensure correct format
+      }else if(response.status===400){
+        console.log(response.status)
+      } else {
+        console.log("Deletion of member failed");
+      }
+    } catch (error) {
+      console.error("Error deleting member:", error);
+    }
+  };
+  
+
+
   return (
     <div className="flex flex-col items-center mt-14 min-h-screen bg-gray-100 p-4">
       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
@@ -59,6 +93,7 @@ const AllMembers = () => {
                 <th className="py-3 px-4">Mobile</th>
                 <th className="py-3 px-4">Pan No</th>
                 <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-2">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -75,15 +110,18 @@ const AllMembers = () => {
                   </td>
                   <td className="py-3 px-4">
                     <span
-                      className={`px-3 py-1 text-sm font-medium rounded-full ${
-                        member.status === "active"
+                      className={`px-3 py-1 text-sm font-medium rounded-full ${member.status === "active"
                           ? "bg-green-200 text-green-700"
                           : "bg-red-200 text-red-700"
-                      }`}
+                        }`}
                     >
                       {member.status}
                     </span>
                   </td>
+                  <td className="py-3 px-4 text-red-600" onClick={(event) => handleDelete(member._id, event)}>
+                    <Trash2 />
+                  </td>
+
                 </tr>
               ))}
             </tbody>

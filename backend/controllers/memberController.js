@@ -15,15 +15,17 @@ const memberController = {
         guarantor,
       } = req.body;
 
-      console.log(req.user);
-
       // Handle file uploads
       const photo = req.files.photo[0].path;
       const guarantorPhoto = req.files.guarantorPhoto[0].path;
       const guarantorCheque = req.files.guarantorCheque[0].path;
-      const extraDocuments = req.files.extraDocuments;
 
-      // Ensure the `referredBy` and `createdBy` fields are populated from `req.user`
+      // Handle extraDocuments specifically
+      const extraDocuments_0 = req.files.extraDocuments_0 ? req.files.extraDocuments_0[0].path : null;
+      const extraDocuments_1 = req.files.extraDocuments_1 ? req.files.extraDocuments_1[0].path : null;
+      const extraDocuments_2 = req.files.extraDocuments_2 ? req.files.extraDocuments_2[0].path : null;
+      const extraDocuments_3 = req.files.extraDocuments_3 ? req.files.extraDocuments_3[0].path : null;
+
       const referredBy = {
         crpName: req.user.name,
         crpMobile: req.user.mobile,
@@ -37,16 +39,19 @@ const memberController = {
         photo,
         aadharNo,
         panNo,
-        accNo, // Ensure accNo is included here
+        accNo,
         mobileNumber,
         guarantor: {
           ...guarantor,
           photo: guarantorPhoto,
           chequePhoto: guarantorCheque,
-          extraDocuments,
+          extraDocuments_0,
+          extraDocuments_1,
+          extraDocuments_2,
+          extraDocuments_3,
         },
-        referredBy, // Attach referredBy object
-        createdBy: req.user.id, // Attach createdBy field
+        referredBy,
+        createdBy: req.user.id,
       });
 
       await member.save();
@@ -56,26 +61,23 @@ const memberController = {
       });
     } catch (error) {
       if (error.code === 11000) {
-        // Handle duplicate error for unique fields (AadharNo or PanNo)
         if (error.keyValue.aadharNo) {
           return res.status(400).json({
-            message:
-              "Aadhar number already exists. Please provide a unique Aadhar number.",
+            message: "Aadhar number already exists. Please provide a unique Aadhar number.",
           });
         }
         if (error.keyValue.panNo) {
           return res.status(400).json({
-            message:
-              "PAN number already exists. Please provide a unique PAN number.",
+            message: "PAN number already exists. Please provide a unique PAN number.",
           });
         }
       }
-      // General error handling
       res.status(500).json({
         message: error.message,
       });
     }
   },
+
   updateMember: async (req, res) => {
     try {
       const updates = req.body;
@@ -92,10 +94,19 @@ const memberController = {
         if (req.files.guarantorCheque) {
           updates["guarantor.chequePhoto"] = req.files.guarantorCheque[0].path;
         }
-        if (req.files.extraDocuments) {
-          updates["guarantor.extraDocuments"] = req.files.extraDocuments.map(
-            (file) => file.path
-          );
+
+        // Handle extraDocuments specifically
+        if (req.files.extraDocuments_0) {
+          updates["guarantor.extraDocuments_0"] = req.files.extraDocuments_0[0].path;
+        }
+        if (req.files.extraDocuments_1) {
+          updates["guarantor.extraDocuments_1"] = req.files.extraDocuments_1[0].path;
+        }
+        if (req.files.extraDocuments_2) {
+          updates["guarantor.extraDocuments_2"] = req.files.extraDocuments_2[0].path;
+        }
+        if (req.files.extraDocuments_3) {
+          updates["guarantor.extraDocuments_3"] = req.files.extraDocuments_3[0].path;
         }
       }
 
@@ -152,16 +163,19 @@ const memberController = {
         return res.status(404).json({ message: "Member not found" });
       }
 
-      // Mark member as inactive
-      member.status = "inactive";
-      await member.save();
+      if (member.status === "inactive") {
+        return res.status(400).json({ message: "This member is in a group and cannot be deleted" });
+      }
 
-      res.json({ message: "Member deactivated successfully" });
+      await member.deleteOne(); // Ensure deletion is awaited
+
+      res.status(200).json({ message: "Member deleted successfully" });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: error.message });
+      console.error("Error deleting member:", error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
   },
+
 };
 
 module.exports = memberController;

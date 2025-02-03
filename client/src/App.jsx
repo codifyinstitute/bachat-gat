@@ -26,6 +26,7 @@ import GroupByCrp from "./pages/Crp/GroupByCrp";
 import ApproveCollection from "./pages/Admin/ApproveCollection";
 import Crpdashboard from "./pages/Crp/Crpdashboard";
 import AddBank from "./pages/Admin/AddBank";
+import AllCRP from "./pages/Admin/AllCRP";
 
 AOS.init();
 
@@ -38,6 +39,7 @@ function App() {
       <Route path="admin/*" element={<Sidebar role="admin" />}>
         <Route path="AdminDashboard" element={<AdminDashboard />} />
         <Route path="add-crp" element={<AddCRP />} />
+        <Route path="all-crp" element={<AllCRP />} />
         <Route path="all-members" element={<AllMembers />} />
         <Route path="groups" element={<Groups />} />
         <Route path="member/:id" element={<MemberDetails />} />

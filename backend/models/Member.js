@@ -24,16 +24,20 @@ const guarantorSchema = new mongoose.Schema({
 
   // extraDocuments: [String],
   extraDocuments_0: {
-    String,
+    type:String,
+    required:true
   },
   extraDocuments_1: {
-    String,
+    type:String,
+    required:true
   },
   extraDocuments_2: {
-    String,
+    type:String,
+    required:true
   },
   extraDocuments_3: {
-    String,
+    type:String,
+    required:true
   },
 });
 

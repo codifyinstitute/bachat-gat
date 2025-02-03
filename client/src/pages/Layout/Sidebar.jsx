@@ -14,6 +14,7 @@ const Sidebar = ({ role }) => {
       { name: "Dashboard", path: "/admin/AdminDashboard", icon: <LayoutDashboard /> },
       { name: "Add CRP", path: "/admin/add-crp", icon: <UserPlus /> },
       { name: "All Members", path: "/admin/all-members", icon: <Users /> },
+      { name: "All CRP", path: "/admin/all-crp", icon: <Users /> },
       { name: "Group-wise Members", path: "/admin/groups", icon: <List /> },
       { name: "Approval Loans", path: "/admin/approvallist", icon: <HandCoins className="text-[#ffaf7a]"/>,},
       { name: "Approve Collection", path: "/admin/approvecollection", icon: <Boxes className="text-[#ffaf7a]"/> },
