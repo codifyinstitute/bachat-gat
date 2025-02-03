@@ -65,10 +65,6 @@ const memberSchema = new mongoose.Schema(
         ref: "CRP",
         required: true,
       },
-      accNo: {
-        type: String,
-        required: true,
-      },
     },
     photo: {
       type: String,
@@ -83,6 +79,10 @@ const memberSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+    },
+    accNo: {
+      type: String,
+      required: true,
     },
     mobileNumber: {
       type: String,
