@@ -21,10 +21,7 @@ const guarantorSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  accNo: {
-    type: String,
-    required: true,
-  },
+
   // extraDocuments: [String],
   extraDocuments_0: {
     String,
@@ -66,6 +63,10 @@ const memberSchema = new mongoose.Schema(
       crpId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "CRP",
+        required: true,
+      },
+      accNo: {
+        type: String,
         required: true,
       },
     },
