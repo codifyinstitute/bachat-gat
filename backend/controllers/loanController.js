@@ -315,6 +315,91 @@ const loanController = {
   //   }
   // },
 
+  // createLoan: async (req, res) => {
+  //   try {
+  //     const {
+  //       groupId,
+  //       totalAmount,
+  //       interestRate,
+  //       termMonths,
+  //       startDate,
+  //       bankDetails,
+  //     } = req.body;
+
+  //     // Validate group exists and is active
+  //     const group = await Group.findOne({
+  //       _id: groupId,
+  //       status: "active",
+  //     }).populate("members.member");
+
+  //     if (!group) {
+  //       return res.status(404).json({ message: "Active group not found" });
+  //     }
+
+  //     // Validate Bank Details
+  //     // if (
+  //     //   !bankDetails ||
+  //     //   !bankDetails.bankName ||
+  //     //   !bankDetails.accountNumber ||
+  //     //   !bankDetails.ifscCode ||
+  //     //   !bankDetails.branch
+  //     // )
+  //     if (
+  //       !bankDetails ||
+  //       !bankDetails.name ||
+
+  //       !bankDetails.ifsc ||
+  //       !bankDetails.branch
+  //     ) {
+  //       return res
+  //         .status(400)
+  //         .json({ message: "Complete bank details are required" });
+  //     }
+
+  //     // Calculate per member amount
+  //     const memberCount = group.members.length;
+  //     const perMemberAmount = totalAmount / memberCount;
+
+  //     // Generate repayment schedules for each member
+  //     const repaymentSchedules = group.members.map((member) =>
+  //       loanController.generateRepaymentSchedule(
+  //         member.member._id,
+  //         perMemberAmount,
+  //         interestRate,
+  //         termMonths,
+  //         startDate
+  //       )
+  //     );
+
+  //     const loan = new Loan({
+  //       groupId,
+  //       totalAmount,
+  //       perMemberAmount,
+  //       interestRate,
+  //       termMonths,
+  //       startDate,
+  //       repaymentSchedules,
+  //       createdBy: req.user.id,
+  //       bankDetails, // Save bank details
+  //     });
+
+  //     await loan.save();
+
+  //     // Populate member details
+  //     await loan.populate([
+  //       { path: "groupId", select: "name" },
+  //       { path: "repaymentSchedules.memberId", select: "name mobileNumber" },
+  //     ]);
+
+  //     res.status(201).json({
+  //       message: "Loan created successfully",
+  //       loan,
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   createLoan: async (req, res) => {
     try {
       const {
@@ -337,23 +422,29 @@ const loanController = {
       }
 
       // Validate Bank Details
-      // if (
-      //   !bankDetails ||
-      //   !bankDetails.bankName ||
-      //   !bankDetails.accountNumber ||
-      //   !bankDetails.ifscCode ||
-      //   !bankDetails.branch
-      // )
       if (
         !bankDetails ||
         !bankDetails.name ||
-        
         !bankDetails.ifsc ||
         !bankDetails.branch
       ) {
         return res
           .status(400)
           .json({ message: "Complete bank details are required" });
+      }
+
+      // Check if the group already has a loan with the same bank details
+      const existingLoan = await Loan.findOne({
+        groupId: groupId,
+        "bankDetails.name": bankDetails.name,
+        "bankDetails.ifsc": bankDetails.ifsc,
+        "bankDetails.branch": bankDetails.branch,
+      });
+
+      if (existingLoan) {
+        return res.status(400).json({
+          message: "This group has already taken a loan from the same bank",
+        });
       }
 
       // Calculate per member amount
