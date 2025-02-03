@@ -7,6 +7,7 @@ const CollectionForm = () => {
   const [groups, setGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [collectionDate, setCollectionDate] = useState("");
+  
 
   useEffect(() => {
     const fetchGroups = async () => {

@@ -99,143 +99,203 @@ const AddMember = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-lg space-y-4">
-      <label htmlFor="name">Name</label>
-      <input
-        type="text"
-        name="name"
-        placeholder="Name"
-        onChange={handleChange}
-        required
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
-      <label htmlFor="address">Address</label>
-      <input
-        type="text"
-        name="address"
-        placeholder="Address"
-        onChange={handleChange}
-        required
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
-      <label htmlFor="dateOfBirth">Date Of Birth</label>
-      <input
-        type="date"
-        name="dateOfBirth"
-        onChange={handleChange}
-        required
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
-      <label htmlFor="aadharNo">Aadhar No</label>
-      <input
-        type="text"
-        name="aadharNo"
-        placeholder="Aadhar No"
-        onChange={handleChange}
-        required
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
-      <label htmlFor="panNo">PAN No</label>
-      <input
-        type="text"
-        name="panNo"
-        placeholder="PAN No"
-        onChange={handleChange}
-        required
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
-      <label htmlFor="mobileNumber">Mobile Number</label>
-      <input
-        type="text"
-        name="mobileNumber"
-        placeholder="Mobile Number"
-        onChange={handleChange}
-        required
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
+    <div className="w-full h-[100vh] overflow-y-auto ">
+      <h1 className="text-2xl mt-4 ml-16">Add Member</h1>
+      <form onSubmit={handleSubmit} className=" w-full mx-auto p-6 bg-white rounded-lg shadow-lg space-y-4 md:w-[95%] lg:w-[90%] mt-8">
 
-      <h3 className="text-lg font-semibold">Guarantor Details</h3>
-      <label htmlFor="guarantorName">Guarantor Name</label>
-      <input
-        type="text"
-        name="name"
-        placeholder="Guarantor Name"
-        onChange={handleGuarantorChange}
-        required
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
-      <label htmlFor="guarantorMobileNo">Guarantor Mobile No</label>
-      <input
-        type="text"
-        name="mobileNo"
-        placeholder="Guarantor Mobile"
-        onChange={handleGuarantorChange}
-        required
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
-      <label htmlFor="guarantorRelation">Relation</label>
-      <select
-        name="relation"
-        onChange={handleGuarantorChange}
-        required
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="">Select Relation</option>
-        <option value="Father">Father</option>
-        <option value="Mother">Mother</option>
-        <option value="Sibling">Sibling</option>
-      </select>
+        <div className="w-full md:flex md:gap-4">
+          <div className="mb-4 lg:w-[50%]">
+          <label htmlFor="name">Name</label>
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            onChange={handleChange}
+            required
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 "
+          />
+          </div>
+          <div className="lg:w-[50%]">
+            <label htmlFor="address">Address</label>
+            <input
+              type="text"
+              name="address"
+              placeholder="Address"
+              onChange={handleChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
 
-      <h3 className="text-lg font-semibold">Upload Documents</h3>
-      <input
-        type="file"
-        name="photo"
-        onChange={handleFileChange}
-        required
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
-      <label htmlFor="guarantorPhoto">Guarantor Photo</label>
-      <input
-        type="file"
-        name="guarantorPhoto"
-        onChange={handleFileChange}
-        required
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
-      <label htmlFor="guarantorCheque">Guarantor Cheque</label>
-      <input
-        type="file"
-        name="guarantorCheque"
-        onChange={handleFileChange}
-        required
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
+        <div className="w-full md:flex md:gap-4">
+          <div className="mb-4 lg:w-[50%]">
+            <label htmlFor="dateOfBirth">Date Of Birth</label>
+            <input
+              type="date"
+              name="dateOfBirth"
+              onChange={handleChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-      <h3>Extra Documents (Images)</h3>
-      <input
-        type="file"
-        name="extraDocuments_0"
-        onChange={handleFileChange}
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
-      <input
-        type="file"
-        name="extraDocuments_1"
-        onChange={handleFileChange}
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
-      <input
-        type="file"
-        name="extraDocuments_2"
-        onChange={handleFileChange}
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
-      <input
-        type="file"
-        name="extraDocuments_3"
-        onChange={handleFileChange}
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-      />
+          <div className="lg:w-[50%]">
+            <label htmlFor="aadharNo">Aadhar No</label>
+            <input
+              type="text"
+              name="aadharNo"
+              placeholder="Aadhar No"
+              onChange={handleChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        <div className="w-full md:flex md:gap-4">
+          <div className="mb-4 md:w-[70%] lg:w-[50%]">
+            <label htmlFor="panNo">PAN No</label>
+            <input
+              type="text"
+              name="panNo"
+              placeholder="PAN No"
+              onChange={handleChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="lg:w-[50%]">
+            <label htmlFor="mobileNumber">Mobile Number</label>
+            <input
+              type="text"
+              name="mobileNumber"
+              placeholder="Mobile Number"
+              onChange={handleChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        <div className="w-full md:flex md:flex-col md:gap-4">
+          <h3 className="text-lg font-semibold">Guarantor Details</h3>
+          <div className="md:flex gap-4 ">
+          <div className="mb-4 lg:w-[50%]">
+            <label htmlFor="guarantorName">Guarantor Name</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Guarantor Name"
+              onChange={handleGuarantorChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="lg:w-[50%]">
+            <label htmlFor="guarantorMobileNo">Guarantor Mobile No</label>
+            <input
+              type="text"
+              name="mobileNo"
+              placeholder="Guarantor Mobile"
+              onChange={handleGuarantorChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          </div>
+        </div>
+
+        <div className="w-full md:flex md:gap-4">
+          <div className="mb-4 md:w-[75%] lg:w-[50%]">
+            <label htmlFor="guarantorRelation">Relation</label>
+            <select
+              name="relation"
+              onChange={handleGuarantorChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Relation</option>
+              <option value="Father">Father</option>
+              <option value="Mother">Mother</option>
+              <option value="Sibling">Sibling</option>
+            </select>
+          </div>
+          <div className="mb-4 lg:w-[50%]">
+            <label htmlFor="guarantorPhoto"> Photo</label>
+            <input
+              type="file"
+              name="photo"
+              onChange={handleFileChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+          </div>
+        </div>
+        <div className="w-full md:flex md:flex-col md:gap-4">
+          <h3 className="text-lg font-semibold">Upload Documents</h3>
+          <div className="md:flex gap-4">
+          <div className="mb-4 lg:w-[50%]">
+            <label htmlFor="guarantorPhoto">Guarantor Photo</label>
+            <input
+              type="file"
+              name="guarantorPhoto"
+              onChange={handleFileChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="mb-4 lg:w-[50%]">
+          <label htmlFor="guarantorCheque">Guarantor Cheque</label>
+          <input
+            type="file"
+            name="guarantorCheque"
+            onChange={handleFileChange}
+            required
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+          />
+          </div>
+          </div>
+      </div>
+      <div className="w-full  md:flex md:flex-col md:gap-4">
+        <h3>Extra Documents (Images)</h3>
+        <div className="md:flex flex-wrap md:gap-4">
+          <div className="mb-4 md:w-[48%]">
+            <input
+              type="file"
+              name="extraDocuments_0"
+              onChange={handleFileChange}
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="mb-4 md:w-[48%]">
+            <input
+              type="file"
+              name="extraDocuments_1"
+              onChange={handleFileChange}
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="mb-4 md:w-[48%]">
+            <input
+              type="file"
+              name="extraDocuments_2"
+              onChange={handleFileChange}
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="mb-4 md:w-[48%]">
+            <input
+              type="file"
+              name="extraDocuments_3"
+              onChange={handleFileChange}
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+      </div>
+
 
       <button
         type="submit"
@@ -244,6 +304,7 @@ const AddMember = () => {
         Add Member
       </button>
     </form>
+    </div>
   );
 };
 

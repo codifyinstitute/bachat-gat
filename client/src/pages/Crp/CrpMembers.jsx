@@ -6,44 +6,41 @@ import "aos/dist/aos.css";
 const AllMembers = () => {
   const navigate = useNavigate(); // Get navigate function
   const [members, setMembers] = useState([]); // State to store fetched members
-  // const [loading, setLoading] = useState(true); // State to manage loading state
   const [error, setError] = useState(null); // State to store any error
 
   // Assuming the admin_token is stored in localStorage
   const adminToken = localStorage.getItem("crp_token");
-  console.log(adminToken)
+  console.log(adminToken);
+
   useEffect(() => {
     // Fetch members data from backend API
     const fetchMembers = async () => {
       try {
         // Add Authorization header with Bearer token
-        const response = await axios.get("http://localhost:5000/api/member", {
+        const response = await axios.get("http://localhost:5000/api/crp/membycrp", {
           headers: {
             Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
           },
         });
-        console.log("API Response:", response.data);
 
+        console.log("API Response:", response.data); // Log the full response
+
+        // Handle different response formats
         if (Array.isArray(response.data)) {
-          setMembers(response.data); // Set members to the response data
+          setMembers(response.data); // Array of members
+        } else if (response.data.members && Array.isArray(response.data.members)) {
+          setMembers(response.data.members); // Nested 'members' array
         } else {
           setError("The response data is not in the expected format.");
         }
       } catch (err) {
         setError("Failed to fetch members data.");
         console.error(err);
-      } 
-      // finally {
-      //   setLoading(false); // Stop loading once data is fetched
-      // }
+      }
     };
 
     fetchMembers();
-  },[adminToken]); // Ensure the token is passed into useEffect (can also use session storage, cookies, etc.)
-
-  // if (loading) {
-  //   return <div>Loading...</div>; // Display loading message while data is being fetched
-  // }
+  }, [adminToken]); // Ensure the token is passed into useEffect (can also use session storage, cookies, etc.)
 
   if (error) {
     return <div>{error}</div>; // Display error message if there's an issue
@@ -60,7 +57,7 @@ const AllMembers = () => {
               <tr className="text-gray-600 text-left border-b">
                 <th className="py-3 px-4">Member Name</th>
                 <th className="py-3 px-4">Mobile</th>
-                <th className="py-3 px-4">Email</th>
+                <th className="py-3 px-4">Pan No</th>
                 <th className="py-3 px-4">Status</th>
               </tr>
             </thead>
@@ -73,7 +70,9 @@ const AllMembers = () => {
                 >
                   <td className="py-3 px-4">{member.name}</td>
                   <td className="py-3 px-4">{member.mobileNumber}</td>
-                  <td className="py-3 px-4">{member.referredBy.crpName}@example.com</td>
+                  <td className="py-3 px-4">
+                    {member.panNo}
+                  </td>
                   <td className="py-3 px-4">
                     <span
                       className={`px-3 py-1 text-sm font-medium rounded-full ${
