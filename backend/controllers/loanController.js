@@ -1,9 +1,6 @@
 // const Loan = require("../models/Loan");
 // const Group = require("../models/Group");
 // const Member = require("../models/Member");
-// const pdfKit = require("pdfkit");
-// const fs = require("fs");
-// const bankDetails = require("../models/bankScema");
 
 // const loanController = {
 //   // Calculate EMI
@@ -46,16 +43,11 @@
 //     };
 //   },
 
+//   // Create new loan
 //   createLoan: async (req, res) => {
 //     try {
-//       const {
-//         groupId,
-//         totalAmount,
-//         interestRate,
-//         termMonths,
-//         startDate,
-//         bankDetails,
-//       } = req.body;
+//       const { groupId, totalAmount, interestRate, termMonths, startDate } =
+//         req.body;
 
 //       // Validate group exists and is active
 //       const group = await Group.findOne({
@@ -65,18 +57,6 @@
 
 //       if (!group) {
 //         return res.status(404).json({ message: "Active group not found" });
-//       }
-
-//       // Check if the group already has a loan with the same bank
-//       const existingLoan = await Loan.findOne({
-//         groupId,
-//         bankName: bankDetails.name, // Match the bank name
-//       });
-
-//       if (existingLoan) {
-//         return res.status(400).json({
-//           message: `This group has already sanctioned a loan with ${bankDetails.name}`,
-//         });
 //       }
 
 //       // Calculate per member amount
@@ -103,7 +83,6 @@
 //         startDate,
 //         repaymentSchedules,
 //         createdBy: req.user.id,
-//         bankDetails: bankDetails, // Save bank details
 //       });
 
 //       await loan.save();
@@ -122,6 +101,7 @@
 //       res.status(500).json({ message: error.message });
 //     }
 //   },
+
 //   // Approve loan
 //   approveLoan: async (req, res) => {
 //     try {
@@ -173,30 +153,9 @@
 //   },
 
 //   // Get all loans
-//   // getAllLoans: async (req, res) => {
-//   //   try {
-//   //     const loans = await Loan.find({ createdBy: req.user.id })
-//   //       .populate("groupId", "name")
-//   //       .populate("repaymentSchedules.memberId", "name mobileNumber")
-//   //       .populate("approvedBy", "username")
-//   //       .populate("createdBy", "name");
-
-//   //     res.json(loans);
-//   //   } catch (error) {
-//   //     res.status(500).json({ message: error.message });
-//   //   }
-//   // },
-
 //   getAllLoans: async (req, res) => {
 //     try {
-//       let query = {};
-
-//       // If the user is a CRP, show only their loans
-//       if (req.user.role === "crp") {
-//         query = { createdBy: req.user.id };
-//       }
-
-//       const loans = await Loan.find(query)
+//       const loans = await Loan.find({ createdBy: req.user.id })
 //         .populate("groupId", "name")
 //         .populate("repaymentSchedules.memberId", "name mobileNumber")
 //         .populate("approvedBy", "username")
@@ -229,37 +188,12 @@
 //         return res.status(404).json({ message: "Member schedule not found" });
 //       }
 
-//       // Generate PDF for repayment schedule
-//       const doc = new pdfKit();
-//       const filePath = `./${memberId}_repayment_schedule.pdf`;
-
-//       doc.pipe(fs.createWriteStream(filePath));
-
-//       doc
-//         .fontSize(12)
-//         .text(
-//           `Repayment Schedule for Member: ${memberSchedule.memberId.name}`,
-//           {
-//             align: "center",
-//           }
-//         );
-
-//       memberSchedule.installments.forEach((installment) => {
-//         doc.text(
-//           `Installment #${
-//             installment.installmentNumber
-//           } - Due: ${installment.dueDate.toLocaleDateString()}`
-//         );
-//         doc.text(
-//           `Amount: ₹${installment.amount} | Principal: ₹${installment.principal} | Interest: ₹${installment.interest}`
-//         );
-//         doc.text("--------------------------");
-//       });
-
-//       doc.end();
-
-//       res.download(filePath, () => {
-//         fs.unlinkSync(filePath); // Remove the file after download
+//       // Here you would generate and return PDF
+//       // This is a placeholder for PDF generation logic
+//       res.json({
+//         message:
+//           "PDF generation endpoint - implement with your preferred PDF library",
+//         schedule: memberSchedule,
 //       });
 //     } catch (error) {
 //       res.status(500).json({ message: error.message });
@@ -268,13 +202,11 @@
 // };
 
 // module.exports = loanController;
-
 const Loan = require("../models/Loan");
 const Group = require("../models/Group");
 const Member = require("../models/Member");
 const pdfKit = require("pdfkit");
 const fs = require("fs");
-const { Bank } = require("../models/bankScema");
 
 const loanController = {
   // Calculate EMI
@@ -317,7 +249,72 @@ const loanController = {
     };
   },
 
-  // Create loan with separate bank details
+  // Create new loan
+  // createLoan: async (req, res) => {
+  //   try {
+  //     const {
+  //       groupId,
+  //       totalAmount,
+  //       interestRate,
+  //       termMonths,
+  //       startDate,
+  //       bankDetails,
+  //     } = req.body;
+
+  //     // Validate group exists and is active
+  //     const group = await Group.findOne({
+  //       _id: groupId,
+  //       status: "active",
+  //     }).populate("members.member");
+
+  //     if (!group) {
+  //       return res.status(404).json({ message: "Active group not found" });
+  //     }
+
+  //     // Calculate per member amount
+  //     const memberCount = group.members.length;
+  //     const perMemberAmount = totalAmount / memberCount;
+
+  //     // Generate repayment schedules for each member
+  //     const repaymentSchedules = group.members.map((member) =>
+  //       loanController.generateRepaymentSchedule(
+  //         member.member._id,
+  //         perMemberAmount,
+  //         interestRate,
+  //         termMonths,
+  //         startDate
+  //       )
+  //     );
+
+  //     const loan = new Loan({
+  //       groupId,
+  //       totalAmount,
+  //       perMemberAmount,
+  //       interestRate,
+  //       termMonths,
+  //       startDate,
+  //       repaymentSchedules,
+  //       createdBy: req.user.id,
+  //       bankDetails: bankDetails, // Save bank details
+  //     });
+
+  //     await loan.save();
+
+  //     // Populate member details
+  //     await loan.populate([
+  //       { path: "groupId", select: "name" },
+  //       { path: "repaymentSchedules.memberId", select: "name mobileNumber" },
+  //     ]);
+
+  //     res.status(201).json({
+  //       message: "Loan created successfully",
+  //       loan,
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   createLoan: async (req, res) => {
     try {
       const {
@@ -326,7 +323,7 @@ const loanController = {
         interestRate,
         termMonths,
         startDate,
-        bankDetails, // Bank details passed separately
+        bankDetails,
       } = req.body;
 
       // Validate group exists and is active
@@ -339,16 +336,24 @@ const loanController = {
         return res.status(404).json({ message: "Active group not found" });
       }
 
-      // Check if the group already has a loan with the same bank
-      const existingLoan = await Loan.findOne({
-        groupId,
-        bankName: bankDetails.name, // Match the bank name
-      });
-
-      if (existingLoan) {
-        return res.status(400).json({
-          message: `This group has already sanctioned a loan with ${bankDetails.name}`,
-        });
+      // Validate Bank Details
+      // if (
+      //   !bankDetails ||
+      //   !bankDetails.bankName ||
+      //   !bankDetails.accountNumber ||
+      //   !bankDetails.ifscCode ||
+      //   !bankDetails.branch
+      // )
+      if (
+        !bankDetails ||
+        !bankDetails.name ||
+        !bankDetails.accountNumber ||
+        !bankDetails.ifsc ||
+        !bankDetails.branch
+      ) {
+        return res
+          .status(400)
+          .json({ message: "Complete bank details are required" });
       }
 
       // Calculate per member amount
@@ -375,7 +380,7 @@ const loanController = {
         startDate,
         repaymentSchedules,
         createdBy: req.user.id,
-        bankName: bankDetails.name, // Save bank name separately
+        bankDetails, // Save bank details
       });
 
       await loan.save();
@@ -386,17 +391,48 @@ const loanController = {
         { path: "repaymentSchedules.memberId", select: "name mobileNumber" },
       ]);
 
-      // Fetch bank details using the Bank model (not bankDetails)
-      const bank = await Bank.findOne({ name: bankDetails.name });
-
       res.status(201).json({
         message: "Loan created successfully",
         loan,
-        bank, // Provide both loan and bank details in response
       });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
+  },
+
+  generateRepaymentSchedule: (
+    memberId,
+    perMemberAmount,
+    interestRate,
+    termMonths,
+    startDate
+  ) => {
+    const installments = [];
+    const monthlyInterestRate = interestRate / 100 / 12;
+    const emi =
+      (perMemberAmount * monthlyInterestRate) /
+      (1 - Math.pow(1 + monthlyInterestRate, -termMonths));
+
+    for (let i = 1; i <= termMonths; i++) {
+      const dueDate = new Date(startDate);
+      dueDate.setMonth(dueDate.getMonth() + i);
+
+      installments.push({
+        installmentNumber: i,
+        dueDate,
+        amount: emi.toFixed(2),
+        principal: (emi - perMemberAmount * monthlyInterestRate).toFixed(2),
+        interest: (perMemberAmount * monthlyInterestRate).toFixed(2),
+        status: "pending",
+      });
+    }
+
+    return {
+      memberId,
+      installments,
+      totalAmount: (emi * termMonths).toFixed(2),
+      paidAmount: 0,
+    };
   },
 
   // Approve loan
@@ -421,13 +457,9 @@ const loanController = {
 
       await loan.save();
 
-      // Fetch the associated bank details using the Bank model (not bankDetails)
-      const bank = await Bank.findOne({ name: loan.bankName });
-
       res.json({
         message: "Loan approved successfully",
         loan,
-        bank, // Include bank details in response
       });
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -447,19 +479,27 @@ const loanController = {
         return res.status(404).json({ message: "Loan not found" });
       }
 
-      // Fetch associated bank details using the Bank model (not bankDetails)
-      const bank = await Bank.findOne({ name: loan.bankName });
-
-      res.json({
-        loan,
-        bank, // Include both loan and bank details
-      });
+      res.json(loan);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   },
 
   // Get all loans
+  // getAllLoans: async (req, res) => {
+  //   try {
+  //     const loans = await Loan.find({ createdBy: req.user.id })
+  //       .populate("groupId", "name")
+  //       .populate("repaymentSchedules.memberId", "name mobileNumber")
+  //       .populate("approvedBy", "username")
+  //       .populate("createdBy", "name");
+
+  //     res.json(loans);
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   getAllLoans: async (req, res) => {
     try {
       let query = {};
@@ -475,15 +515,7 @@ const loanController = {
         .populate("approvedBy", "username")
         .populate("createdBy", "name");
 
-      // Fetch bank details for each loan and include in the response
-      const loanWithBanks = await Promise.all(
-        loans.map(async (loan) => {
-          const bank = await Bank.findOne({ name: loan.bankName });
-          return { loan, bank };
-        })
-      );
-
-      res.json(loanWithBanks);
+      res.json(loans);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -509,9 +541,6 @@ const loanController = {
       if (!memberSchedule) {
         return res.status(404).json({ message: "Member schedule not found" });
       }
-
-      // Fetch associated bank details using the Bank model (not bankDetails)
-      const bank = await Bank.findOne({ name: loan.bankName });
 
       // Generate PDF for repayment schedule
       const doc = new pdfKit();
@@ -539,14 +568,6 @@ const loanController = {
         );
         doc.text("--------------------------");
       });
-
-      // Add bank details to the PDF
-      doc.text(`Bank Details:`);
-      doc.text(`Bank Name: ${bank.name}`);
-      doc.text(`Branch: ${bank.branch}`);
-      doc.text(`IFSC: ${bank.ifsc}`);
-      doc.text(`Interest Rate: ${bank.interestRate}%`);
-      doc.text("--------------------------");
 
       doc.end();
 

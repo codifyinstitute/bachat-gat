@@ -12,7 +12,7 @@ const groupStatementSchema = new mongoose.Schema({
     required: true,
   },
   amount: {
-    type: Number,
+    type: Number,21
     required: true,
   },
   transactionDate: {
