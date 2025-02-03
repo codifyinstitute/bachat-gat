@@ -7,7 +7,7 @@ const CollectionForm = () => {
   const [groups, setGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [collectionDate, setCollectionDate] = useState("");
-  const [savingsAmount, setSavingsAmount] = useState(""); // ✅ New state for savings amount
+  // const [savingsAmount, setSavingsAmount] = useState(""); // ✅ New state for savings amount
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -41,7 +41,7 @@ const CollectionForm = () => {
     const payload = {
       groupId: selectedGroupId,
       collectionDate,
-      savingsAmount: Number(savingsAmount), // ✅ Include savingsAmount in the payload
+      // savingsAmount: Number(savingsAmount), // ✅ Include savingsAmount in the payload
     };
 
     try {
@@ -105,19 +105,6 @@ const CollectionForm = () => {
             required
           />
         </div>
-
-        {/* <div>
-          <label htmlFor="savingsAmount" className="block text-gray-700">Savings Amount:</label> {/* ✅ New input *
-          <input
-            type="number"
-            id="savingsAmount"
-            value={savingsAmount}
-            onChange={(e) => setSavingsAmount(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-            required
-            min="0"
-          />
-        </div> */}
 
         <button
           type="submit"
