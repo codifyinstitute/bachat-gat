@@ -8,7 +8,7 @@ const AddMember = () => {
     dateOfBirth: "",
     aadharNo: "",
     panNo: "",
-    accNo:"",
+    accNo: "",
     mobileNumber: "",
     photo: null,
     guarantor: {
@@ -94,10 +94,34 @@ const AddMember = () => {
       });
       alert("Member added successfully");
       console.log(res.data);
+  
+      // Reset all fields, including the nested ones for the guarantor and extraDocuments
+      setFormData({
+        name: "",
+        address: "",
+        dateOfBirth: "",
+        aadharNo: "",
+        panNo: "",
+        accNo: "",
+        mobileNumber: "",
+        photo: null,
+        guarantor: {
+          name: "",
+          mobileNo: "",
+          relation: "",
+          guarantorPhoto: null,
+          guarantorCheque: null,
+          extraDocuments_0: null,
+          extraDocuments_1: null,
+          extraDocuments_2: null,
+          extraDocuments_3: null,
+        }
+      });
     } catch (error) {
       alert(error.response?.data?.message || "Error adding member");
     }
   };
+  
 
   return (
     <div className="w-full h-[100vh] overflow-y-auto ">
@@ -106,15 +130,15 @@ const AddMember = () => {
 
         <div className="w-full md:flex md:gap-4">
           <div className="mb-4 lg:w-[50%]">
-          <label htmlFor="name">Name</label>
-          <input
-            type="text"
-            name="name"
-            placeholder="Name"
-            onChange={handleChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 "
-          />
+            <label htmlFor="name">Name</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Name"
+              onChange={handleChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 "
+            />
           </div>
           <div className="lg:w-[50%]">
             <label htmlFor="address">Address</label>
@@ -194,28 +218,28 @@ const AddMember = () => {
         <div className="w-full md:flex md:flex-col md:gap-4">
           <h3 className="text-lg font-semibold">Guarantor Details</h3>
           <div className="md:flex gap-4 ">
-          <div className="mb-4 lg:w-[50%]">
-            <label htmlFor="guarantorName">Guarantor Name</label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Guarantor Name"
-              onChange={handleGuarantorChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="lg:w-[50%]">
-            <label htmlFor="guarantorMobileNo">Guarantor Mobile No</label>
-            <input
-              type="text"
-              name="mobileNo"
-              placeholder="Guarantor Mobile"
-              onChange={handleGuarantorChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+            <div className="mb-4 lg:w-[50%]">
+              <label htmlFor="guarantorName">Guarantor Name</label>
+              <input
+                type="text"
+                name="name"
+                placeholder="Guarantor Name"
+                onChange={handleGuarantorChange}
+                required
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="lg:w-[50%]">
+              <label htmlFor="guarantorMobileNo">Guarantor Mobile No</label>
+              <input
+                type="text"
+                name="mobileNo"
+                placeholder="Guarantor Mobile"
+                onChange={handleGuarantorChange}
+                required
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
         </div>
 
@@ -242,80 +266,80 @@ const AddMember = () => {
               onChange={handleFileChange}
               required
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-              />
+            />
           </div>
         </div>
         <div className="w-full md:flex md:flex-col md:gap-4">
           <h3 className="text-lg font-semibold">Upload Documents</h3>
           <div className="md:flex gap-4">
-          <div className="mb-4 lg:w-[50%]">
-            <label htmlFor="guarantorPhoto">Guarantor Photo</label>
-            <input
-              type="file"
-              name="guarantorPhoto"
-              onChange={handleFileChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="mb-4 lg:w-[50%]">
-          <label htmlFor="guarantorCheque">Guarantor Cheque</label>
-          <input
-            type="file"
-            name="guarantorCheque"
-            onChange={handleFileChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-          />
-          </div>
-          </div>
-      </div>
-      <div className="w-full  md:flex md:flex-col md:gap-4">
-        <h3>Extra Documents (Images)</h3>
-        <div className="md:flex flex-wrap md:gap-4">
-          <div className="mb-4 md:w-[48%]">
-            <input
-              type="file"
-              name="extraDocuments_0"
-              onChange={handleFileChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="mb-4 md:w-[48%]">
-            <input
-              type="file"
-              name="extraDocuments_1"
-              onChange={handleFileChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="mb-4 md:w-[48%]">
-            <input
-              type="file"
-              name="extraDocuments_2"
-              onChange={handleFileChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="mb-4 md:w-[48%]">
-            <input
-              type="file"
-              name="extraDocuments_3"
-              onChange={handleFileChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="mb-4 lg:w-[50%]">
+              <label htmlFor="guarantorPhoto">Guarantor Photo</label>
+              <input
+                type="file"
+                name="guarantorPhoto"
+                onChange={handleFileChange}
+                required
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4 lg:w-[50%]">
+              <label htmlFor="guarantorCheque">Guarantor Cheque</label>
+              <input
+                type="file"
+                name="guarantorCheque"
+                onChange={handleFileChange}
+                required
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
         </div>
-      </div>
+        <div className="w-full  md:flex md:flex-col md:gap-4">
+          <h3>Extra Documents (Images)</h3>
+          <div className="md:flex flex-wrap md:gap-4">
+            <div className="mb-4 md:w-[48%]">
+              <input
+                type="file"
+                name="extraDocuments_0"
+                onChange={handleFileChange}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4 md:w-[48%]">
+              <input
+                type="file"
+                name="extraDocuments_1"
+                onChange={handleFileChange}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4 md:w-[48%]">
+              <input
+                type="file"
+                name="extraDocuments_2"
+                onChange={handleFileChange}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4 md:w-[48%]">
+              <input
+                type="file"
+                name="extraDocuments_3"
+                onChange={handleFileChange}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        </div>
 
 
-      <button
-        type="submit"
-        className="w-full py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-      >
-        Add Member
-      </button>
-    </form>
+        <button
+          type="submit"
+          className="w-full py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          Add Member
+        </button>
+      </form>
     </div>
   );
 };
