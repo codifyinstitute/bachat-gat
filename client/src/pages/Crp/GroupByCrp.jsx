@@ -3,89 +3,248 @@ import axios from "axios";
 
 const GroupsList = () => {
   const [groups, setGroups] = useState([]);
+  const [loansData, setLoansData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showCRP, setShowCRP] = useState(false);
+  const [showWhatsApp, setShowWhatsApp] = useState(false);
+  const [expandedGroup, setExpandedGroup] = useState(null); // Track expanded group
 
   useEffect(() => {
-    const fetchGroups = async () => {
+    const fetchGroupsAndLoans = async () => {
       try {
-        const adminToken = localStorage.getItem("crp_token");
-        if (!adminToken) {
+        const crptoken = localStorage.getItem("crp_token");
+
+        if (!crptoken) {
           setError("No authentication token found. Please log in.");
           setLoading(false);
           return;
         }
 
-        const response = await axios.get("http://localhost:5000/api/groups/created-by-crp", {
-          headers: {
-            Authorization: `Bearer ${adminToken}`,
-          },
-        });
+        // Fetch groups and loans data concurrently
+        const [groupsRes, loansRes] = await Promise.all([
+          axios.get("http://localhost:5000/api/groups/created-by-crp", {
+            headers: {
+              Authorization: `Bearer ${crptoken}`,
+              "Content-Type": "application/json",
+            },
+          }),
+          axios.get("http://localhost:5000/api/loan", {
+            headers: {
+              Authorization: `Bearer ${crptoken}`,
+              "Content-Type": "application/json",
+            },
+          }),
+        ]);
 
-        setGroups(response.data);
+        console.log("Groups Response:", groupsRes.data); // Debugging groups data
+        console.log("Loans Response:", loansRes.data); // Debugging loans data
+
+        setGroups(groupsRes.data);
+        setLoansData(loansRes.data);
         setLoading(false);
       } catch (err) {
-        setError(err.response?.data?.message || "Error fetching groups");
+        console.error("Error fetching data:", err); // Log error
+        setError("Error fetching data");
         setLoading(false);
       }
     };
 
-    fetchGroups();
-  }, []);
+    fetchGroupsAndLoans();
+  }, [ ]); // Empty array ensures the hook runs only once
 
-  if (loading) return <p className="text-center text-lg">Loading groups...</p>;
-  if (error) return <p className="text-center text-red-500 text-lg">{error}</p>;
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value.toLowerCase());
+  };
+
+  const toggleExpand = (groupId) => {
+    setExpandedGroup(expandedGroup === groupId ? null : groupId);
+  };
+  console.log(loansData,"loansdata")
+
+  const getLoanDetails = (groupId) => {
+    console.log(`Fetching loan details for groupId: ${groupId}`);
+    // Log the loansData structure and groupId to check if there’s a mismatch
+    console.log("Loans Data:", loansData);
+    const loansForGroup = loansData.filter((loan) => {
+      console.log("loan", loan)
+      console.log("Loan Group ID:", loan.loan.groupId._id); // This will show the actual groupId for each loan
+      console.log("grpname",groupId)
+      return loan.loan.groupId._id === groupId;
+
+    });
+    console.log("Loans for group:", loansForGroup); // Check the resulting loans for the group
+    return loansForGroup;
+  };
+
+  const filteredGroups = groups.filter((group) => {
+    const groupNameMatch = group.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const memberMatch = group.members?.some((member) =>
+      member?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return groupNameMatch || memberMatch;
+  });
+console.log("filtere", filteredGroups)
+
+  console.log("Filtered Groups:", filteredGroups); // Debugging filtered groups
+
+  if (loading) return <p className="text-center text-lg">Loading...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold text-center mb-4">Groups Created by CRP</h2>
-      {groups.length === 0 ? (
+      <h2 className="text-2xl font-bold text-center mb-4">Your Groups</h2>
+
+      <div className="flex justify-between md:gap-2 lg:gap-4 md:justify-center flex-wrap items-center mb-4">
+        <input
+          type="text"
+          placeholder="Search Groups or Members..."
+          value={searchTerm}
+          onChange={handleSearch}
+          className="p-2 border border-gray-400 rounded-md w-full md:w-[40%] lg:w-1/2"
+        />
+
+        <div className="flex justify-between w-full md:w-[55%] px-4 py-2">
+          <label>
+            <input
+              type="checkbox"
+              checked={showCRP}
+              onChange={() => setShowCRP(!showCRP)}
+            />{" "}
+            CRP Name
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={showWhatsApp}
+              onChange={() => setShowWhatsApp(!showWhatsApp)}
+            />{" "}
+            Get WhatsApp
+          </label>
+        </div>
+      </div>
+
+      {filteredGroups.length === 0 ? (
         <p className="text-center text-gray-500">No groups found</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-300 shadow-md rounded-lg overflow-hidden">
             <thead className="bg-blue-500 text-white">
               <tr>
+                <th className="p-3 text-left">Sr. No</th>
                 <th className="p-3 text-left">Group Name</th>
                 <th className="p-3 text-left">Address</th>
-                <th className="p-3 text-left">Status</th>
-                <th className="p-3 text-left">Members</th>
+                <th className="p-3 text-left"> Loan Amt</th>
+                <th className="p-3 text-left">Bank</th>
+                {showCRP && <th className="p-3 text-left">CRP Name</th>}
+                {showWhatsApp && <th className="p-3 text-left">WhatsApp Link</th>}
               </tr>
             </thead>
             <tbody>
-              {groups.map((group) => (
-                <tr key={group._id} className="border-b hover:bg-gray-100">
-                  <td className="p-3 font-semibold">{group.name}</td>
-                  <td className="p-3">{group.address}</td>
-                  <td className={`p-3 font-semibold ${group.status === "active" ? "text-green-500" : "text-red-500"}`}>
-                    {group.status}
-                  </td>
-                  <td className="p-3">
-                    {group.members.length === 0 ? (
-                      <p className="text-gray-500">No members</p>
-                    ) : (
-                      <ul className="list-disc pl-4">
-                        {group.members.map((member, index) => (
-                          member?.member ? ( // ✅ Check if member.member exists
-                            <li key={index} className="flex justify-between">
-                              <span>{member.member.name} ({member.member.mobileNumber})</span>
-                              <span
-                                className={`px-2 py-1 text-xs rounded-lg ${
-                                  member.member.status === "active" ? "bg-green-200 text-green-700" : "bg-red-200 text-red-700"
-                                }`}
-                              >
-                                {member.member.status}
-                              </span>
-                            </li>
+              {filteredGroups.map((group, index) => {
+                const groupLoans = getLoanDetails(group._id); // Use group._id to match loan details
+                return (
+                  <React.Fragment key={group._id}>
+                    <tr
+                      className="border-b hover:bg-gray-100 cursor-pointer"
+                      onClick={() => toggleExpand(group._id)}
+                    >
+                      <td className="p-3">{index + 1}</td>
+                      <td className="p-3 font-semibold">{group.name}</td>
+                      <td className="p-3">{group.address}</td>
+
+                      {/* Loan Data */}
+                      <td className="p-3">
+                        {groupLoans.length > 0 ? groupLoans[0].loan.totalAmount : "N/A"}
+                        {console.log("grploan", groupLoans)}
+                      </td>
+                      <td className="p-3">
+                        {groupLoans.length > 0
+                          ? groupLoans[0].loan.bank || "N/A"
+                          : "N/A"}
+                      </td>
+
+                      {showCRP && <td className="p-3">{group.createdBy.name || "N/A"}</td>}
+
+                      {showWhatsApp && (<td className="p-3">
+                          {console.log("whts", group.whatsappGroupLink)}
+                          {showWhatsApp && <td className="p-3">{group.whatsappGroupLink || "N/A"}</td>}
+                        </td>
+                      )}
+                    </tr>
+
+                    {/* Expandable Loan Details */}
+                    {expandedGroup === group._id && (
+                      <tr>
+                        <td colSpan="7" className="p-4 bg-gray-50">
+                          <h4 className="font-semibold text-lg mb-2">Loan Details:</h4>
+                          {groupLoans.length > 0 ? (
+                            groupLoans.map((loan, i) => (
+                              <div key={i} className="py-2 px-4 border-b">
+                                <div className="w-full flex justify-between mb-2">
+                                  <p className=""><strong className="w-[300%]">Loan ID:</strong> {loan.loan._id}</p>
+                                  <p><strong>Sanction Amount:</strong> {loan.loan.totalAmount}</p>
+                                </div>
+                                <div className="w-full flex justify-between mb-2">
+                                  <p><strong>Interest Rate:</strong> {loan.loan.interestRate}%</p>
+                                  <p><strong>Status:</strong> {loan.loan.status}</p>
+                                </div>
+                                <div className="w-full flex justify-between mb-2">
+                                  <p><strong>Start Date:</strong> {new Date(loan.loan.startDate).toLocaleDateString()}</p>
+                                  <p><strong>Term (Months):</strong> {loan.loan.termMonths}</p>
+                                </div>
+                                <div className="w-full flex justify-between mb-2">
+                                  <p><strong>Per Member Amount:</strong>{(loan.loan.perMemberAmount)}</p>
+                                  {/* <p><strong>Term (Months):</strong> {loan.loan.termMonths}</p> */}
+                                </div>
+                                {loan.loan.repaymentSchedules && loan.loan.repaymentSchedules.length > 0 ? (
+                                  loan.loan.repaymentSchedules.map((schedule, idx) => (
+                                    <div key={idx} className="p-2">
+                                      {console.log("schedule",schedule)}
+                                      <p><strong>Installment Schedule:</strong></p>
+                                          <table className="w-full border-collapse border border-gray-400">
+                                            <thead>
+                                              <tr className="bg-gray-200">
+                                                <th className="border border-gray-400 px-2 py-1">#</th>
+                                                <th className="border border-gray-400 px-2 py-1">Due Date</th>
+                                                <th className="border border-gray-400 px-2 py-1">Amount (₹)</th>
+                                                <th className="border border-gray-400 px-2 py-1">Principal (₹)</th>
+                                                <th className="border border-gray-400 px-2 py-1">Interest (₹)</th>
+                                                <th className="border border-gray-400 px-2 py-1">Paid Amount (₹)</th>
+                                                <th className="border border-gray-400 px-2 py-1">Status</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              {schedule.installments.map((inst, index) => (
+                                                <tr key={inst._id} className="text-center">
+                                                  <td className="border border-gray-400 px-2 py-1">{index + 1}</td>
+                                                  <td className="border border-gray-400 px-2 py-1">{new Date(inst.dueDate).toLocaleDateString()}</td>
+                                                  <td className="border border-gray-400 px-2 py-1">{inst.amount.toFixed(2)}</td>
+                                                  <td className="border border-gray-400 px-2 py-1">{inst.principal.toFixed(2)}</td>
+                                                  <td className="border border-gray-400 px-2 py-1">{inst.interest.toFixed(2)}</td>
+                                                  <td className="border border-gray-400 px-2 py-1">{inst.paidAmount.toFixed(2)}</td>
+                                                  <td className="border border-gray-400 px-2 py-1">{inst.status}</td>
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <p>No repayment schedule available.</p>
+                                )}
+                              </div>
+                            ))
                           ) : (
-                            <li key={index} className="text-gray-500">Member data unavailable</li> // ✅ Handle missing data
-                          )
-                        ))}
-                      </ul>
+                            <p>No loan details available for this group.</p>
+                          )}
+                        </td>
+                      </tr>
                     )}
-                  </td>
-                </tr>
-              ))}
+                  </React.Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>

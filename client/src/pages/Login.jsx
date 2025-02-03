@@ -44,7 +44,7 @@ const Login = () => {
           // If login is successful, you'll receive a JWT token
           if (response.data.token) {
             localStorage.setItem('crp_token', response.data.token);
-            navigate('/crp/CrpDashboard');
+            navigate('/crp/CrpHome');
           }
         } else if (formData.username) {
           // If username is filled, log in as Admin

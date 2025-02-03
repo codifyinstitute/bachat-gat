@@ -58,6 +58,7 @@ const adminController = {
         { expiresIn: "24h" }
       );
 
+
       res.json({ token });
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -81,6 +82,7 @@ const adminController = {
         password, // Store the hashed password
         createdBy: req.user.id,
       });
+
 
       await crp.save();
       console.log(req.body);

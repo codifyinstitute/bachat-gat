@@ -1,52 +1,47 @@
 import React, { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
-import { UserPlus, Users, List, CheckCircle, Menu, X } from "lucide-react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import {LayoutDashboard , UsersRound, HandCoins, UserPlus, Users, List, CheckCircle, Menu, X, LogOut,CircleDotDashed, Boxes, Landmark   } from "lucide-react";
 import logo from "../../assets/Images/logo.png";
+// import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 const Sidebar = ({ role }) => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const navigate = useNavigate();
   // Define links based on roles
   const links = {
     admin: [
       
-      { name: "Dashboard", path: "/admin/AdminDashboard", icon: <Users /> },
+      { name: "Dashboard", path: "/admin/AdminDashboard", icon: <LayoutDashboard /> },
       { name: "Add CRP", path: "/admin/add-crp", icon: <UserPlus /> },
       { name: "All Members", path: "/admin/all-members", icon: <Users /> },
       { name: "Group-wise Members", path: "/admin/groups", icon: <List /> },
-      { name: "Approval List", path: "/admin/approvallist", icon: <CheckCircle />,},
-      { name: "Approved List", path: "/admin/approvedlist",icon: <CheckCircle />,},
-      { name: "Approve Collection", path: "/admin/approvecollection", icon: <CheckCircle /> },
-      { name: "Add Bank", path: "/admin/addbank", icon: <CheckCircle /> },
+      { name: "Approval Loans", path: "/admin/approvallist", icon: <HandCoins className="text-[#ffaf7a]"/>,},
+      { name: "Approve Collection", path: "/admin/approvecollection", icon: <Boxes className="text-[#ffaf7a]"/> },
+      { name: "Approved List", path: "/admin/approvedlist",icon: <CheckCircle className="text-[#12c20f]"/>,},
+      { name: "Add Bank", path: "/admin/addbank", icon: <Landmark /> },
     ],
 
     crp: [
       // { name: "Home", path: "/crp/home", icon: <Users /> },
-      { name: "CrpHome", path: "/crp/CrpHome", icon: <Users /> },
-      { name: "All Members", path: "/crp/Crp-members", icon: <Users /> },
+      { name: "Crp Dashboard", path: "/crp/CrpHome", icon: <LayoutDashboard /> },
       { name: "Add Members", path: "/crp/add-members", icon: <UserPlus /> },
+      { name: "All Members", path: "/crp/Crp-members", icon: <Users /> },
       { name: "Add Groups", path: "/crp/add-groups", icon: <UserPlus /> },
-      {
-        name: "Loan Sanction",
-        path: "/crp/Crp-loansanction",
-        icon: <CheckCircle />,
-      },
-      {
-        name: "Approved List",
-        path: "/crp/crpapprovedlist",
-        icon: <CheckCircle />,
-      },
-      {
-        name: "Pending Loans",
-        path: "/crp/pending-loans",
-        icon: <CheckCircle />,
-      },
-      { name: "Collections", path: "/crp/collection", icon: <CheckCircle /> },
+      { name: "GroupByCrp", path: "/crp/GroupByCrp", icon: <UsersRound  /> },
+      { name: "Loan Sanction", path: "/crp/Crp-loansanction",icon: <HandCoins />,},
+      { name: "Approved Loans", path: "/crp/crpapprovedlist",icon: <CheckCircle className="text-[#12c20f]"/>,},
+      { name: "Pending Loans", path: "/crp/pending-loans", icon: <CircleDotDashed className="text-[#ffaf7a]" />,},
+      { name: "Collections", path: "/crp/collection", icon: <Boxes  /> },
       // { name: "Payments", path: "/crp/payment", icon: <CheckCircle /> },
-      { name: "PaymentPage", path: "/crp/PaymentPage", icon: <CheckCircle /> },
-      { name: "GroupByCrp", path: "/crp/GroupByCrp", icon: <CheckCircle /> },
+      { name: "PaymentPage", path: "/crp/PaymentPage", icon: <Landmark /> },
       
     ],
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("crp_token");
+    localStorage.removeItem("admin_token");
+    navigate("/");
   };
 
   return (
@@ -65,13 +60,13 @@ const Sidebar = ({ role }) => {
       <aside
         className={`fixed inset-y-0 left-0 transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 transition-transform duration-300 ease-in-out w-64 bg-white text-gray-800 z-10 md:static flex-shrink-0 min-h-screen`}
+        } md:translate-x-0 transition-transform duration-300 ease-in-out w-64 bg-white text-gray-800 z-10 md:static flex-shrink-0 min-h-screen `}
       >
         <div className="p-4 text-lg font-bold border-b border-gray-700 flex gap-4 items-center">
           <img src={logo} alt="Logo" className="h-10 w-15 rounded-md" />
           {role.toUpperCase()} Panel
         </div>
-        <nav className="mt-4">
+        <nav className="mt-4 h-[70vh] overflow-y-auto">
           {links[role]?.map((link) => (
             <NavLink
               key={link.path}
@@ -87,7 +82,17 @@ const Sidebar = ({ role }) => {
               {link.name}
             </NavLink>
           ))}
+        {/* Logout Link */}
         </nav>
+        <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 w-full text-left text-red-600 hover:bg-gray-200 mt-4"
+          >
+            <LogOut />
+            Logout
+          </button>
+
+
       </aside>
 
       {/* Main Content */}

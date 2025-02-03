@@ -5,8 +5,7 @@ const LoanSanctionForm = () => {
   const [loanDetails, setLoanDetails] = useState({
     groupId: "",
     totalAmount: "",
-    // perMemberAmount: "",
-    interestRate: "",
+    interestRate: "",  // This will be auto-filled based on the selected bank
     termMonths: "",
     startDate: "",
     bankDetails: [
@@ -14,7 +13,7 @@ const LoanSanctionForm = () => {
         bankName: "",
         branch: "",
         ifscCode: "",
-        interestRate: "", // Ensure this is not missing
+        interestRate: "",
       },
     ],
   });
@@ -22,6 +21,23 @@ const LoanSanctionForm = () => {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [banks, setBanks] = useState([]);
+  const [selectedBank, setSelectedBank] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchBanks = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/banks");
+        setBanks(response.data);
+      } catch (err) {
+        setError("Failed to fetch banks.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBanks();
+  }, []);
 
   useEffect(() => {
     fetchGroups();
@@ -53,6 +69,29 @@ const LoanSanctionForm = () => {
       }));
     } else {
       setLoanDetails({ ...loanDetails, [field]: value });
+    }
+  };
+
+  // ✅ Handle Bank Selection
+  const handleBankChange = (e) => {
+    const selectedBankId = e.target.value;
+    setSelectedBank(selectedBankId);
+
+    const bank = banks.find((b) => b._id === selectedBankId);
+    if (bank) {
+      setLoanDetails((prevDetails) => ({
+        ...prevDetails,
+        interestRate: bank.interestRate, // Set interest rate from selected bank
+        bankDetails: [
+          {
+            ...prevDetails.bankDetails[0],
+            bankName: bank.name,
+            branch: bank.branch,
+            ifscCode: bank.ifscCode,
+            interestRate: bank.interestRate,
+          },
+        ],
+      }));
     }
   };
 
@@ -121,16 +160,37 @@ const LoanSanctionForm = () => {
           />
         </div>
 
-
         <div className="mb-3">
-          <label className="block text-sm font-medium">Interest Rate (%)</label>
+          <label className="block text-sm font-medium">Start Date</label>
           <input
-            type="number"
+            type="date"
             className="w-full border p-2 rounded"
-            value={loanDetails.interestRate}
-            onChange={(e) => handleChange("interestRate", e.target.value)}
+            value={loanDetails.startDate}
+            onChange={(e) => handleChange("startDate", e.target.value)}
             required
           />
+        </div>
+        
+        <div className="mb-3">
+          <label className="block text-lg font-semibold mb-2">Select a Bank:</label>
+          {error && <p className="text-red-500">{error}</p>}
+          {loading ? (
+            <p className="text-gray-600">Loading banks...</p>
+          ) : (
+            <select
+              value={selectedBank}
+              onChange={handleBankChange} // ✅ Bank selection handler
+              className="w-full px-4 py-2 border rounded bg-white shadow-sm"
+              required
+            >
+              <option value="" disabled>Select a bank</option>
+              {banks.map((bank) => (
+                <option key={bank._id} value={bank._id}>
+                  {bank.name} - {bank.branch}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div className="mb-3">
@@ -144,56 +204,17 @@ const LoanSanctionForm = () => {
           />
         </div>
 
+        {/* ✅ Interest Rate - Read-Only */}
         <div className="mb-3">
-          <label className="block text-sm font-medium">Start Date</label>
-          <input
-            type="date"
-            className="w-full border p-2 rounded"
-            value={loanDetails.startDate}
-            onChange={(e) => handleChange("startDate", e.target.value)}
-            required
-          />
-        </div>
-
-        {/* <div className="mb-3">
-          <h2 className="text-lg font-bold mb-2">Bank Details</h2>
-
-          <label className="block text-sm font-medium">Bank Name</label>
-          <input
-            type="text"
-            className="w-full border p-2 rounded"
-            value={loanDetails.bankDetails[0].bankName}
-            onChange={(e) => handleChange("bankDetails.bankName", e.target.value)}
-            required
-          />
-
-          <label className="block text-sm font-medium">Branch</label>
-          <input
-            type="text"
-            className="w-full border p-2 rounded"
-            value={loanDetails.bankDetails[0].branch}
-            onChange={(e) => handleChange("bankDetails.branch", e.target.value)}
-            required
-          />
-
-          <label className="block text-sm font-medium">IFSC Code</label>
-          <input
-            type="text"
-            className="w-full border p-2 rounded"
-            value={loanDetails.bankDetails[0].ifscCode}
-            onChange={(e) => handleChange("bankDetails.ifscCode", e.target.value)}
-            required
-          />
-
           <label className="block text-sm font-medium">Interest Rate (%)</label>
           <input
             type="number"
-            className="w-full border p-2 rounded"
-            value={loanDetails.bankDetails[0].interestRate}
-            onChange={(e) => handleChange("bankDetails.interestRate", e.target.value)}
+            className="w-full border p-2 rounded bg-gray-100"
+            value={loanDetails.interestRate}
+            readOnly // ✅ Make it read-only
             required
           />
-        </div> */}
+        </div>
 
         <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full" disabled={loading}>
           {loading ? "Processing..." : "Sanction Loan"}

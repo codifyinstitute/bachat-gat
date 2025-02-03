@@ -12,7 +12,7 @@ router.post("/", auth(["crp"]), loanController.createLoan);
 router.post("/:loanId/approve", auth(["admin"]), loanController.approveLoan);
 
 // Get loan details (both admin and CRP can view loan details)
-router.get("/:id", auth(["admin", "crp"]), loanController.getLoan);
+router.get("/:id", loanController.getLoan);
 
 // Get all loans (both admin and CRP can view all loans created by them)
 router.get("/", auth(["admin", "crp"]), loanController.getAllLoans);
