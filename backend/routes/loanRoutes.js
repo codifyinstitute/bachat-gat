@@ -11,6 +11,7 @@ router.post("/", auth(["crp"]), loanController.createLoan);
 // Approve a loan (only admin can approve a loan)
 router.post("/:loanId/approve", auth(["admin"]), loanController.approveLoan);
 
+router.get("/count",auth(["admin"]),loanController.getLoanCounts)
 // Get loan details (both admin and CRP can view loan details)
 router.get("/:id", loanController.getLoan);
 
@@ -23,5 +24,6 @@ router.get(
   auth(["admin", "crp"]),
   loanController.generateRepaymentSchedulePDF
 );
+
 
 module.exports = router;

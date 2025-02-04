@@ -33,6 +33,12 @@ const Login = () => {
       setErrorMessage(''); // Reset any previous error messages
 
       try {
+        // Prevent navigation of the browser back button
+        window.history.pushState(null, document.title, window.location.href);
+        window.onpopstate = function () {
+          window.history.pushState(null, document.title, window.location.href);
+        };
+
         // If email is filled, log in as CRP
         if (formData.email) {
           const response = await axios.post('http://localhost:5000/api/crp/login', formData, {
