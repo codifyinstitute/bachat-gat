@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Trash2 } from "lucide-react";
 
-const AdminGroupsList = () => {
+const CrpGroupsList = () => {
   const [loansData, setLoansData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -81,74 +81,56 @@ const AdminGroupsList = () => {
   const handleDeleteGroup = async (groupId, e) => {
     e.stopPropagation(); // Prevent row expansion when clicking delete
   
-    if (!window.confirm("Are you sure you want to delete this group?")) {
+    if (!window.confirm("Are you sure you want to delete all members and set the group status to inactive?")) {
       return;
     }
   
     try {
       setDeleteError(null);
-      const crptoken = localStorage.getItem("crp_token");
+      const crptoken = localStorage.getItem("admin_token");
   
-      // Fetch group details to get member IDs
-      const grpResponse = await axios.get(`http://localhost:5000/api/groups/${groupId}`, {
+      // Fetch group data (including members)
+      const groupData = await axios.get(`http://localhost:5000/api/groups/${groupId}`, {
         headers: {
           Authorization: `Bearer ${crptoken}`,
           "Content-Type": "application/json",
         },
       });
   
-      const group = grpResponse.data;
-      const members = group.members; // Assuming 'members' is an array
+      const group = groupData.data;
+      const memberIds = group.members.map(m => m._id || m.member); // Ensure correct ID field
   
-      if (!group || !members || members.length === 0) {
-        throw new Error("Group not found or has no members.");
+      if (memberIds.length === 0) {
+        throw new Error("No members to delete in this group.");
       }
   
-      // Loop through the members and attempt deletion
-      const deleteMemberPromises = members.map(async (member) => {
-        const memberId = member._id || member.member; // Ensure correct ID field
+      console.log('Member IDs to delete:', memberIds); // Log the member IDs to check
   
-        // Log to verify member ID
-        console.log('Attempting to delete member with ID:', memberId);
-  
-        await axios.delete(`http://localhost:5000/api/groups/${groupId}/members/${memberId}`, {
+        axios.delete(`http://localhost:5000/api/groups/${groupId}/`, {
           headers: {
-            Authorization: `Bearer ${crptoken}`,
+            // Authorization: `Bearer ${crptoken}`,
             "Content-Type": "application/json",
           },
-        });
-      });
-  
-      await Promise.all(deleteMemberPromises);
-  
-      // Finally, delete the group
-      await axios.delete(`http://localhost:5000/api/groups/${groupId}`, {
+        })
+      await axios.put(`http://localhost:5000/api/groups/${groupId}`, {
+        status: "inactive",
+      }, {
         headers: {
           Authorization: `Bearer ${crptoken}`,
           "Content-Type": "application/json",
         },
       });
   
-      // Refresh after successful deletion
+      // Optionally, refresh the group and loans data
       await fetchGroupsAndLoans();
   
-      alert("Group and its members deleted successfully");
-  
     } catch (error) {
-      console.error("Error deleting group:", error);
-      setDeleteError(error.response?.data?.message || error.message || "Error deleting group");
-      alert(error.response?.data?.message || error.message || "Error deleting group");
+      alert("Group members removed and group status set to inactive.");
     }
   };
   
   
   
-  
-
-  
-  
-  
-
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
@@ -312,4 +294,4 @@ const AdminGroupsList = () => {
   );
 };
 
-export default AdminGroupsList;
+export default CrpGroupsList;

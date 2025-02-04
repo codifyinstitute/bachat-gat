@@ -96,6 +96,7 @@
     
         console.log("API Response:", response.data);
         setMessage("Group created successfully!");
+        alert("Group created successfully!")
       } catch (error) {
         console.error("Error:", error);
         setMessage(error.response?.data?.message || "Error creating group. Please try again.");
