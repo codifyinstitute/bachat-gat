@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ReactECharts from "echarts-for-react";
+import axios from 'axios'
 
 const Crpdashboard = () => {
+
+  const [fetchcrpdata,setfetchcrpdata]=useState([])
   // Sample data (replace with actual API data)
   const totalUsers = 1000;
   const totalAmount = 500000;
@@ -9,9 +12,47 @@ const Crpdashboard = () => {
   const totalSavings = 300000;
   const totalInterest = 50000;
   const totalCrpMembers = 50;
-  const approvedList = 10
-  const completedList = 10
-  const pendingList = 10;
+  const [approvedList, setapprovedList] = useState(10);
+  const [pendingList, setpendingList] = useState(20);
+  const [completedList, setcompletedList] = useState(50)
+
+  const adminToken = localStorage.getItem("crp_token");
+  console.log("Admin Token:", adminToken);
+
+  useEffect(() => {
+    const fetchpiedetails = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/loan/", ({
+          headers: {
+            Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
+          },
+        }))
+
+        if (!response.data) {
+          console.log('the response data is not fetched, error in backend')
+        }
+
+        setfetchcrpdata(response.data)
+
+        // for(let i=0;i<fetchcrpdata.length;i++){
+        //   if(fetchcrpdata[i].status=="approved"){
+        //     setapprovedList(approvedList+1)
+        //   }else if(fetchcrpdata[i].status=="pending"){
+        //     setpendingList(pendingList+1)
+        //   }else if(fetchcrpdata[i].status=="completed"){
+        //     setcompletedList(completedList+1)
+        //   }
+        //   console.log(approvedList)
+        //   console.log(pendingList)
+        //   console.log(completedList)
+        // }
+
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    fetchpiedetails()
+  }, [])
 
   // Chart options for various types
   const chartOptions = {
@@ -41,8 +82,8 @@ const Crpdashboard = () => {
         bottom: "10%",
         top: "20%", // Adjusted top for proper spacing
       },
-    // },
-  },
+      // },
+    },
     barChart: {
       title: { text: "Total Data Overview", left: "center" },
       tooltip: { trigger: "axis" },
@@ -71,20 +112,20 @@ const Crpdashboard = () => {
       grid: { left: "15%", right: "5%", bottom: "10%", top: "20%" }, // Add margins for axis labels
     },
     pieChart: {
-      title: { text: "CRP vs Pending Approvals", left: "center" },
+      title: { text: "List", left: "center" },
       tooltip: { trigger: "item" },
       series: [
         {
           name: "Status",
           type: "pie",
-          radius: "50%",
+          radius: "70%",
           data: [
-            { value: approvedList, name: "Approved List" },
-            { value: pendingList, name: "Pending List" },
-            { value: completedList, name: "Completed list" },
+            { value: completedList, name: "Completed Loan", itemStyle: { color: "#d4df33bd" } },
+            { value: pendingList, name: "Pending Loan", itemStyle: { color: "#a87ae8" } },
+            { value: approvedList, name: "Approved Loan", itemStyle: { color: "#cf2224" } },
           ],
           emphasis: {
-            itemStyle: {
+            itemStyle: {  
               shadowBlur: 10,
               shadowOffsetX: 0,
               shadowColor: "rgba(0, 0, 0, 0.5)",
@@ -122,7 +163,7 @@ const Crpdashboard = () => {
 
   return (
     <div className="p-4 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">CRP Dashboard</h1>
 
       {/* Grid Layout for Charts */}
       <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-8">
