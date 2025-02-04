@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect,useState } from "react";
 import ReactECharts from "echarts-for-react";
+import axios from 'axios'
 
 const AdminDashboard = () => {
   // Sample data (replace with actual API data)
@@ -8,8 +9,39 @@ const AdminDashboard = () => {
   const totalLoan = 200000;
   const totalSavings = 300000;
   const totalInterest = 50000;
-  const totalCrpMembers = 50;
-  const pendingList = 10;
+  const [approvedList,setapprovedList] = useState(0);
+  const totalCrpMembers=0
+  const [pendingList,setpendingList] = useState(0);
+  const [completedList,setcompletedList]= useState(0)
+
+  // Assuming the admin_token is stored in localStorage
+  const adminToken = localStorage.getItem("admin_token");
+  console.log("Admin Token:", adminToken);
+
+  useEffect(()=>{
+    const fetchpiedetails= async ()=>{
+      try{
+        const response =await axios.get("http://localhost:5000/api/loan/count",({
+          headers: {
+            Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
+          },
+        }))
+
+        if(!response.data) {
+          console.log('the response data is not fetched, error in backend')
+        }
+
+        console.log(response.data)
+
+        setpendingList(response.data.pending) 
+        setcompletedList(response.data.completed) 
+        setapprovedList(response.data.approved) 
+      }catch(error){
+        console.log(error)
+      }
+    }
+    fetchpiedetails()
+  },[])
 
   // Chart options for various types
   const chartOptions = {
@@ -69,7 +101,7 @@ const AdminDashboard = () => {
       grid: { left: "15%", right: "5%", bottom: "10%", top: "20%" }, // Add margins for axis labels
     },
     pieChart: {
-      title: { text: "CRP vs Pending Approvals", left: "center" },
+      title: { text: "List", left: "center" },
       tooltip: { trigger: "item" },
       series: [
         {
@@ -77,8 +109,9 @@ const AdminDashboard = () => {
           type: "pie",
           radius: "50%",
           data: [
-            { value: totalCrpMembers, name: "CRP Members" },
-            { value: pendingList, name: "Pending Approvals" },
+            { value: completedList, name: "Completed Loan", itemStyle: { color: "#65de4d" } },
+            { value: pendingList, name: "Pending Loan", itemStyle: { color: "#de3939" } },
+            { value: approvedList, name: "Approved Loan", itemStyle: { color: "#f6ff00" } },
           ],
           emphasis: {
             itemStyle: {
@@ -90,6 +123,7 @@ const AdminDashboard = () => {
         },
       ],
     },
+    
     barRaceChart: {
       title: { text: "Loan, Savings, Interest Race", left: "center" },
       tooltip: { trigger: "axis" },

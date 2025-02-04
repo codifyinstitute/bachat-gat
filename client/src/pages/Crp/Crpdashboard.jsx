@@ -9,6 +9,8 @@ const Crpdashboard = () => {
   const totalSavings = 300000;
   const totalInterest = 50000;
   const totalCrpMembers = 50;
+  const approvedList = 10
+  const completedList = 10
   const pendingList = 10;
 
   // Chart options for various types
@@ -77,8 +79,9 @@ const Crpdashboard = () => {
           type: "pie",
           radius: "50%",
           data: [
-            { value: totalCrpMembers, name: "CRP Members" },
-            { value: pendingList, name: "Pending Approvals" },
+            { value: approvedList, name: "Approved List" },
+            { value: pendingList, name: "Pending List" },
+            { value: completedList, name: "Completed list" },
           ],
           emphasis: {
             itemStyle: {
