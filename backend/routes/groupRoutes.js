@@ -26,6 +26,6 @@ router.get("/", auth(["admin"]), groupController.getAllGroups);
 
 router.delete("/:groupId/members/:memberId", groupController.removeMember);
 
-router.delete("/:id", auth(["admin", "crp"]), groupController.deactivateGroup);
+router.delete("/:id", groupController.deactivateGroup);
 
 module.exports = router;
