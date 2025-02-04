@@ -645,6 +645,23 @@ const groupController = {
     }
   },
   // Deactivate group
+  // deactivateGroup: async (req, res) => {
+  //   try {
+  //     const group = await Group.findById(req.params.id);
+
+  //     if (!group) {
+  //       return res.status(404).json({ message: "Group not found" });
+  //     }
+
+  //     group.status = "inactive";
+  //     await group.save();
+
+  //     res.json({ message: "Group deactivated successfully" });
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   deactivateGroup: async (req, res) => {
     try {
       const group = await Group.findById(req.params.id);
@@ -653,10 +670,22 @@ const groupController = {
         return res.status(404).json({ message: "Group not found" });
       }
 
+      // Mark group as inactive
       group.status = "inactive";
       await group.save();
 
-      res.json({ message: "Group deactivated successfully" });
+      // Extract all member IDs from the group
+      const memberIds = group.members.map((m) => m.member);
+
+      // Update all members' status to "active"
+      await Member.updateMany(
+        { _id: { $in: memberIds } },
+        { $set: { status: "active" } }
+      );
+
+      res.json({
+        message: "Group deactivated successfully, members set to active",
+      });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

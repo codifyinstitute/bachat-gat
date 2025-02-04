@@ -612,6 +612,36 @@ const loanController = {
     }
   },
 
+
+  getLoanCounts: async (req, res) => {
+    try {
+      console.log("Fetching loan counts...");
+      const approvedCount = await Loan.countDocuments({ status: "approved" });
+      const completedCount = await Loan.countDocuments({ status: "completed" });
+      const pendingCount = await Loan.countDocuments({ status: "pending" });
+
+      console.log("Counts fetched:", { approvedCount, completedCount, pendingCount });
+
+      res.status(200).json({
+        success: true,
+        data: {
+          approved: approvedCount,
+          completed: completedCount,
+          pending: pendingCount,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching loan counts:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch loan counts",
+        error: error.message,
+      });
+    }
+  },
+
+
+
   // Generate loan repayment schedule PDF
   generateRepaymentSchedulePDF: async (req, res) => {
     try {
@@ -650,8 +680,7 @@ const loanController = {
 
       memberSchedule.installments.forEach((installment) => {
         doc.text(
-          `Installment #${
-            installment.installmentNumber
+          `Installment #${installment.installmentNumber
           } - Due: ${installment.dueDate.toLocaleDateString()}`
         );
         doc.text(

@@ -94,29 +94,7 @@ const AddMember = () => {
       });
       alert("Member added successfully");
       console.log(res.data);
-  
-      // Reset all fields, including the nested ones for the guarantor and extraDocuments
-      setFormData({
-        name: "",
-        address: "",
-        dateOfBirth: "",
-        aadharNo: "",
-        panNo: "",
-        accNo: "",
-        mobileNumber: "",
-        photo: null,
-        guarantor: {
-          name: "",
-          mobileNo: "",
-          relation: "",
-          guarantorPhoto: null,
-          guarantorCheque: null,
-          extraDocuments_0: null,
-          extraDocuments_1: null,
-          extraDocuments_2: null,
-          extraDocuments_3: null,
-        }
-      });
+      window.location.reload();
     } catch (error) {
       alert(error.response?.data?.message || "Error adding member");
     }
