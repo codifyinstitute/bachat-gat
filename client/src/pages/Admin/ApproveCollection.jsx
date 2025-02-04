@@ -17,22 +17,25 @@ const ApproveCollection = () => {
           setLoading(false);
           return;
         }
-
+  
         const response = await axios.get("http://localhost:5000/api/collection", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
-
+  
         console.log(response.data);
-
+  
         if (response.status === 200) {
-          setCollections(response.data);
+          // Filter collections with status 'pending'
+          const pendingCollections = response.data.filter(
+            (collection) => collection.status === "pending"
+          );
+          setCollections(pendingCollections);
         }
       } catch (error) {
         if (error.response) {
-          // Log the response details for debugging
           setError(`Error: ${error.response.status} - ${error.response.data.message || "Failed to fetch collections"}`);
           console.error("Response Error:", error.response);
         } else {
@@ -42,9 +45,11 @@ const ApproveCollection = () => {
         setLoading(false);
       }
     };
-
+  
     fetchCollections();
   }, []);
+  
+  
 
   // Handle collection approval
   const handleApprove = async (id) => {

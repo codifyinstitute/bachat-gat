@@ -265,11 +265,17 @@ const collectionController = {
       if (!collection) {
         return res.status(404).json({ message: "Collection not found" });
       }
-
-      if (collection.status !== "completed") {
-        return res.status(400).json({
-          message: "Only completed collections can be approved",
-        });
+      for (let i = 0; i < collection.payments.length; i++) {
+        const payment = collection.payments[i];
+        if (payment.status !== "completed") {
+          console.log(`Status of payment ${i + 1}:`, payment.status);
+          return res.status(400).json({
+            message: "Only completed collections can be approved",
+          });
+        }
+        else{
+          collection.status = "completed"
+        }
       }
 
       collection.approvedBy = req.user.id;
