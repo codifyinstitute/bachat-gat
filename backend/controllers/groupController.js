@@ -627,6 +627,7 @@ const groupController = {
 
       if (memberIndex === -1) {
         return res.status(404).json({ message: "Member not found in group" });
+        // await group.save();
       }
 
       // Remove member from the group

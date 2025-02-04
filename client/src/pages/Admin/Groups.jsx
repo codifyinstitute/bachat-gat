@@ -82,58 +82,50 @@ const AdminGroupsList = () => {
       setDeleteError(null);
       const crptoken = localStorage.getItem("admin_token");
   
-      // First check if the group has any active loans
-      console.log("grpid", groupId);
+      // Check for active loans
       const groupLoans = getLoanDetails(groupId);
-      console.log("grploan", groupLoans);
-  
-      // Fetch group data (including members) from the backend
-      const grpdata = await axios.get(`http://localhost:5000/api/groups/${groupId}`, {
-        headers: { 
-          Authorization: `Bearer ${crptoken}`,
-          "Content-Type": "application/json"
-        },
-      });
-  
-      console.log("Group Data:", grpdata.data.members[0]._id);
-  
-      // Check if the group has active loans
       if (groupLoans.length > 0) {
         throw new Error("Cannot delete group with active loans. Please close all loans first.");
       }
   
-      // Fetch the group members from the fetched group data
-      const group = grpdata.data; // Group data from the API response
+      // Fetch group data (including members)
+      const grpdata = await axios.get(`http://localhost:5000/api/groups/${groupId}`, {
+        headers: { 
+          Authorization: `Bearer ${crptoken}`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      const group = grpdata.data;
       if (!group || !group.members || group.members.length === 0) {
         throw new Error("Group not found or has no members.");
       }
   
-      // Iterate over each member and delete them
-      const deletePromises = group.members.map(async (member) => {
+      // Iterate over each member and remove them
+      const deleteMemberPromises = group.members.map(async (member) => {
         await axios.delete(`http://localhost:5000/api/groups/${groupId}/members/${member._id}`, {
           headers: { 
             Authorization: `Bearer ${crptoken}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
         });
       });
   
-      // Wait for all member deletion requests to complete
-      await Promise.all(deletePromises);
+      // Wait for all member deletions to complete
+      await Promise.all(deleteMemberPromises);
   
       // Now delete the group itself
-      // Uncomment to delete the group after deleting the members
-      // await axios.delete(`http://localhost:5000/api/groups/${groupId}`, {
-      //   headers: { 
-      //     Authorization: `Bearer ${crptoken}`,
-      //     "Content-Type": "application/json"
-      //   },
-      // });
+      await axios.delete(`http://localhost:5000/api/groups/${groupId}`, {
+        headers: { 
+          Authorization: `Bearer ${crptoken}`,
+          "Content-Type": "application/json",
+        },
+      });
   
       // Refresh the data after successful deletion
       await fetchGroupsAndLoans();
-      
-      // Show success message (optional)
+  
+      // Success message
       alert("Group and its members deleted successfully");
   
     } catch (error) {
@@ -142,6 +134,7 @@ const AdminGroupsList = () => {
       alert(error.response?.data?.message || error.message || "Error deleting group");
     }
   };
+  
   
   
 

@@ -89,7 +89,7 @@ const GroupsList = () => {
       }
 
       // Send delete request to backend
-      await axios.delete(`http://localhost:5000/api/groups/${groupId}`, {
+      await axios.delete(`http://localhost:5000/api/groups/${groupId}/members/${memberid}`, {
         headers: { 
           Authorization: `Bearer ${crptoken}`,
           "Content-Type": "application/json"
