@@ -83,7 +83,7 @@ const PaymentPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-md shadow-lg rounded-lg">
+    <div className="container mx-auto p-4 max-w-md shadow-lg rounded-lg mt-16">
       <h2 className="text-xl font-bold mb-4">Make a Payment</h2>
       {isLoading ? (
         <p>Loading collections...</p>

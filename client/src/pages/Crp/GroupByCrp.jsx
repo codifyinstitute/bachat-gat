@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Trash2 } from "lucide-react";
 
-const GroupsList = () => {
+const AdminGroupsList = () => {
   const [loansData, setLoansData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,13 +16,13 @@ const GroupsList = () => {
   const fetchGroupsAndLoans = async () => {
     try {
       const crptoken = localStorage.getItem("crp_token");
-
+  
       if (!crptoken) {
         setError("No authentication token found. Please log in.");
         setLoading(false);
         return;
       }
-
+  
       const [groupsRes, loansRes] = await Promise.all([
         axios.get("http://localhost:5000/api/groups/created-by-crp", {
           headers: {
@@ -37,8 +37,11 @@ const GroupsList = () => {
           },
         }),
       ]);
-
-      setGroups(groupsRes.data);
+  
+      // Filter the groups to only include those with status "active"
+      const activeGroups = groupsRes.data.filter(group => group.status === 'active');
+      
+      setGroups(activeGroups);  // Set only the active groups
       setLoansData(loansRes.data);
       setLoading(false);
     } catch (err) {
@@ -46,6 +49,7 @@ const GroupsList = () => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchGroupsAndLoans();
@@ -71,43 +75,79 @@ const GroupsList = () => {
     return groupNameMatch || memberMatch;
   });
 
+
+
+
   const handleDeleteGroup = async (groupId, e) => {
     e.stopPropagation(); // Prevent row expansion when clicking delete
-    
+  
     if (!window.confirm("Are you sure you want to delete this group?")) {
       return;
     }
-
+  
     try {
       setDeleteError(null);
       const crptoken = localStorage.getItem("crp_token");
-      
-      // First check if the group has any active loans
-      const groupLoans = getLoanDetails(groupId);
-      if (groupLoans.length > 0) {
-        throw new Error("Cannot delete group with active loans. Please close all loans first.");
-      }
-
-      // Send delete request to backend
-      await axios.delete(`http://localhost:5000/api/groups/${groupId}/members/${memberid}`, {
-        headers: { 
+  
+      // Fetch group details to get member IDs
+      const grpResponse = await axios.get(`http://localhost:5000/api/groups/${groupId}`, {
+        headers: {
           Authorization: `Bearer ${crptoken}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
       });
-
-      // Refresh the data after successful deletion
+  
+      const group = grpResponse.data;
+      const members = group.members; // Assuming 'members' is an array
+  
+      if (!group || !members || members.length === 0) {
+        throw new Error("Group not found or has no members.");
+      }
+  
+      // Loop through the members and attempt deletion
+      const deleteMemberPromises = members.map(async (member) => {
+        const memberId = member._id || member.member; // Ensure correct ID field
+  
+        // Log to verify member ID
+        console.log('Attempting to delete member with ID:', memberId);
+  
+        await axios.delete(`http://localhost:5000/api/groups/${groupId}/members/${memberId}`, {
+          headers: {
+            Authorization: `Bearer ${crptoken}`,
+            "Content-Type": "application/json",
+          },
+        });
+      });
+  
+      await Promise.all(deleteMemberPromises);
+  
+      // Finally, delete the group
+      await axios.delete(`http://localhost:5000/api/groups/${groupId}`, {
+        headers: {
+          Authorization: `Bearer ${crptoken}`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      // Refresh after successful deletion
       await fetchGroupsAndLoans();
-      
-      // Show success message (optional)
-      alert("Group deleted successfully");
-      
+  
+      alert("Group and its members deleted successfully");
+  
     } catch (error) {
       console.error("Error deleting group:", error);
       setDeleteError(error.response?.data?.message || error.message || "Error deleting group");
       alert(error.response?.data?.message || error.message || "Error deleting group");
     }
   };
+  
+  
+  
+  
+
+  
+  
+  
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
@@ -272,4 +312,4 @@ const GroupsList = () => {
   );
 };
 
-export default GroupsList;
+export default AdminGroupsList;

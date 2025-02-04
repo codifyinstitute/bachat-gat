@@ -625,10 +625,9 @@ const groupController = {
         (m) => m.member.toString() === memberId
       );
 
-      // if (memberIndex === -1) {
-      //   return res.status(404).json({ message: "Member not found in group" });
-      //   // await group.save();
-      // }
+      if (memberIndex === -1) {
+        return res.status(404).json({ message: "Member not found in group" });
+      }
 
       // Remove member from the group
       group.members.splice(memberIndex, 1);

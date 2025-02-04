@@ -255,7 +255,11 @@ const AddMember = () => {
               <option value="">Select Relation</option>
               <option value="Father">Father</option>
               <option value="Mother">Mother</option>
-              <option value="Sibling">Sibling</option>
+              <option value="Husband">Husband</option>
+              <option value="Son">Son</option>
+              <option value="Daughter">Daughter</option>
+              <option value="Brother">Brother</option>
+              <option value="Sister">Sister</option>
             </select>
           </div>
           <div className="mb-4 lg:w-[50%]">
