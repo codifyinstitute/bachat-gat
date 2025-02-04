@@ -12,8 +12,8 @@ const groupStatementSchema = new mongoose.Schema({
     required: true,
   },
   amount: {
-    type: Number,21
-    required: true,
+    type: Number,
+    // required: true,
   },
   transactionDate: {
     type: Date,
