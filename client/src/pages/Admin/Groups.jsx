@@ -16,13 +16,13 @@ const AdminGroupsList = () => {
   const fetchGroupsAndLoans = async () => {
     try {
       const crptoken = localStorage.getItem("admin_token");
-
+  
       if (!crptoken) {
         setError("No authentication token found. Please log in.");
         setLoading(false);
         return;
       }
-
+  
       const [groupsRes, loansRes] = await Promise.all([
         axios.get("http://localhost:5000/api/groups/", {
           headers: {
@@ -37,8 +37,11 @@ const AdminGroupsList = () => {
           },
         }),
       ]);
-
-      setGroups(groupsRes.data);
+  
+      // Filter the groups to only include those with status "active"
+      const activeGroups = groupsRes.data.filter(group => group.status === 'active');
+      
+      setGroups(activeGroups);  // Set only the active groups
       setLoansData(loansRes.data);
       setLoading(false);
     } catch (err) {
@@ -46,6 +49,7 @@ const AdminGroupsList = () => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchGroupsAndLoans();
@@ -71,6 +75,9 @@ const AdminGroupsList = () => {
     return groupNameMatch || memberMatch;
   });
 
+
+
+
   const handleDeleteGroup = async (groupId, e) => {
     e.stopPropagation(); // Prevent row expansion when clicking delete
   
@@ -82,50 +89,49 @@ const AdminGroupsList = () => {
       setDeleteError(null);
       const crptoken = localStorage.getItem("admin_token");
   
-      // Check for active loans
-      const groupLoans = getLoanDetails(groupId);
-      if (groupLoans.length > 0) {
-        throw new Error("Cannot delete group with active loans. Please close all loans first.");
-      }
-  
-      // Fetch group data (including members)
-      const grpdata = await axios.get(`http://localhost:5000/api/groups/${groupId}`, {
-        headers: { 
+      // Fetch group details to get member IDs
+      const grpResponse = await axios.get(`http://localhost:5000/api/groups/${groupId}`, {
+        headers: {
           Authorization: `Bearer ${crptoken}`,
           "Content-Type": "application/json",
         },
       });
   
-      const group = grpdata.data;
-      if (!group || !group.members || group.members.length === 0) {
+      const group = grpResponse.data;
+      const members = group.members; // Assuming 'members' is an array
+  
+      if (!group || !members || members.length === 0) {
         throw new Error("Group not found or has no members.");
       }
   
-      // Iterate over each member and remove them
-      const deleteMemberPromises = group.members.map(async (member) => {
-        await axios.delete(`http://localhost:5000/api/groups/${groupId}/members/${member._id}`, {
-          headers: { 
+      // Loop through the members and attempt deletion
+      const deleteMemberPromises = members.map(async (member) => {
+        const memberId = member._id || member.member; // Ensure correct ID field
+  
+        // Log to verify member ID
+        console.log('Attempting to delete member with ID:', memberId);
+  
+        await axios.delete(`http://localhost:5000/api/groups/${groupId}/members/${memberId}`, {
+          headers: {
             Authorization: `Bearer ${crptoken}`,
             "Content-Type": "application/json",
           },
         });
       });
   
-      // Wait for all member deletions to complete
       await Promise.all(deleteMemberPromises);
   
-      // Now delete the group itself
+      // Finally, delete the group
       await axios.delete(`http://localhost:5000/api/groups/${groupId}`, {
-        headers: { 
+        headers: {
           Authorization: `Bearer ${crptoken}`,
           "Content-Type": "application/json",
         },
       });
   
-      // Refresh the data after successful deletion
+      // Refresh after successful deletion
       await fetchGroupsAndLoans();
   
-      // Success message
       alert("Group and its members deleted successfully");
   
     } catch (error) {
@@ -134,6 +140,11 @@ const AdminGroupsList = () => {
       alert(error.response?.data?.message || error.message || "Error deleting group");
     }
   };
+  
+  
+  
+  
+
   
   
   
