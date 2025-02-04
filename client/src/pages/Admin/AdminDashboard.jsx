@@ -10,9 +10,9 @@ const AdminDashboard = () => {
   const totalSavings = 300000;
   const totalInterest = 50000;
   const totalCrpMembers=0
-  const [approvedList,setapprovedList] = useState(0);
-  const [pendingList,setpendingList] = useState(0);
-  const [completedList,setcompletedList]= useState(0)
+  const [approvedList,setapprovedList] = useState(20);
+  const [pendingList,setpendingList] = useState(50);
+  const [completedList,setcompletedList]= useState(10)
 
   // Assuming the admin_token is stored in localStorage
   const adminToken = localStorage.getItem("admin_token");
@@ -33,9 +33,9 @@ const AdminDashboard = () => {
 
         console.log(response.data)
 
-        setpendingList(response.data.pending) 
-        setcompletedList(response.data.completed) 
-        setapprovedList(response.data.approved) 
+        // setpendingList(response.data.pending) 
+        // setcompletedList(response.data.completed) 
+        // setapprovedList(response.data.approved) 
       }catch(error){
         console.log(error)
       }
