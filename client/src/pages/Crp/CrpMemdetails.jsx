@@ -11,7 +11,7 @@ const MemberDetails = () => {
   useEffect(() => {
     const fetchMember = async () => {
       try {
-        const token = localStorage.getItem("admin_token");
+        const token = localStorage.getItem("crp_token");
         const response = await fetch(`http://localhost:5000/api/member/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
