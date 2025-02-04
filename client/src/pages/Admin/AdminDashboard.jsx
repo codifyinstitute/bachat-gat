@@ -9,8 +9,8 @@ const AdminDashboard = () => {
   const totalLoan = 200000;
   const totalSavings = 300000;
   const totalInterest = 50000;
-  const [approvedList,setapprovedList] = useState(0);
   const totalCrpMembers=0
+  const [approvedList,setapprovedList] = useState(0);
   const [pendingList,setpendingList] = useState(0);
   const [completedList,setcompletedList]= useState(0)
 

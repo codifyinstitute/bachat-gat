@@ -68,15 +68,23 @@ const AllMembers = () => {
         });
   
         setMembers(updatedResponse.data.members || updatedResponse.data || []); // Ensure correct format
-      }else if(response.status===400){
-        console.log(response.status)
+      } else if (response.status === 400 && response.data.message) {
+        // Alert the message if response status is 400
+        alert(response.data.message);
       } else {
         console.log("Deletion of member failed");
       }
     } catch (error) {
       console.error("Error deleting member:", error);
+      // Check for the error response and alert the message
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message);
+      } else {
+        alert("An error occurred while deleting the member.");
+      }
     }
   };
+  
   
 
 
