@@ -1,11 +1,10 @@
-const Collection = require
-("../models/Collection");
+const Collection = require("../models/Collection");
 const Group = require("../models/Group");
 const Loan = require("../models/Loan");
 const Member = require("../models/Member");
-
+const MemberStatement = require("../models/MemberStatement");
+const GroupStatement = require("../models/GroupStatement");
 const collectionController = {
-  
   initializeCollection: async (req, res) => {
     try {
       const { groupId, collectionDate, savingsAmount } = req.body;
@@ -99,7 +98,105 @@ const collectionController = {
     }
   },
 
-  
+  // recordPayment: async (req, res) => {
+  //   try {
+  //     const { collectionId, memberId } = req.params;
+  //     const { paymentMethod, transactionId, remarks } = req.body;
+
+  //     const collection = await Collection.findById(collectionId).populate(
+  //       "groupId"
+  //     );
+  //     if (!collection) {
+  //       return res.status(404).json({ message: "Collection not found" });
+  //     }
+
+  //     const payment = collection.payments.find(
+  //       (p) => p.memberId.toString() === memberId
+  //     );
+
+  //     if (!payment) {
+  //       return res.status(404).json({ message: "Payment record not found" });
+  //     }
+
+  //     // Retrieve the group to check its savings balance
+  //     const group = await Group.findById(collection.groupId);
+  //     if (!group) {
+  //       return res.status(404).json({ message: "Group not found" });
+  //     }
+
+  //     // Check if the group has enough savings balance
+  //     // if (group.savingsBalance < payment.savingsAmount) {
+  //     //   return res
+  //     //     .status(400)
+  //     //     .json({ message: "Insufficient savings in the group" });
+  //     // }
+
+  //     // Deduct the savings amount from the group's balance
+  //     group.savingsBalance -= payment.savingsAmount;
+
+  //     // Update payment details
+  //     payment.paymentMethod = paymentMethod || payment.paymentMethod;
+  //     payment.transactionId = transactionId || payment.transactionId;
+  //     payment.remarks = remarks || payment.remarks;
+  //     payment.status = "completed";
+  //     payment.paymentDate = new Date();
+
+  //     // Record transaction in Member Statement
+  //     await MemberStatement.create({
+  //       memberId,
+  //       transactionType: "savings_withdrawal",
+  //       amount: payment.savingsAmount,
+  //       transactionDate: new Date(),
+  //       description: `Savings withdrawn from Group (${group.name})`,
+  //     });
+
+  //     // Record transaction in Group Statement
+  //     await GroupStatement.create({
+  //       groupId: group._id,
+  //       transactionType: "savings_withdrawal",
+  //       amount: -payment.savingsAmount,
+  //       transactionDate: new Date(),
+  //       description: `Savings given to Member (${memberId})`,
+  //     });
+
+  //     // Update loan repayment schedule
+  //     const loan = await Loan.findById(payment.loanId);
+  //     const memberSchedule = loan.repaymentSchedules.find(
+  //       (schedule) => schedule.memberId.toString() === memberId
+  //     );
+
+  //     const installment = memberSchedule.installments.find(
+  //       (inst) => inst.installmentNumber === payment.installmentNumber
+  //     );
+
+  //     installment.status = "paid";
+  //     installment.paidAmount = payment.emiAmount;
+  //     installment.paidDate = payment.paymentDate;
+  //     memberSchedule.paidAmount += payment.emiAmount;
+
+  //     // Update collection status
+  //     const allPaid = collection.payments.every(
+  //       (p) => p.status === "completed"
+  //     );
+  //     collection.status = allPaid ? "completed" : "partial";
+
+  //     await Promise.all([collection.save(), loan.save(), group.save()]);
+
+  //     await collection.populate([
+  //       { path: "groupId", select: "name" },
+  //       { path: "payments.memberId", select: "name mobileNumber" },
+  //     ]);
+
+  //     res.json({
+  //       message:
+  //         "Payment recorded successfully, savings withdrawn and reflected",
+  //       collection,
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   recordPayment: async (req, res) => {
     try {
       const { collectionId, memberId } = req.params;
@@ -126,13 +223,6 @@ const collectionController = {
         return res.status(404).json({ message: "Group not found" });
       }
 
-      // Check if the group has enough savings balance
-      if (group.savingsBalance < payment.savingsAmount) {
-        return res
-          .status(400)
-          .json({ message: "Insufficient savings in the group" });
-      }
-
       // Deduct the savings amount from the group's balance
       group.savingsBalance -= payment.savingsAmount;
 
@@ -140,7 +230,7 @@ const collectionController = {
       payment.paymentMethod = paymentMethod || payment.paymentMethod;
       payment.transactionId = transactionId || payment.transactionId;
       payment.remarks = remarks || payment.remarks;
-      payment.status = "completed";
+      payment.status = "paid"; // ✅ Changed from "completed" to "paid"
       payment.paymentDate = new Date();
 
       // Record transaction in Member Statement
@@ -167,20 +257,28 @@ const collectionController = {
         (schedule) => schedule.memberId.toString() === memberId
       );
 
+      if (!memberSchedule) {
+        return res
+          .status(404)
+          .json({ message: "Repayment schedule not found" });
+      }
+
       const installment = memberSchedule.installments.find(
         (inst) => inst.installmentNumber === payment.installmentNumber
       );
 
-      installment.status = "paid";
+      if (!installment) {
+        return res.status(404).json({ message: "Installment not found" });
+      }
+
+      installment.status = "paid"; // ✅ Changed from "completed" to "paid"
       installment.paidAmount = payment.emiAmount;
       installment.paidDate = payment.paymentDate;
       memberSchedule.paidAmount += payment.emiAmount;
 
-      // Update collection status
-      const allPaid = collection.payments.every(
-        (p) => p.status === "completed"
-      );
-      collection.status = allPaid ? "completed" : "partial";
+      // Update collection status based on payments
+      const allPaid = collection.payments.every((p) => p.status === "paid");
+      collection.status = allPaid ? "completed" : "partial"; // ✅ Properly reflect payment status
 
       await Promise.all([collection.save(), loan.save(), group.save()]);
 
@@ -272,9 +370,8 @@ const collectionController = {
           return res.status(400).json({
             message: "Only completed collections can be approved",
           });
-        }
-        else{
-          collection.status = "completed"
+        } else {
+          collection.status = "completed";
         }
       }
 

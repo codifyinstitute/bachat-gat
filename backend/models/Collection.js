@@ -32,7 +32,6 @@ const paymentSchema = new mongoose.Schema({
   pendingEmi: {
     type: Number,
   },
-  
 
   savingsAmount: {
     type: Number,
@@ -52,11 +51,17 @@ const paymentSchema = new mongoose.Schema({
     // required: true,
   },
   transactionId: String,
+  // status: {
+  //   type: String,
+  //   enum: ["pending", "completed", "failed"],
+  //   default: "pending",
+  // },
   status: {
     type: String,
-    enum: ["pending", "completed", "failed"],
+    enum: ["pending", "paid", "completed", "failed"], // Add "paid"
     default: "pending",
   },
+
   remarks: String,
 });
 
