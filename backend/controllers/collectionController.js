@@ -197,6 +197,106 @@ const collectionController = {
   //   }
   // },
 
+  // recordPayment: async (req, res) => {
+  //   try {
+  //     const { collectionId, memberId } = req.params;
+  //     const { paymentMethod, transactionId, remarks } = req.body;
+
+  //     const collection = await Collection.findById(collectionId).populate(
+  //       "groupId"
+  //     );
+  //     if (!collection) {
+  //       return res.status(404).json({ message: "Collection not found" });
+  //     }
+
+  //     const payment = collection.payments.find(
+  //       (p) => p.memberId.toString() === memberId
+  //     );
+
+  //     if (!payment) {
+  //       return res.status(404).json({ message: "Payment record not found" });
+  //     }
+
+  //     // Retrieve the group to check its savings balance
+  //     const group = await Group.findById(collection.groupId);
+  //     if (!group) {
+  //       return res.status(404).json({ message: "Group not found" });
+  //     }
+
+  //     // Deduct the savings amount from the group's balance
+  //     group.savingsBalance -= payment.savingsAmount;
+
+  //     // Update payment details
+  //     payment.paymentMethod = paymentMethod || payment.paymentMethod;
+  //     payment.transactionId = transactionId || payment.transactionId;
+  //     payment.remarks = remarks || payment.remarks;
+  //     payment.status = "paid"; // ✅ Changed from "completed" to "paid"
+  //     payment.paymentDate = new Date();
+
+  //     // Record transaction in Member Statement
+  //     await MemberStatement.create({
+  //       memberId,
+  //       transactionType: "savings_withdrawal",
+  //       amount: payment.savingsAmount,
+  //       transactionDate: new Date(),
+  //       description: `Savings withdrawn from Group (${group.name})`,
+  //     });
+
+  //     // Record transaction in Group Statement
+  //     await GroupStatement.create({
+  //       groupId: group._id,
+  //       transactionType: "savings_withdrawal",
+  //       amount: -payment.savingsAmount,
+  //       transactionDate: new Date(),
+  //       description: `Savings given to Member (${memberId})`,
+  //     });
+
+  //     // Update loan repayment schedule
+  //     const loan = await Loan.findById(payment.loanId);
+  //     const memberSchedule = loan.repaymentSchedules.find(
+  //       (schedule) => schedule.memberId.toString() === memberId
+  //     );
+
+  //     if (!memberSchedule) {
+  //       return res
+  //         .status(404)
+  //         .json({ message: "Repayment schedule not found" });
+  //     }
+
+  //     const installment = memberSchedule.installments.find(
+  //       (inst) => inst.installmentNumber === payment.installmentNumber
+  //     );
+
+  //     if (!installment) {
+  //       return res.status(404).json({ message: "Installment not found" });
+  //     }
+
+  //     installment.status = "paid"; // ✅ Changed from "completed" to "paid"
+  //     installment.paidAmount = payment.emiAmount;
+  //     installment.paidDate = payment.paymentDate;
+  //     memberSchedule.paidAmount += payment.emiAmount;
+
+  //     // Update collection status based on payments
+  //     const allPaid = collection.payments.every((p) => p.status === "paid");
+  //     collection.status = allPaid ? "completed" : "partial"; // ✅ Properly reflect payment status
+
+  //     await Promise.all([collection.save(), loan.save(), group.save()]);
+
+  //     await collection.populate([
+  //       { path: "groupId", select: "name" },
+  //       { path: "payments.memberId", select: "name mobileNumber" },
+  //     ]);
+
+  //     res.json({
+  //       message:
+  //         "Payment recorded successfully, savings withdrawn and reflected",
+  //       collection,
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   recordPayment: async (req, res) => {
     try {
       const { collectionId, memberId } = req.params;
@@ -205,6 +305,7 @@ const collectionController = {
       const collection = await Collection.findById(collectionId).populate(
         "groupId"
       );
+
       if (!collection) {
         return res.status(404).json({ message: "Collection not found" });
       }
@@ -217,23 +318,18 @@ const collectionController = {
         return res.status(404).json({ message: "Payment record not found" });
       }
 
-      // Retrieve the group to check its savings balance
       const group = await Group.findById(collection.groupId);
       if (!group) {
         return res.status(404).json({ message: "Group not found" });
       }
 
-      // Deduct the savings amount from the group's balance
       group.savingsBalance -= payment.savingsAmount;
-
-      // Update payment details
       payment.paymentMethod = paymentMethod || payment.paymentMethod;
       payment.transactionId = transactionId || payment.transactionId;
       payment.remarks = remarks || payment.remarks;
-      payment.status = "paid"; // ✅ Changed from "completed" to "paid"
+      payment.status = "paid";
       payment.paymentDate = new Date();
 
-      // Record transaction in Member Statement
       await MemberStatement.create({
         memberId,
         transactionType: "savings_withdrawal",
@@ -242,7 +338,6 @@ const collectionController = {
         description: `Savings withdrawn from Group (${group.name})`,
       });
 
-      // Record transaction in Group Statement
       await GroupStatement.create({
         groupId: group._id,
         transactionType: "savings_withdrawal",
@@ -251,12 +346,11 @@ const collectionController = {
         description: `Savings given to Member (${memberId})`,
       });
 
-      // Update loan repayment schedule
       const loan = await Loan.findById(payment.loanId);
       const memberSchedule = loan.repaymentSchedules.find(
         (schedule) => schedule.memberId.toString() === memberId
       );
-
+      
       if (!memberSchedule) {
         return res
           .status(404)
@@ -266,19 +360,32 @@ const collectionController = {
       const installment = memberSchedule.installments.find(
         (inst) => inst.installmentNumber === payment.installmentNumber
       );
-
       if (!installment) {
         return res.status(404).json({ message: "Installment not found" });
       }
 
-      installment.status = "paid"; // ✅ Changed from "completed" to "paid"
+      installment.status = "paid";
       installment.paidAmount = payment.emiAmount;
       installment.paidDate = payment.paymentDate;
       memberSchedule.paidAmount += payment.emiAmount;
 
-      // Update collection status based on payments
-      const allPaid = collection.payments.every((p) => p.status === "paid");
-      collection.status = allPaid ? "completed" : "partial"; // ✅ Properly reflect payment status
+      // Update EMI tracking fields
+      payment.paidEmi = payment.emiAmount;
+      payment.outstandingEmi =
+        memberSchedule.totalAmount - memberSchedule.paidAmount;
+      payment.pendingEmi = Math.max(0, payment.outstandingEmi);
+
+      // Check if all installments are paid, close the loan
+      const allPaid = memberSchedule.installments.every(
+        (inst) => inst.status === "paid"
+      );
+      if (allPaid) {
+        loan.status = "closed";
+      }
+
+      collection.status = collection.payments.every((p) => p.status === "paid")
+        ? "completed"
+        : "partial";
 
       await Promise.all([collection.save(), loan.save(), group.save()]);
 
@@ -289,7 +396,7 @@ const collectionController = {
 
       res.json({
         message:
-          "Payment recorded successfully, savings withdrawn and reflected",
+          "Payment recorded successfully, loan updated, savings withdrawn and reflected",
         collection,
       });
     } catch (error) {
