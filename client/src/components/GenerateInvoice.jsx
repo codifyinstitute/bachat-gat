@@ -37,7 +37,7 @@ const DepositSlip = ({
 
     return (
         <div
-            className="min-h-screen flex justify-center items-center bg-gray-100"
+            className="min-h-screen flex flex-col justify-center items-center bg-gray-100"
             style={{ backgroundColor: 'rgb(243, 244, 246)' }} // Light gray
         >
             {/* Deposit Slip */}
@@ -48,7 +48,7 @@ const DepositSlip = ({
                     backgroundColor: 'rgb(255, 255, 255)', // White
                     borderColor: 'rgb(209, 213, 219)', // Gray
                     width: '500px',
-                    height: '500px',
+                    height: '550px',
                 }}
             >
                 {/* Header */}
