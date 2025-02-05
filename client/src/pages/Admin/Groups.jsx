@@ -12,7 +12,30 @@ const AdminGroupsList = () => {
   const [expandedGroup, setExpandedGroup] = useState(null);
   const [groups, setGroups] = useState([]);
   const [deleteError, setDeleteError] = useState(null);
+  const [savingsData, setSavingsData] = useState([]);
   // const [expandedMember, setExpandedMember] = useState(null);
+
+
+  const fetchCollections = async () => {
+    try{
+      // const crptoken = localStorage.getItem("a_token");
+     const res = await axios.get("http://localhost:5000/api/collection",{
+      headers:{
+        // Authorization:`Bearer ${crptoken}`,
+        "Content-Type": "application/json",
+      }
+     })
+     const data = res.data.map((savings) => ({
+      groupId: savings.groupId._id,
+      savingAmount: savings.totalSavingsCollected,
+    }));
+    // console.log(savingsData)
+     
+    }catch(err){
+      console.log(err)
+    }
+  };
+  fetchCollections()
 
   const fetchGroupsAndLoans = async () => {
     try {
@@ -143,6 +166,13 @@ const AdminGroupsList = () => {
     } catch (error) {
       alert("Group members removed and group status set to inactive.");
     }
+  };
+
+  const getSavingAmount = (groupId) => {
+    const matchingSavings = savingsData.find(
+      (saving) => saving.groupId === groupId
+    );
+    return matchingSavings ? matchingSavings.savingAmount : "N/A";
   };
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
@@ -390,10 +420,8 @@ const AdminGroupsList = () => {
                                                           2
                                                         )}
                                                       </td>
-                                                      <td className="border border-gray-400 px-2 py-1">
-                                                        {inst.interest.toFixed(
-                                                          2
-                                                        )}
+                                                      <td className="border p-2 font-bold text-green-600">
+                                                        {getSavingAmount(group._id)}
                                                       </td>
                                                       <td className="border border-gray-400 px-2 py-1">
                                                         {inst.paidAmount.toFixed(
