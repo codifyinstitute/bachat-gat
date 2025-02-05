@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import DepositSlip from "../../components/GenerateInvoice";
+import { toWords } from "number-to-words";
 
 const PaymentPage = () => {
   const [collectionId, setCollectionId] = useState("");
@@ -9,8 +11,33 @@ const PaymentPage = () => {
   const [remarks, setRemarks] = useState("");
   const [message, setMessage] = useState("");
   const [collections, setCollections] = useState([]);
-  const [members, setMembers] = useState([]); // State to hold members of the selected group
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [showDepositSlip, setShowDepositSlip] = useState(false);
+  const [depositSlipData, setDepositSlipData] = useState({
+    date: "",
+    accountNumber: "",
+    name: "",
+    amount: "",
+    amountInWords: "",
+  });
+
+  // Convert number to Indian currency words
+  const convertNumberToWords = (number) => {
+    const [intPart, decimalPart] = number.toString().split('.');
+    
+    let words = toWords(parseInt(intPart));
+    words = words.charAt(0).toUpperCase() + words.slice(1);
+    
+    if (decimalPart) {
+      const paise = toWords(parseInt(decimalPart));
+      words += ' Rupees and ' + paise + ' Paise';
+    } else {
+      words += ' Rupees Only';
+    }
+
+    return words;
+  };
 
   // Fetch collections when the component mounts
   useEffect(() => {
@@ -18,7 +45,6 @@ const PaymentPage = () => {
       try {
         const response = await axios.get("http://localhost:5000/api/collection");
         setCollections(response.data);
-        console.log("ss",collections)
         setIsLoading(false);
       } catch (error) {
         setMessage("Failed to load collections");
@@ -28,58 +54,67 @@ const PaymentPage = () => {
     fetchCollections();
   }, []);
 
-  // Fetch members for the selected collection (group) when a group is selected
-  // useEffect(() => {
-  //   if (!collectionId) return;
-
-  //   const fetchMembers = async () => {
-  //     try {
-  //       const response = await axios.get(`http://localhost:5000/api/collection/${collectionId}`);
-  //       console.log(response.data, "kok")
-  //       setMembers(response.data.members.map((item) => item.member)); // Extract the member objects
-  //     } catch (error) {
-  //       setMessage("Failed to load members");
-  //     }
-  //   };
-
-  //   fetchMembers();
-  // }, [collectionId]);
-  // console.log("mem",members)
-
   const handlePayment = async (e) => {
     e.preventDefault();
-
+  
     try {
-      // Retrieve CRP token from localStorage
       const crpToken = localStorage.getItem("crp_token");
-
+  
       if (!crpToken) {
         setMessage("No CRP token found");
         return;
       }
-
-      // Check if collectionId exists
-      const collectionExists = collections.some((col) => col._id === collectionId);
-      if (!collectionExists) {
+  
+      const selectedCollection = collections.find((col) => col._id === collectionId);
+      if (!selectedCollection) {
         setMessage("Collection not found");
         return;
       }
-
-      // Make POST request to the API with the Bearer token
+  
+      const selectedPayment = selectedCollection.payments.find((payment) => payment.memberId?._id === memberId);
+      if (!selectedPayment) {
+        setMessage("Member not found in the selected collection");
+        return;
+      }
+  
       const response = await axios.post(
         `http://localhost:5000/api/collection/${collectionId}/payments/${memberId}`,
         { paymentMethod, transactionId, remarks },
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${crpToken}`, // Add Bearer token
+            Authorization: `Bearer ${crpToken}`,
           },
         }
       );
+
+      const memberdata = await axios.get(`http://localhost:5000/api/member/${selectedPayment.memberId._id}`,{
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${crpToken}`,
+        },
+      })
+
+      if(!memberdata) console.log("error while fetching member account no.")
+
+  
+      setDepositSlipData({
+        date: new Date().toLocaleDateString(),
+        accountNumber: memberdata.data.accNo || "N/A",
+        name: selectedPayment.memberId.name,
+        amount: selectedPayment.totalAmount.toFixed(2),
+        amountInWords: convertNumberToWords(selectedPayment.totalAmount)
+      });
+
+      setShowDepositSlip(true);
       setMessage(response.data.message);
     } catch (error) {
       setMessage(error.response?.data?.message || "Payment failed");
     }
+  };
+
+  const closeDepositSlip = () => {
+    setShowDepositSlip(false);
   };
 
   return (
@@ -103,22 +138,21 @@ const PaymentPage = () => {
             ))}
           </select>
 
-          {/* Dropdown to select Member based on selected Group */}
           <select
-  value={memberId}
-  onChange={(e) => setMemberId(e.target.value)}
-  className="w-full p-2 border rounded"
-  required
->
-  <option value="">Select Member</option>
-  {collections
-    .find((collection) => collection._id === collectionId)?.payments
-    .map((payment) => (
-      <option key={payment.memberId?._id} value={payment.memberId?._id}>
-        {payment.memberId?.name || "Unnamed Member"} {/* Display member name */}
-      </option>
-    ))}
-</select>
+            value={memberId}
+            onChange={(e) => setMemberId(e.target.value)}
+            className="w-full p-2 border rounded"
+            required
+          >
+            <option value="">Select Member</option>
+            {collections
+              .find((collection) => collection._id === collectionId)?.payments
+              .map((payment) => (
+                <option key={payment.memberId?._id} value={payment.memberId?._id}>
+                  {payment.memberId?.name || "Unnamed Member"}
+                </option>
+              ))}
+          </select>
 
           <select
             value={paymentMethod}
@@ -153,6 +187,20 @@ const PaymentPage = () => {
         </form>
       )}
       {message && <p className="mt-4 text-center text-red-600">{message}</p>}
+
+      {showDepositSlip && (
+        <div className="fixed inset-0 bg-gray-100 flex justify-center items-center z-50">
+          <div className="relative bg-white p-4 rounded-lg">
+            <button 
+              onClick={closeDepositSlip}
+              className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded"
+            >
+              Close
+            </button>
+            <DepositSlip data={depositSlipData} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
