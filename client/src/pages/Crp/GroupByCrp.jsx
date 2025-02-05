@@ -49,6 +49,7 @@ const CrpGroupsList = () => {
       setLoading(false);
     }
   };
+
   
 
   useEffect(() => {
@@ -74,7 +75,6 @@ const CrpGroupsList = () => {
     );
     return groupNameMatch || memberMatch;
   });
-
 
 
 
@@ -128,11 +128,19 @@ const CrpGroupsList = () => {
       alert("Group members removed and group status set to inactive.");
     }
   };
-  
+  function formatDate(isoDate) {
+    const date = new Date(isoDate);
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const year = String(date.getUTCFullYear()).slice(-2);
+    return `${day}/${month}/${year}`;
+}
   
   
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
+
+  
 
   return (
     <div className="container mx-auto p-4">
@@ -248,7 +256,7 @@ const CrpGroupsList = () => {
                                         <thead>
                                           <tr className="bg-gray-200">
                                             <th className="border border-gray-400 px-2 py-1">#</th>
-                                            <th className="border border-gray-400 px-2 py-1">Due Date</th>
+                                            <th className="border border-gray-400  py-1">Due Date</th>
                                             <th className="border border-gray-400 px-2 py-1">Amount (₹)</th>
                                             <th className="border border-gray-400 px-2 py-1">Principal (₹)</th>
                                             <th className="border border-gray-400 px-2 py-1">Interest (₹)</th>
@@ -260,7 +268,7 @@ const CrpGroupsList = () => {
                                           {schedule.installments.map((inst, index) => (
                                             <tr key={inst._id} className="text-center">
                                               <td className="border border-gray-400 px-2 py-1">{index + 1}</td>
-                                              <td className="border border-gray-400 px-2 py-1">{new Date(inst.dueDate).toLocaleDateString()}</td>
+                                              <td className="border border-gray-400 px-2 py-1">{formatDate(inst.dueDate)}</td>
                                               <td className="border border-gray-400 px-2 py-1">{inst.amount.toFixed(2)}</td>
                                               <td className="border border-gray-400 px-2 py-1">{inst.principal.toFixed(2)}</td>
                                               <td className="border border-gray-400 px-2 py-1">{inst.interest.toFixed(2)}</td>

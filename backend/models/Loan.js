@@ -50,7 +50,7 @@ const loanSchema = new mongoose.Schema(
     repaymentSchedules: [repaymentScheduleSchema],
     status: {
       type: String,
-      enum: ["pending", "approved", "active", "completed", "defaulted"],
+      enum: ["pending", "approved", "active","paid", "closed", "overdue", "defaulted"],
       default: "pending",
     },
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
