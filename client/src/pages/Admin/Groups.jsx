@@ -129,27 +129,27 @@ const AdminGroupsList = () => {
     return groupNameMatch || memberMatch;
   });
 
-  const getSavingAmount = (groupId) => {
-    if (!savingsData || savingsData.length === 0) {
-      console.log("savingsData is empty or undefined");
-      return 0;
-    }
+  // const getSavingAmount = (groupId) => {
+  //   if (!savingsData || savingsData.length === 0) {
+  //     console.log("savingsData is empty or undefined");
+  //     return 0;
+  //   }
   
-    console.log("Checking savingsData for groupId:", groupId);
+  //   console.log("Checking savingsData for groupId:", groupId);
   
-    const saving = savingsData.find((savings) => {
-      console.log("Comparing:", savings.groupId, "==", groupId);
-      return savings.groupId === groupId?._id;
-    });
+  //   const saving = savingsData.find((savings) => {
+  //     console.log("Comparing:", savings.groupId, "==", groupId);
+  //     return savings.groupId === groupId?._id;
+  //   });
   
-    if (!saving) {
-      console.log("No matching saving record found for groupId:", groupId);
-      return 0;
-    }
+  //   if (!saving) {
+  //     console.log("No matching saving record found for groupId:", groupId);
+  //     return 0;
+  //   }
   
-    console.log("Found saving amount:", saving.savingAmount);
-    return saving.savingAmount;
-  };
+  //   console.log("Found saving amount:", saving.savingAmount);
+  //   return saving.savingAmount;
+  // };
   
 
 
@@ -422,9 +422,9 @@ const AdminGroupsList = () => {
                                                   <th className="border border-gray-400 px-2 py-1">
                                                     Interest (₹)
                                                   </th>
-                                                  <th className="border border-gray-400 px-2 py-1">
+                                                  {/* <th className="border border-gray-400 px-2 py-1">
                                                     Savings (₹)
-                                                  </th>
+                                                  </th> */}
                                                   <th className="border border-gray-400 px-2 py-1">
                                                     Paid Amount (₹)
                                                   </th>
@@ -461,11 +461,11 @@ const AdminGroupsList = () => {
                                                           2
                                                         )}
                                                       </td>
-                                                      <td className="p-3">
+                                                      {/* <td className="p-3">
                                                         {getSavingAmount(
                                                           group._id
                                                         )}
-                                                      </td>
+                                                      </td> */}
                                                       <td className="border border-gray-400 px-2 py-1">
                                                         {inst.paidAmount.toFixed(
                                                           2
