@@ -4,7 +4,7 @@ const collectionController = require("../controllers/collectionController");
 const auth = require("../middleware/auth");
 
 // Collection routes
-router.post("/", collectionController.initializeCollection);
+router.post("/",auth(['crp']), collectionController.initializeCollection);
 
 router.post(
   "/:collectionId/payments/:memberId",
