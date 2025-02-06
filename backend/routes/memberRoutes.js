@@ -30,5 +30,6 @@ router.get("/:id", auth(["admin", "crp"]), memberController.getMember);
 router.get("/", auth(["admin", "crp"]), memberController.getAllMembers);
 
 router.delete("/:id", auth(["admin", "crp"]), memberController.deleteMember);
+router.put("/:id/toggle-npa", auth(["crp"]), memberController.toggleNPA);
 
 module.exports = router;

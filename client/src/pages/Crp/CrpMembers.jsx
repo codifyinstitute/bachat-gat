@@ -18,18 +18,24 @@ const AllMembers = () => {
     const fetchMembers = async () => {
       try {
         // Add Authorization header with Bearer token
-        const response = await axios.get("http://localhost:5000/api/crp/membycrp", {
-          headers: {
-            Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
-          },
-        });
+        const response = await axios.get(
+          "http://localhost:5000/api/crp/membycrp",
+          {
+            headers: {
+              Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
+            },
+          }
+        );
 
         console.log("API Response:", response.data); // Log the full response
 
         // Handle different response formats
         if (Array.isArray(response.data)) {
           setMembers(response.data); // Array of members
-        } else if (response.data.members && Array.isArray(response.data.members)) {
+        } else if (
+          response.data.members &&
+          Array.isArray(response.data.members)
+        ) {
           setMembers(response.data.members); // Nested 'members' array
         } else {
           setError("The response data is not in the expected format.");
@@ -55,11 +61,14 @@ const AllMembers = () => {
     if (!isConfirmed) return; // Do nothing if the user cancels
 
     try {
-      const response = await axios.delete(`http://localhost:5000/api/member/${_id}`, {
-        headers: {
-          Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
-        },
-      });
+      const response = await axios.delete(
+        `http://localhost:5000/api/member/${_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
+          },
+        }
+      );
 
       if (response.status === 200) {
         console.log("Member deleted successfully");
@@ -68,11 +77,14 @@ const AllMembers = () => {
         alert("Member deleted successfully!");
 
         // Fetch updated members list from API after deletion
-        const updatedResponse = await axios.get("http://localhost:5000/api/crp/membycrp", {
-          headers: {
-            Authorization: `Bearer ${adminToken}`,
-          },
-        });
+        const updatedResponse = await axios.get(
+          "http://localhost:5000/api/crp/membycrp",
+          {
+            headers: {
+              Authorization: `Bearer ${adminToken}`,
+            },
+          }
+        );
 
         setMembers(updatedResponse.data.members || updatedResponse.data || []); // Ensure correct format
       } else if (response.status === 400 && response.data.message) {
@@ -85,7 +97,11 @@ const AllMembers = () => {
     } catch (error) {
       console.error("Error deleting member:", error);
       // Check for the error response and alert the message
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         alert(error.response.data.message);
       } else {
         alert("An error occurred while deleting the member.");
@@ -93,20 +109,26 @@ const AllMembers = () => {
     }
   };
 
-  const toggleNPA = async (_id, currentNPA, event) => {
+  const toggleNPA = async (_id, event) => {
     event.stopPropagation();
     try {
-      const updatedMember = await axios.put(
+      const response = await axios.put(
         `http://localhost:5000/api/member/${_id}/toggle-npa`,
-        { isNPA: !currentNPA },
+        {},
         { headers: { Authorization: `Bearer ${adminToken}` } }
       );
+
+      console.log("Updated Member Response:", response.data); // 🔍 Debugging log
+
       setMembers(
         members.map((member) =>
-          member._id === _id ? { ...member, isNPA: updatedMember.data.isNPA } : member
+          member._id === _id
+            ? { ...member, isNPA: member.isNPA === "NO" ? "YES" : "NO" } // Update to use strings
+            : member
         )
       );
     } catch (error) {
+      console.error("Error updating NPA status:", error);
       alert("Failed to update NPA status.");
     }
   };
@@ -114,7 +136,9 @@ const AllMembers = () => {
   return (
     <div className="flex flex-col items-center mt-14 min-h-screen bg-gray-100 p-4">
       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-2xl font-semibold text-gray-700 mb-4">All Members</h1>
+        <h1 className="text-2xl font-semibold text-gray-700 mb-4">
+          All Members
+        </h1>
 
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white">
@@ -137,31 +161,36 @@ const AllMembers = () => {
                 >
                   <td className="py-3 px-4">{member.name}</td>
                   <td className="py-3 px-4">{member.mobileNumber}</td>
+                  <td className="py-3 px-4">{member.panNo}</td>
                   <td className="py-3 px-4">
-                    {member.panNo}
-                  </td>
-                  <td className="py-3 px-4"><button
+                    <button
                       className={`px-3 py-1 text-sm font-medium rounded ${
-                        member.isNPA ? "bg-red-500 text-white" : "bg-gray-300 text-gray-700"
+                        member.isNPA === "YES"
+                          ? "bg-green-300 text-black"
+                          : "bg-red-200 text-black"
                       }`}
-                      onClick={(event) => toggleNPA(member._id, member.isNPA, event)}
+                      onClick={(event) => toggleNPA(member._id, event)}
                     >
-                      {member.isNPA ? "Yes" : "No"}
-                    </button></td>
+                      {member.isNPA === "YES" ? "Yes" : "No"}
+                    </button>
+                  </td>
                   <td className="py-3 px-4">
                     <span
-                      className={`px-3 py-1 text-sm font-medium rounded-full ${member.status === "active"
+                      className={`px-3 py-1 text-sm font-medium rounded-full ${
+                        member.status === "active"
                           ? "bg-green-200 text-green-700"
                           : "bg-red-200 text-red-700"
-                        }`}
+                      }`}
                     >
                       {member.status}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-red-600" onClick={(event) => handleDelete(member._id, event)}>
+                  <td
+                    className="py-3 px-4 text-red-600"
+                    onClick={(event) => handleDelete(member._id, event)}
+                  >
                     <Trash2 />
                   </td>
-
                 </tr>
               ))}
             </tbody>
