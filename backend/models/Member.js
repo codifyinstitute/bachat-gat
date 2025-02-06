@@ -91,9 +91,10 @@ const memberSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    isNPA:{
+    isNPA: {
       type: String,
-      default:"No"
+      enum: ['YES', 'NO'],
+      default: 'NO'
     },
     guarantor: guarantorSchema,
     status: {

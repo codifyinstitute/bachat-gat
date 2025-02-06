@@ -41,7 +41,7 @@ const memberController = {
         panNo,
         accNo,
         mobileNumber,
-        isNPA,
+        isNPA:"No",
         guarantor: {
           ...guarantor,
           photo: guarantorPhoto,
@@ -155,6 +155,34 @@ const memberController = {
     }
   },
 
+  toggleNPA: async (req, res) => {
+    try {
+      const member = await Member.findById(req.params.id);
+      if (!member) return res.status(404).json({ message: "Member not found" });
+  
+      // Initialize isNPA if it's undefined
+      if (!member.isNPA) {
+        member.isNPA = "NO";
+      }
+  
+      // Ensure valid values
+      const currentValue = String(member.isNPA).toUpperCase();
+      member.isNPA = currentValue === "NO" ? "YES" : "NO";
+      
+      await member.save();
+  
+      res.json({ 
+        message: "NPA status updated", 
+        member,
+        isNPA: member.isNPA // Explicitly return the new value
+      });
+    } catch (error) {
+      console.error("Backend error:", error); // Add logging
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+
   // Delete member
   deleteMember: async (req, res) => {
     try {
@@ -178,5 +206,6 @@ const memberController = {
   },
 
 };
+
 
 module.exports = memberController;
