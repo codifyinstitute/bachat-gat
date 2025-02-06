@@ -1,6 +1,50 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Copy } from "lucide-react";
+import { Copy, X } from "lucide-react";
 import { useState, useEffect } from "react";
+
+const ImageModal = ({ imageUrl, onClose }) => {
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (imageUrl) {
+      const img = new Image();
+      img.src = imageUrl;
+      img.onload = () => {
+        setDimensions({
+          width: img.width,
+          height: img.height
+        });
+      };
+    }
+  }, [imageUrl]);
+
+  if (!imageUrl) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="relative bg-white p-4 rounded-lg max-w-[90vw] max-h-[90vh]">
+        <button
+          onClick={onClose}
+          className="absolute -top-4 -right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
+        >
+          <X className="w-4 h-4" />
+        </button>
+        <img
+          src={imageUrl}
+          alt="Full size"
+          style={{
+            maxWidth: '90vw',
+            maxHeight: '80vh',
+            width: dimensions.width,
+            height: dimensions.height,
+            objectFit: 'contain'
+          }}
+          className="rounded-lg"
+        />
+      </div>
+    </div>
+  );
+};
 
 const CrpMemberDetails = () => {
   const { id } = useParams();
@@ -17,6 +61,7 @@ const CrpMemberDetails = () => {
   const [fileextraDocuments_1, setFileExtraDocuments_1] = useState(null);
   const [fileextraDocuments_2, setFileExtraDocuments_2] = useState(null);
   const [fileextraDocuments_3, setFileExtraDocuments_3] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     const fetchMember = async () => {
@@ -212,6 +257,19 @@ const CrpMemberDetails = () => {
     }
   };
 
+  const handleImageClick = (imagePath) => {
+    setSelectedImage(getFullImageUrl(imagePath));
+  };
+
+  const ImageComponent = ({ src, alt, className }) => (
+    <img
+      src={src}
+      alt={alt}
+      className={`${className} cursor-pointer hover:opacity-80 transition-opacity`}
+      onClick={() => handleImageClick(src)}
+    />
+  );
+
   if (!member || !editedMember)
     return <p className="text-center mt-10">Loading member details...</p>;
 
@@ -297,16 +355,24 @@ const CrpMemberDetails = () => {
                 {
                   label: "Photo",
                   value: (
-                    <img
-                      src={getFullImageUrl(member.photo)}
-                      alt="Member"
-                      className="h-16 w-16 rounded-full border border-gray-300"
-                    />
+                    <>
+                      <ImageComponent
+                        src={getFullImageUrl(member.photo)}
+                        alt="Member"
+                        className="h-16 w-16 rounded-full border border-gray-300"
+                      />
+                      {selectedImage && (
+                        <ImageModal
+                          imageUrl={selectedImage}
+                          onClose={() => setSelectedImage(null)}
+                        />
+                      )}
+                    </>
                   ),
-                  // editable: true,
                   field: "photo",
                   isImage: true,
                 },
+                
               ].map((item) => (
                 <tr key={item.label}>
                   <td className="py-3 px-4 font-semibold text-gray-900">
@@ -379,14 +445,8 @@ const CrpMemberDetails = () => {
                   },
                   {
                     label: "Photo",
-                    value: photoFile ? (
-                      <img
-                        src={URL.createObjectURL(photoFile)}
-                        alt="Guarantor"
-                        className="h-16 w-16 rounded-full border border-gray-300"
-                      />
-                    ) : (
-                      <img
+                    value: (
+                      <ImageComponent
                         src={getFullImageUrl(member.guarantor.photo)}
                         alt="Guarantor"
                         className="h-16 w-16 rounded-full border border-gray-300"
@@ -399,7 +459,7 @@ const CrpMemberDetails = () => {
                   {
                     label: "Cheque Photo",
                     value: (
-                      <img
+                      <ImageComponent
                         src={getFullImageUrl(member.guarantor.chequePhoto)}
                         alt="Cheque"
                         className="h-16 w-16 rounded-md border border-gray-300"
@@ -412,7 +472,7 @@ const CrpMemberDetails = () => {
                   {
                     label: "Document 1",
                     value: (
-                      <img
+                      <ImageComponent
                         src={getFullImageUrl(member.guarantor.extraDocuments_0)}
                         alt="Document 1"
                         className="h-16 w-16 rounded-md border border-gray-300"
@@ -425,7 +485,7 @@ const CrpMemberDetails = () => {
                   {
                     label: "Document 2",
                     value: (
-                      <img
+                      <ImageComponent
                         src={getFullImageUrl(member.guarantor.extraDocuments_1)}
                         alt="Document 2"
                         className="h-16 w-16 rounded-md border border-gray-300"
@@ -438,7 +498,7 @@ const CrpMemberDetails = () => {
                   {
                     label: "Document 3",
                     value: (
-                      <img
+                      <ImageComponent
                         src={getFullImageUrl(member.guarantor.extraDocuments_2)}
                         alt="Document 3"
                         className="h-16 w-16 rounded-md border border-gray-300"
@@ -451,7 +511,7 @@ const CrpMemberDetails = () => {
                   {
                     label: "Document 4",
                     value: (
-                      <img
+                      <ImageComponent
                         src={getFullImageUrl(member.guarantor.extraDocuments_3)}
                         alt="Document 4"
                         className="h-16 w-16 rounded-md border border-gray-300"
