@@ -54,26 +54,45 @@ const collectionController = {
       }
 
       // Initialize empty payments for each member
-      const payments = group.members.map((member) => {
-        const memberSchedule = loan.repaymentSchedules.find(
-          (schedule) =>
-            schedule.memberId.toString() === member.member._id.toString()
-        );
+      const payments = group.members
+        .map((member) => {
+          const memberSchedule = loan.repaymentSchedules.find(
+            (schedule) => schedule.memberId.toString() === member.member._id.toString()
+          );
 
-        const currentInstallment = memberSchedule.installments.find(
-          (inst) => !inst.paidDate && inst.status === "pending"
-        );
+          if (!memberSchedule) {
+            console.log(`No repayment schedule found for member (${member.member._id})`);
+            return null;
+          }
 
-        return {
-          memberId: member.member._id,
-          loanId: loan._id,
-          installmentNumber: currentInstallment.installmentNumber,
-          emiAmount: currentInstallment.amount,
-          savingsAmount: savingsAmountValue, // Use the provided or default savings amount
-          totalAmount: currentInstallment.amount + savingsAmountValue,
-          status: "pending",
-        };
-      });
+          // Find both paid and pending installments
+          const currentInstallment = memberSchedule.installments.find(
+            (inst) => inst.status === "pending"
+          ) || memberSchedule.installments.find(
+            (inst) => inst.status === "paid"
+          );
+          
+
+          // If no installment is found, exclude this member
+          if (!currentInstallment) {
+            console.log(`No installments found for member (${member.member._id}), skipping.`);
+            return null;
+          }
+
+          return {
+            memberId: member.member._id,
+            loanId: loan._id,
+            installmentNumber: currentInstallment.installmentNumber, // Ensure always present
+            emiAmount: currentInstallment.amount,
+            savingsAmount: savingsAmountValue,
+            totalAmount: currentInstallment.amount + savingsAmountValue,
+            status: currentInstallment.status, // Use "paid" if already paid, "pending" otherwise
+          };
+        })
+        .filter((payment) => payment !== null); // Remove invalid entries
+
+
+
 
       const collection = new Collection({
         groupId,
@@ -326,39 +345,43 @@ const collectionController = {
     try {
       const { collectionId, memberId } = req.params;
       const { paymentMethod, transactionId, remarks } = req.body;
-
+  
       const collection = await Collection.findById(collectionId).populate("groupId");
       if (!collection) {
-        return res.status(404).json({ message: "Collection not found" });
+        return res.status(404).json({ message: "Collection not found. Please check the collection ID." });
       }
-
+  
       const payment = collection.payments.find(p => p.memberId.toString() === memberId);
       if (!payment) {
-        return res.status(404).json({ message: "Payment record not found" });
+        return res.status(404).json({ message: "Payment record not found. Please check the member ID." });
       }
-
+  
+      // ✅ Check if the payment is already made
+      if (payment.status === "paid") {
+        return res.status(400).json({ message: "Payment already completed for this installment." });
+      }
+  
       const group = await Group.findById(collection.groupId);
       if (!group) {
-        return res.status(404).json({ message: "Group not found" });
+        return res.status(404).json({ message: "Group not found. Please check the group ID." });
       }
-
-      // Update payment details
+  
+      // Proceed with payment processing
       group.savingsBalance -= payment.savingsAmount;
       payment.paymentMethod = paymentMethod || payment.paymentMethod;
       payment.transactionId = transactionId || payment.transactionId;
       payment.remarks = remarks || payment.remarks;
       payment.status = "paid";
       payment.paymentDate = new Date();
-
+  
       await MemberStatement.create({
         memberId,
         transactionType: "savings_withdrawal",
         amount: payment.savingsAmount,
         transactionDate: new Date(),
-        description: `Savings withdrawn from Group(${group.name
-          })`,
+        description: `Savings withdrawn from Group(${group.name})`,
       });
-
+  
       await GroupStatement.create({
         groupId: group._id,
         transactionType: "savings_withdrawal",
@@ -366,53 +389,53 @@ const collectionController = {
         transactionDate: new Date(),
         description: `Savings given to Member(${memberId})`,
       });
-
+  
       const loan = await Loan.findById(payment.loanId);
       const memberSchedule = loan.repaymentSchedules.find(schedule => schedule.memberId.toString() === memberId);
       if (!memberSchedule) {
-        return res.status(404).json({ message: "Repayment schedule not found" });
+        return res.status(404).json({ message: "Repayment schedule not found for this member." });
       }
-
+  
       const installment = memberSchedule.installments.find(inst => inst.installmentNumber === payment.installmentNumber);
       if (!installment) {
-        return res.status(404).json({ message: "Installment not found" });
+        return res.status(404).json({ message: "Installment not found. Please verify the installment number." });
       }
-
+  
       installment.status = "paid";
       installment.paidAmount = payment.emiAmount;
       installment.paidDate = payment.paymentDate;
       memberSchedule.paidAmount += payment.emiAmount;
-
-      // Update EMI tracking fields
+  
       payment.paidEmi = payment.emiAmount;
       payment.outstandingEmi = memberSchedule.totalAmount - memberSchedule.paidAmount;
       payment.pendingEmi = Math.max(0, payment.outstandingEmi);
-
-      // Check if all installments are paid, close only this member's loan
+  
+      // Check if all installments are paid
       const allPaid = memberSchedule.installments.every(inst => inst.status === "paid");
       if (allPaid) {
         memberSchedule.status = "closed";
       }
-
-      // Update collection status correctly
+  
       collection.status = collection.payments.every(p => p.status === "paid") ? "completed" : "partial";
-
+  
       await Promise.all([collection.save(), loan.save(), group.save()]);
-
+  
       await collection.populate([
         { path: "groupId", select: "name" },
         { path: "payments.memberId", select: "name mobileNumber" },
       ]);
-
+  
       res.json({
-        message: "Payment recorded successfully, loan updated, savings withdrawn and reflected",
+        message: "Payment recorded successfully. Loan updated and savings withdrawn.",
         collection,
       });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error("Payment Error:", error); // Logs the exact error in the backend
+      res.status(500).json({ message: "An unexpected error occurred. Please try again later." });
     }
   },
-
+  
+  
   // Foreclose Member Loan
   // forecloseLoan: async (req, res) => {
   //   try {

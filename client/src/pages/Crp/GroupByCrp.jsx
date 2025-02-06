@@ -16,13 +16,13 @@ const CrpGroupsList = () => {
   const fetchGroupsAndLoans = async () => {
     try {
       const crptoken = localStorage.getItem("crp_token");
-  
+
       if (!crptoken) {
         setError("No authentication token found. Please log in.");
         setLoading(false);
         return;
       }
-  
+
       const [groupsRes, loansRes] = await Promise.all([
         axios.get("http://localhost:5000/api/groups/created-by-crp", {
           headers: {
@@ -37,10 +37,11 @@ const CrpGroupsList = () => {
           },
         }),
       ]);
-  
+
+
       // Filter the groups to only include those with status "active"
       const activeGroups = groupsRes.data.filter(group => group.status === 'active');
-      
+
       setGroups(activeGroups);  // Set only the active groups
       setLoansData(loansRes.data);
       setLoading(false);
@@ -50,7 +51,7 @@ const CrpGroupsList = () => {
     }
   };
 
-  
+
 
   useEffect(() => {
     fetchGroupsAndLoans();
@@ -80,15 +81,15 @@ const CrpGroupsList = () => {
 
   const handleDeleteGroup = async (groupId, e) => {
     e.stopPropagation(); // Prevent row expansion when clicking delete
-  
+
     if (!window.confirm("Are you sure you want to delete all members and set the group status to inactive?")) {
       return;
     }
-  
+
     try {
       setDeleteError(null);
       const crptoken = localStorage.getItem("admin_token");
-  
+
       // Fetch group data (including members)
       const groupData = await axios.get(`http://localhost:5000/api/groups/${groupId}`, {
         headers: {
@@ -96,22 +97,22 @@ const CrpGroupsList = () => {
           "Content-Type": "application/json",
         },
       });
-  
+
       const group = groupData.data;
       const memberIds = group.members.map(m => m._id || m.member); // Ensure correct ID field
-  
+
       if (memberIds.length === 0) {
         throw new Error("No members to delete in this group.");
       }
-  
+
       console.log('Member IDs to delete:', memberIds); // Log the member IDs to check
-  
-        axios.delete(`http://localhost:5000/api/groups/${groupId}/`, {
-          headers: {
-            // Authorization: `Bearer ${crptoken}`,
-            "Content-Type": "application/json",
-          },
-        })
+
+      axios.delete(`http://localhost:5000/api/groups/${groupId}/`, {
+        headers: {
+          // Authorization: `Bearer ${crptoken}`,
+          "Content-Type": "application/json",
+        },
+      })
       await axios.put(`http://localhost:5000/api/groups/${groupId}`, {
         status: "inactive",
       }, {
@@ -120,10 +121,10 @@ const CrpGroupsList = () => {
           "Content-Type": "application/json",
         },
       });
-  
+
       // Optionally, refresh the group and loans data
       await fetchGroupsAndLoans();
-  
+
     } catch (error) {
       alert("Group members removed and group status set to inactive.");
     }
@@ -134,13 +135,14 @@ const CrpGroupsList = () => {
     const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based
     const year = String(date.getUTCFullYear()).slice(-2);
     return `${day}/${month}/${year}`;
-}
-  
-  
+  }
+
+
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
-  
+  console.log(loansData)
+  console.log(groups)
 
   return (
     <div className="container mx-auto p-4">

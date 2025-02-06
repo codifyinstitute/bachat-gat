@@ -27,6 +27,7 @@ import ApproveCollection from "./pages/Admin/ApproveCollection";
 import Crpdashboard from "./pages/Crp/Crpdashboard";
 import AddBank from "./pages/Admin/AddBank";
 import AllCRP from "./pages/Admin/AllCRP";
+import Forclose from "./pages/Crp/Forclose"
 
 AOS.init();
 
@@ -62,6 +63,7 @@ function App() {
         <Route path="paymentPage" element={<PaymentPage />} />
         <Route path="GroupByCrp" element={<GroupByCrp />} />
         <Route path="CrpHome" element={<Crpdashboard />} />
+        <Route path="Crpforclose" element={<Forclose />} />
       </Route>
     </Routes>
   );

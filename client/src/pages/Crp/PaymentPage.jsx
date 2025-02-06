@@ -98,8 +98,6 @@ const PaymentPage = () => {
       if(!memberdata) console.log("error while fetching member account no.")
 
 
-        console.log
-
   
       setDepositSlipData({
         date: new Date().toLocaleDateString(),
@@ -110,7 +108,7 @@ const PaymentPage = () => {
       });
 
       setShowDepositSlip(true);
-      setMessage(response.data.message);
+      alert(response.data.message);
     } catch (error) {
       setMessage(error.response?.data?.message || "Payment failed");
     }
@@ -189,7 +187,6 @@ const PaymentPage = () => {
           </button>
         </form>
       )}
-      {message && <p className="mt-4 text-center text-red-600">{message}</p>}
 
       {showDepositSlip && (
         <div className="fixed inset-0 bg-gray-100 flex justify-center items-center z-50">
