@@ -21,7 +21,6 @@ const guarantorSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-
   // extraDocuments: [String],
   extraDocuments_0: {
     type:String,
@@ -91,6 +90,10 @@ const memberSchema = new mongoose.Schema(
     mobileNumber: {
       type: String,
       required: true,
+    },
+    isNPA:{
+      type: String,
+      default:"No"
     },
     guarantor: guarantorSchema,
     status: {

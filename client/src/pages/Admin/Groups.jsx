@@ -15,27 +15,47 @@ const AdminGroupsList = () => {
   const [savingsData, setSavingsData] = useState([]);
   // const [expandedMember, setExpandedMember] = useState(null);
 
-
   const fetchCollections = async () => {
-    try{
-      // const crptoken = localStorage.getItem("a_token");
-     const res = await axios.get("http://localhost:5000/api/collection",{
-      headers:{
-        // Authorization:`Bearer ${crptoken}`,
-        "Content-Type": "application/json",
-      }
-     })
-     const data = res.data.map((savings) => ({
-      groupId: savings.groupId._id,
-      savingAmount: savings.totalSavingsCollected,
-    }));
-    // console.log(savingsData)
-     
-    }catch(err){
-      console.log(err)
+    try {
+      const res = await axios.get("http://localhost:5000/api/collection", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      // Mapping the data and accumulating savingsAmount from the payments array
+      const data = res.data.map((collection) => {
+        // Extracting groupId and calculating total savingsAmount from payments
+        const groupId = collection.groupId?._id; // Assuming groupId is stored in groupId.groupId
+  
+        const totalSavingsAmount = collection.payments.reduce((acc, payment) => {
+          return acc + (payment.savingsAmount || 0); // Accumulate savingsAmount from each payment
+        }, 0);
+  
+        return {
+          groupId,
+          savingAmount: totalSavingsAmount, // Sum of all savingsAmount in payments
+        };
+      });
+  
+      console.log("Fetched data with savingsAmount:", data);
+  
+      setSavingsData(data); // Save the fetched data
+    } catch (err) {
+      console.error("Error fetching collections:", err);
     }
   };
-  fetchCollections()
+
+  // Fetch collections when the component mounts
+  useEffect(() => {
+    console.log("coll", savingsData);
+    fetchCollections();
+  }, []);
+
+  // Log savingsData whenever it updates
+  useEffect(() => {
+    console.log("savingsData", savingsData);
+  }, [savingsData]);
 
   const fetchGroupsAndLoans = async () => {
     try {
@@ -68,17 +88,18 @@ const AdminGroupsList = () => {
       );
       // console.log(activeGroups)
       // const admintoken=localStorage.getItem('crp_token')
-      // const memberId = 
-      
+      // const memberId =
 
       setGroups(activeGroups); // Set only the active groups
       setLoansData(loansRes.data);
+      
       setLoading(false);
     } catch (err) {
       setError("Error fetching data");
       setLoading(false);
     }
   };
+  // fetchCollections()
 
   useEffect(() => {
     fetchGroupsAndLoans();
@@ -94,7 +115,8 @@ const AdminGroupsList = () => {
   };
 
   const getLoanDetails = (groupId) => {
-    return loansData.filter((loan) => loan.groupId._id === groupId);
+    // console.log("ll",loansData)
+    return loansData.filter((loan) => loan.groupId?._id === groupId);
   };
 
   const filteredGroups = groups.filter((group) => {
@@ -106,6 +128,31 @@ const AdminGroupsList = () => {
     );
     return groupNameMatch || memberMatch;
   });
+
+  const getSavingAmount = (groupId) => {
+    if (!savingsData || savingsData.length === 0) {
+      console.log("savingsData is empty or undefined");
+      return 0;
+    }
+  
+    console.log("Checking savingsData for groupId:", groupId);
+  
+    const saving = savingsData.find((savings) => {
+      console.log("Comparing:", savings.groupId, "==", groupId);
+      return savings.groupId === groupId?._id;
+    });
+  
+    if (!saving) {
+      console.log("No matching saving record found for groupId:", groupId);
+      return 0;
+    }
+  
+    console.log("Found saving amount:", saving.savingAmount);
+    return saving.savingAmount;
+  };
+  
+
+
 
   const handleDeleteGroup = async (groupId, e) => {
     e.stopPropagation(); // Prevent row expansion when clicking delete
@@ -166,13 +213,6 @@ const AdminGroupsList = () => {
     } catch (error) {
       alert("Group members removed and group status set to inactive.");
     }
-  };
-
-  const getSavingAmount = (groupId) => {
-    const matchingSavings = savingsData.find(
-      (saving) => saving.groupId === groupId
-    );
-    return matchingSavings ? matchingSavings.savingAmount : "N/A";
   };
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
@@ -238,6 +278,7 @@ const AdminGroupsList = () => {
             <tbody>
               {filteredGroups.map((group, index) => {
                 const groupLoans = getLoanDetails(group._id);
+                // const savingcollection = getSavingAmount(group._id)
                 return (
                   <React.Fragment key={group._id}>
                     <tr
@@ -420,8 +461,10 @@ const AdminGroupsList = () => {
                                                           2
                                                         )}
                                                       </td>
-                                                      <td className="border p-2 font-bold text-green-600">
-                                                        {getSavingAmount(group._id)}
+                                                      <td className="p-3">
+                                                        {getSavingAmount(
+                                                          group._id
+                                                        )}
                                                       </td>
                                                       <td className="border border-gray-400 px-2 py-1">
                                                         {inst.paidAmount.toFixed(

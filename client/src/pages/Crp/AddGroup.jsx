@@ -107,7 +107,7 @@
     
 
     return (
-      <div className="p-4 max-w-md mx-auto bg-white shadow-md rounded h-[90vh] overflow-y-auto mt-16">
+      <div className="p-4 max-w-md mx-auto bg-white shadow-md rounded h-[fit-content] overflow-y-auto mt-16">
         <h1 className="text-xl font-bold mb-4">Create Group</h1>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
