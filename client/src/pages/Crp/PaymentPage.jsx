@@ -97,6 +97,9 @@ const PaymentPage = () => {
 
       if(!memberdata) console.log("error while fetching member account no.")
 
+
+        console.log
+
   
       setDepositSlipData({
         date: new Date().toLocaleDateString(),

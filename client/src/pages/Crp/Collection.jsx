@@ -44,6 +44,8 @@ const CollectionForm = () => {
       savingsAmount: Number(savingsAmount), // ✅ Include savingsAmount in the payload
     };
 
+    console.log(payload)
+
     try {
       const response = await fetch("http://localhost:5000/api/collection", {
         method: "POST",

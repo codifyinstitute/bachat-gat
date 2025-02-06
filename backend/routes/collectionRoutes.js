@@ -4,7 +4,7 @@ const collectionController = require("../controllers/collectionController");
 const auth = require("../middleware/auth");
 
 // Collection routes
-router.post("/", auth(["crp"]), collectionController.initializeCollection);
+router.post("/", collectionController.initializeCollection);
 
 router.post(
   "/:collectionId/payments/:memberId",
@@ -33,5 +33,7 @@ router.post(
   auth(["admin"]),
   collectionController.approveCollection
 );
+
+router.post('/forclose/:loanId/:memberId',collectionController.forecloseLoan)
 
 module.exports = router;
