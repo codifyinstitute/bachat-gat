@@ -1,12 +1,57 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Copy } from "lucide-react";
+import { Copy, X } from "lucide-react";
 import { useState, useEffect } from "react";
+
+const ImageModal = ({ imageUrl, onClose }) => {
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (imageUrl) {
+      const img = new Image();
+      img.src = imageUrl;
+      img.onload = () => {
+        setDimensions({
+          width: img.width,
+          height: img.height
+        });
+      };
+    }
+  }, [imageUrl]);
+
+  if (!imageUrl) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="relative bg-white p-4 rounded-lg max-w-[90vw] max-h-[90vh]">
+        <button
+          onClick={onClose}
+          className="absolute -top-4 -right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
+        >
+          <X className="w-4 h-4" />
+        </button>
+        <img
+          src={imageUrl}
+          alt="Full size"
+          style={{
+            maxWidth: '90vw',
+            maxHeight: '80vh',
+            width: dimensions.width,
+            height: dimensions.height,
+            objectFit: 'contain'
+          }}
+          className="rounded-lg"
+        />
+      </div>
+    </div>
+  );
+};
 
 const MemberDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [member, setMember] = useState(null);
   const [copiedField, setCopiedField] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     const fetchMember = async () => {
@@ -36,25 +81,31 @@ const MemberDetails = () => {
     setTimeout(() => setCopiedField(null), 1000);
   };
 
+  const handleImageClick = (imagePath) => {
+    setSelectedImage(getFullImageUrl(imagePath));
+  };
+
+  const getFullImageUrl = (imagePath) => {
+    if (!imagePath) return "";
+    const relativePath = imagePath.replace(/\\/g, "/").replace(/^.*?uploads\//, "uploads/");
+    return `http://localhost:5000/${relativePath}`;
+  };
+
   if (!member) return <p className="text-center mt-10">Loading member details...</p>;
 
-  // Function to generate full image URLs
-  const getFullImageUrl = (imagePath) => {
-    if (!imagePath) return ""; // Handle cases where the path is missing
-    const relativePath = imagePath.replace(/\\/g, "/").replace(/^.*?uploads\//, "uploads/");
-    return `http://localhost:5000/${relativePath}`; 
-  };
-  
+  const ImageComponent = ({ src, alt, className }) => (
+    <img
+      src={src}
+      alt={alt}
+      className={`${className} cursor-pointer hover:opacity-80 transition-opacity`}
+      onClick={() => handleImageClick(src)}
+    />
+  );
 
   return (
     <div className="w-full p-0 bg-gradient-to-r from-blue-50 to-purple-100 min-h-screen">
       <div className="w-full bg-white shadow-lg rounded-lg px-4 py-5 mx-auto">
-        <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold text-gray-800 mb-4">Member Details</h1>
-          <button className="py-2 px-4 bg-blue-600 text-white rounded-full hover:bg-blue-700">
-            Add to group
-          </button>
-        </div>
+        {/* ... existing header code ... */}
 
         {/* Personal Information */}
         <div className="bg-gradient-to-r from-indigo-100 to-blue-50 p-6 rounded-xl shadow-lg border-2 border-indigo-300">
@@ -70,21 +121,26 @@ const MemberDetails = () => {
                 { label: "PAN", value: member.panNo },
                 { label: "Mobile", value: member.mobileNumber },
                 { label: "Status", value: member.status },
-                { label: "Photo", value: (
-                  <img
-                    src={getFullImageUrl(member.photo)}
-                    alt="Guarantor"
-                    className="h-16 w-16 rounded-full border border-gray-300"
-                  />
-                ), },
+                {
+                  label: "Photo",
+                  value: (
+                    <ImageComponent
+                      src={getFullImageUrl(member.photo)}
+                      alt="Member"
+                      className="h-16 w-16 rounded-full border border-gray-300"
+                    />
+                  ),
+                },
               ].map((item) => (
                 <tr key={item.label}>
                   <td className="py-3 px-4 font-semibold text-gray-900">{item.label}</td>
                   <td className="py-3 px-4 flex justify-between items-center">
                     {item.value}
-                    <button onClick={() => handleCopy(item.value, item.label)}>
-                      <Copy className="w-5 h-5 text-gray-600 hover:text-gray-800 ml-2" />
-                    </button>
+                    {typeof item.value === 'string' && (
+                      <button onClick={() => handleCopy(item.value, item.label)}>
+                        <Copy className="w-5 h-5 text-gray-600 hover:text-gray-800 ml-2" />
+                      </button>
+                    )}
                     {copiedField === item.label && <span className="text-green-600 ml-2 text-sm">Copied!</span>}
                   </td>
                 </tr>
@@ -106,7 +162,7 @@ const MemberDetails = () => {
                   {
                     label: "Photo",
                     value: (
-                      <img
+                      <ImageComponent
                         src={getFullImageUrl(member.guarantor.photo)}
                         alt="Guarantor"
                         className="h-16 w-16 rounded-full border border-gray-300"
@@ -116,7 +172,7 @@ const MemberDetails = () => {
                   {
                     label: "Cheque Photo",
                     value: (
-                      <img
+                      <ImageComponent
                         src={getFullImageUrl(member.guarantor.chequePhoto)}
                         alt="Cheque"
                         className="h-16 w-16 rounded-md border border-gray-300"
@@ -126,9 +182,9 @@ const MemberDetails = () => {
                   {
                     label: "Document 1",
                     value: (
-                      <img
+                      <ImageComponent
                         src={getFullImageUrl(member.guarantor.extraDocuments_0)}
-                        alt="Cheque"
+                        alt="Document 1"
                         className="h-16 w-16 rounded-md border border-gray-300"
                       />
                     ),
@@ -136,9 +192,9 @@ const MemberDetails = () => {
                   {
                     label: "Document 2",
                     value: (
-                      <img
+                      <ImageComponent
                         src={getFullImageUrl(member.guarantor.extraDocuments_1)}
-                        alt="Cheque"
+                        alt="Document 2"
                         className="h-16 w-16 rounded-md border border-gray-300"
                       />
                     ),
@@ -146,9 +202,9 @@ const MemberDetails = () => {
                   {
                     label: "Document 3",
                     value: (
-                      <img
+                      <ImageComponent
                         src={getFullImageUrl(member.guarantor.extraDocuments_2)}
-                        alt="Cheque"
+                        alt="Document 3"
                         className="h-16 w-16 rounded-md border border-gray-300"
                       />
                     ),
@@ -156,9 +212,9 @@ const MemberDetails = () => {
                   {
                     label: "Document 4",
                     value: (
-                      <img
+                      <ImageComponent
                         src={getFullImageUrl(member.guarantor.extraDocuments_3)}
-                        alt="Cheque"
+                        alt="Document 4"
                         className="h-16 w-16 rounded-md border border-gray-300"
                       />
                     ),
@@ -199,9 +255,15 @@ const MemberDetails = () => {
           &larr; Go Back
         </button>
       </div>
+
+      {selectedImage && (
+        <ImageModal
+          imageUrl={selectedImage}
+          onClose={() => setSelectedImage(null)}
+        />
+      )}
     </div>
   );
 };
-
 
 export default MemberDetails;

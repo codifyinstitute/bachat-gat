@@ -29,6 +29,7 @@ const Sidebar = ({ role }) => {
       { name: "All Members", path: "/crp/Crp-members", icon: <Users /> },
       { name: "Add Groups", path: "/crp/add-groups", icon: <UserPlus /> },
       { name: "GroupByCrp", path: "/crp/GroupByCrp", icon: <UsersRound  /> },
+      { name: "Forclose", path: "/crp/Crpforclose", icon: <UsersRound  /> },
       { name: "Loan Sanction", path: "/crp/Crp-loansanction",icon: <HandCoins />,},
       { name: "Approved Loans", path: "/crp/crpapprovedlist",icon: <CheckCircle className="text-[#12c20f]"/>,},
       { name: "Pending Loans", path: "/crp/pending-loans", icon: <CircleDotDashed className="text-[#ffaf7a]" />,},

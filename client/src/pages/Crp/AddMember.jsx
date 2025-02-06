@@ -69,10 +69,10 @@ const AddMember = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-  
+
     const token = localStorage.getItem("crp_token");
     const formDataToSend = new FormData();
-  
+
     Object.keys(formData).forEach((key) => {
       if (key === "guarantor") {
         Object.keys(formData.guarantor).forEach((gKey) => {
@@ -84,7 +84,7 @@ const AddMember = () => {
         formDataToSend.append(key, formData[key]);
       }
     });
-  
+
     try {
       const res = await axios.post("http://localhost:5000/api/member", formDataToSend, {
         headers: {
@@ -94,12 +94,12 @@ const AddMember = () => {
       });
       alert("Member added successfully");
       console.log(res.data);
-      // window.location.reload();
+      window.location.reload();
     } catch (error) {
       alert(error.response?.data?.message || "Error adding member");
     }
   };
-  
+
 
   return (
     <div className="w-full h-[100vh] overflow-y-auto ">
