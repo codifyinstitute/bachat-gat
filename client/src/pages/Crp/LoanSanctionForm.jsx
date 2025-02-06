@@ -101,6 +101,7 @@ const LoanSanctionForm = () => {
       });
 
       setMessage("Loan sanctioned successfully!");
+      alert("Loan Sanctioned Successfully")
       console.log("Response:", response.data);
     } catch (error) {
       setMessage(error.response?.data?.message || "Error sanctioning loan.");

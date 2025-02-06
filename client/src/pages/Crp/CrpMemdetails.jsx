@@ -10,15 +10,13 @@ const CrpMemberDetails = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedMember, setEditedMember] = useState(null);
   const [error, setError] = useState(null);
-  const [imageFiles, setImageFiles] = useState({
-    photo: null,
-    guarantorPhoto: null,
-    chequePhoto: null,
-    extraDocuments_0: null,
-    extraDocuments_1: null,
-    extraDocuments_2: null,
-    extraDocuments_3: null
-  });
+  const [photoFile, setPhotoFile] = useState(null);
+  const [guarantorPhotoFile, setGuarantorPhotoFile] = useState(null);
+  const [chequePhotoFile, setChequePhotoFile] = useState(null);
+  const [fileextraDocuments_0, setFileExtraDocuments_0] = useState(null);
+  const [fileextraDocuments_1, setFileExtraDocuments_1] = useState(null);
+  const [fileextraDocuments_2, setFileExtraDocuments_2] = useState(null);
+  const [fileextraDocuments_3, setFileExtraDocuments_3] = useState(null);
 
   useEffect(() => {
     const fetchMember = async () => {
@@ -43,19 +41,18 @@ const CrpMemberDetails = () => {
           mobileNumber: data.mobileNumber || "",
           status: data.status || "",
           dateOfBirth: data.dateOfBirth,
-          photo: data.photo,
+          photo: data.photo || "",
           guarantor: {
-            ...(data.guarantor || {}),
             name: data.guarantor?.name || "",
             mobileNo: data.guarantor?.mobileNo || "",
             relation: data.guarantor?.relation || "",
-            photo: data.guarantor?.photo || "",
-            chequePhoto: data.guarantor?.chequePhoto || "",
+            guarantorPhoto: data.guarantor?.photo || "",
+            guarantorCheque: data.guarantor?.chequePhoto || "",
             extraDocuments_0: data.guarantor?.extraDocuments_0 || "",
             extraDocuments_1: data.guarantor?.extraDocuments_1 || "",
             extraDocuments_2: data.guarantor?.extraDocuments_2 || "",
             extraDocuments_3: data.guarantor?.extraDocuments_3 || "",
-          }
+          },
         });
       } catch (error) {
         console.error("Error fetching member data:", error);
@@ -74,7 +71,9 @@ const CrpMemberDetails = () => {
 
   const getFullImageUrl = (imagePath) => {
     if (!imagePath) return "";
-    const relativePath = imagePath.replace(/\\/g, "/").replace(/^.*?uploads\//, "uploads/");
+    const relativePath = imagePath
+      .replace(/\\/g, "/")
+      .replace(/^.*?uploads\//, "uploads/");
     return `http://localhost:5000/${relativePath}`;
   };
 
@@ -83,122 +82,138 @@ const CrpMemberDetails = () => {
     setError(null);
   };
 
-  const handleInputChange = (e, field, section = 'main') => {
+  const handleInputChange = (e, field, section = "main") => {
     setError(null);
-    if (section === 'main') {
-      setEditedMember(prev => ({
+    if (section === "main") {
+      setEditedMember((prev) => ({
         ...prev,
-        [field]: e.target.value
+        [field]: e.target.value,
       }));
-    } else if (section === 'guarantor') {
-      setEditedMember(prev => ({
+    } else if (section === "guarantor") {
+      setEditedMember((prev) => ({
         ...prev,
         guarantor: {
           ...prev.guarantor,
-          [field]: e.target.value
-        }
+          [field]: e.target.value,
+        },
       }));
     }
   };
 
-  const handleImageChange = (e, field) => {
+  const handleImageChange = (e, section) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) return; // Prevent errors if no file is selected
 
-    setImageFiles(prev => ({
-      ...prev,
-      [field]: file
-    }));
-
-    // Create a preview URL for immediate display
-    const previewUrl = URL.createObjectURL(file);
-    if (field === 'photo') {
-      setEditedMember(prev => ({
-        ...prev,
-        photo: previewUrl
-      }));
-    } else {
-      setEditedMember(prev => ({
-        ...prev,
-        guarantor: {
-          ...prev.guarantor,
-          [field]: previewUrl
-        }
-      }));
+    if (section === "photo") {
+      setPhotoFile(file);
+    } else if (section === "guarantor") {
+      switch (e.target.name) {
+        case "guarantorPhoto":
+          setGuarantorPhotoFile(file.name);
+          break;
+        case "guarantorCheque":
+          setChequePhotoFile(file);
+          break;
+        case "extraDocuments_0":
+          setFileExtraDocuments_0(file);
+          break;
+        case "extraDocuments_1":
+          setFileExtraDocuments_1(file);
+          break;
+        case "extraDocuments_2":
+          setFileExtraDocuments_2(file);
+          break;
+        case "extraDocuments_3":
+          setFileExtraDocuments_3(file);
+          break;
+        default:
+          break;
+      }
     }
+    console.log("Updated File:", file.name); // Log the actual selected file
   };
 
   const handleSave = async () => {
     try {
       setError(null);
       const token = localStorage.getItem("crp_token");
-      
-      // Create FormData for file upload
+
       const formData = new FormData();
-      
-      // Add all the regular fields
-      Object.keys(editedMember).forEach(key => {
-        if (key !== 'guarantor' && key !== 'photo' && key !== '_id') {
+      formData.append(
+        "dateOfBirth",
+        new Date(editedMember.dateOfBirth).toISOString()
+      );
+
+      Object.keys(editedMember).forEach((key) => {
+        if (
+          !["photo", "dateOfBirth", "_id", "guarantor", "referredBy"].includes(
+            key
+          )
+        ) {
           formData.append(key, editedMember[key]);
         }
       });
 
-      // Add guarantor fields
-      Object.keys(editedMember.guarantor || {}).forEach(key => {
-        if (!key.includes('photo') && !key.includes('extraDocuments')) {
-          formData.append(`guarantor[${key}]`, editedMember.guarantor[key]);
+      Object.entries(editedMember.guarantor).forEach(([key, value]) => {
+        if (value) {
+          formData.append(`guarantor.${key}`, value);
         }
       });
 
-      // Add image files if they exist
-      if (imageFiles.photo) formData.append('photo', imageFiles.photo);
-      if (imageFiles.guarantorPhoto) formData.append('guarantor[photo]', imageFiles.guarantorPhoto);
-      if (imageFiles.chequePhoto) formData.append('guarantor[chequePhoto]', imageFiles.chequePhoto);
-      if (imageFiles.extraDocuments_0) formData.append('guarantor[extraDocuments_0]', imageFiles.extraDocuments_0);
-      if (imageFiles.extraDocuments_1) formData.append('guarantor[extraDocuments_1]', imageFiles.extraDocuments_1);
-      if (imageFiles.extraDocuments_2) formData.append('guarantor[extraDocuments_2]', imageFiles.extraDocuments_2);
-      if (imageFiles.extraDocuments_3) formData.append('guarantor[extraDocuments_3]', imageFiles.extraDocuments_3);
+      if (photoFile) formData.append("photo", photoFile);
+      if (guarantorPhotoFile)
+        formData.append("guarantor.guarantorPhoto", guarantorPhotoFile);
+      if (chequePhotoFile)
+        formData.append("guarantor.guarantorCheque", chequePhotoFile);
+      if (fileextraDocuments_0)
+        formData.append("guarantor.extraDocuments_0", fileextraDocuments_0);
+      if (fileextraDocuments_1)
+        formData.append("guarantor.extraDocuments_1", fileextraDocuments_1);
+      if (fileextraDocuments_2)
+        formData.append("guarantor.extraDocuments_2", fileextraDocuments_2);
+      if (fileextraDocuments_3)
+        formData.append("guarantor.extraDocuments_3", fileextraDocuments_3);
 
-      const response = await fetch(`http://localhost:5000/api/member/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/member/${member._id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update member data");
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const updatedData = await response.json();
+        if (response.ok) {
+          setMember(updatedData);
+          setEditedMember({
+            ...updatedData,
+            guarantor: { ...updatedData.guarantor },
+          });
+          setIsEditing(false);
+          window.location.reload()
+        } else {
+          throw new Error(
+            updatedData.message || "Failed to update member data"
+          );
+        }
+      } else {
+        const rawText = await response.text();
+        console.error("Unexpected response:", rawText);
+        throw new Error("Server returned an unexpected response.");
       }
-
-      const updatedData = await response.json();
-      setMember(updatedData);
-      setEditedMember({
-        ...updatedData,
-        guarantor: {
-          ...updatedData.guarantor
-        }
-      });
-      setIsEditing(false);
-      // Reset image files
-      setImageFiles({
-        photo: null,
-        guarantorPhoto: null,
-        chequePhoto: null,
-        extraDocuments_0: null,
-        extraDocuments_1: null,
-        extraDocuments_2: null,
-        extraDocuments_3: null
-      });
-      window.location.reload();
     } catch (error) {
       console.error("Error updating member data:", error);
       setError(error.message || "Failed to update member data");
     }
   };
 
-  if (!member || !editedMember) return <p className="text-center mt-10">Loading member details...</p>;
+  if (!member || !editedMember)
+    return <p className="text-center mt-10">Loading member details...</p>;
 
   return (
     <div className="w-full p-0 bg-gradient-to-r from-blue-50 to-purple-100 min-h-screen">
@@ -209,13 +224,21 @@ const CrpMemberDetails = () => {
           </div>
         )}
         <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold text-gray-800 mb-4">Member Details</h1>
+          <h1 className="text-xl font-bold text-gray-800 mb-4">
+            Member Details
+          </h1>
           {isEditing ? (
-            <button onClick={handleSave} className="py-2 px-4 bg-green-600 text-white rounded-full hover:bg-green-700">
+            <button
+              onClick={handleSave}
+              className="py-2 px-4 bg-green-600 text-white rounded-full hover:bg-green-700"
+            >
               Save
             </button>
           ) : (
-            <button onClick={handleEditClick} className="py-2 px-4 bg-blue-600 text-white rounded-full hover:bg-blue-700">
+            <button
+              onClick={handleEditClick}
+              className="py-2 px-4 bg-blue-600 text-white rounded-full hover:bg-blue-700"
+            >
               Edit
             </button>
           )}
@@ -223,46 +246,80 @@ const CrpMemberDetails = () => {
 
         {/* Personal Information */}
         <div className="bg-gradient-to-r from-indigo-100 to-blue-50 p-6 rounded-xl shadow-lg border-2 border-indigo-300">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">Personal Information</h2>
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Personal Information
+          </h2>
           <table className="min-w-full table-auto">
             <tbody className="divide-y divide-gray-200">
               {[
                 { label: "ID", value: member._id, editable: false },
-                { label: "Name", value: member.name, field: "name", editable: true },
-                { label: "Address", value: member.address, field: "address", editable: true },
-                { label: "DOB", value: new Date(member.dateOfBirth).toLocaleDateString(), editable: false },
-                { label: "Aadhar", value: member.aadharNo, field: "aadharNo", editable: true },
-                { label: "PAN", value: member.panNo, field: "panNo", editable: true },
-                { label: "Mobile", value: member.mobileNumber, field: "mobileNumber", editable: true },
-                { label: "Status", value: member.status, field: "status", editable: true },
-                { 
-                  label: "Photo", 
-                  value: <img src={getFullImageUrl(member.photo)} alt="Member" className="h-16 w-16 rounded-full border border-gray-300" />,
-                  editable: true, 
-                  field: "photo", 
-                  isImage: true 
+                {
+                  label: "Name",
+                  value: member.name,
+                  field: "name",
+                  editable: true,
+                },
+                {
+                  label: "Address",
+                  value: member.address,
+                  field: "address",
+                  editable: true,
+                },
+                {
+                  label: "DOB",
+                  value: new Date(member.dateOfBirth).toLocaleDateString(),
+                  editable: false,
+                },
+                {
+                  label: "Aadhar",
+                  value: member.aadharNo,
+                  field: "aadharNo",
+                  editable: true,
+                },
+                {
+                  label: "PAN",
+                  value: member.panNo,
+                  field: "panNo",
+                  editable: true,
+                },
+                {
+                  label: "Mobile",
+                  value: member.mobileNumber,
+                  field: "mobileNumber",
+                  editable: true,
+                },
+                {
+                  label: "Status",
+                  value: member.status,
+                  field: "status",
+                  // editable: true,
+                },
+                {
+                  label: "Photo",
+                  value: (
+                    <img
+                      src={getFullImageUrl(member.photo)}
+                      alt="Member"
+                      className="h-16 w-16 rounded-full border border-gray-300"
+                    />
+                  ),
+                  // editable: true,
+                  field: "photo",
+                  isImage: true,
                 },
               ].map((item) => (
                 <tr key={item.label}>
-                  <td className="py-3 px-4 font-semibold text-gray-900">{item.label}</td>
+                  <td className="py-3 px-4 font-semibold text-gray-900">
+                    {item.label}
+                  </td>
                   <td className="py-3 px-4 flex justify-between items-center">
                     {isEditing && item.editable ? (
                       item.isImage ? (
-                        <div className="flex items-center space-x-4">
-                          <input 
-                            type="file" 
-                            onChange={(e) => handleImageChange(e, item.field)}
-                            accept="image/*"
-                            className="border border-gray-300 px-2 py-1 rounded w-full" 
-                          />
-                          {editedMember[item.field] && (
-                            <img 
-                              src={typeof editedMember[item.field] === 'string' ? editedMember[item.field] : URL.createObjectURL(imageFiles[item.field])}
-                              alt="Preview" 
-                              className="h-16 w-16 rounded-full border border-gray-300" 
-                            />
-                          )}
-                        </div>
+                        <input
+                          type="file"
+                          onChange={(e) => handleImageChange(e, item.field)}
+                          className="border border-gray-300 px-2 py-1 rounded w-full"
+                        />
                       ) : (
                         <input
                           type="text"
@@ -272,20 +329,20 @@ const CrpMemberDetails = () => {
                         />
                       )
                     ) : (
-                      <div className="flex items-center">
-                        {typeof item.value === 'string' ? (
-                          <>
-                            <span>{item.value}</span>
-                            <button onClick={() => handleCopy(item.value, item.label)}>
-                              <Copy className="w-5 h-5 text-gray-600 hover:text-gray-800 ml-2" />
-                            </button>
-                          </>
-                        ) : (
-                          item.value
-                        )}
-                      </div>
+                      item.value
                     )}
-                    {copiedField === item.label && <span className="text-green-600 ml-2 text-sm">Copied!</span>}
+                    {!isEditing && typeof item.value === "string" && (
+                      <button
+                        onClick={() => handleCopy(item.value, item.label)}
+                      >
+                        <Copy className="w-5 h-5 text-gray-600 hover:text-gray-800 ml-2" />
+                      </button>
+                    )}
+                    {copiedField === item.label && (
+                      <span className="text-green-600 ml-2 text-sm">
+                        Copied!
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -296,81 +353,140 @@ const CrpMemberDetails = () => {
         {/* Guarantor Section */}
         {member.guarantor && (
           <div className="bg-gradient-to-r from-red-100 to-orange-50 mt-6 p-6 rounded-xl shadow-lg border-2 border-red-300">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">Guarantor Information</h2>
+            <h2 className="text-lg font-semibold text-gray-700 mb-4">
+              Guarantor Information
+            </h2>
             <table className="min-w-full table-auto">
               <tbody className="divide-y divide-gray-200">
                 {[
-                  { label: "Name", value: member.guarantor.name, field: "name", editable: true },
-                  { label: "Mobile", value: member.guarantor.mobileNo, field: "mobileNo", editable: true },
-                  { label: "Relation", value: member.guarantor.relation, field: "relation", editable: true },
+                  {
+                    label: "Name",
+                    value: member.guarantor.name,
+                    field: "name",
+                    editable: true,
+                  },
+                  {
+                    label: "Mobile",
+                    value: member.guarantor.mobileNo,
+                    field: "mobileNo",
+                    editable: true,
+                  },
+                  {
+                    label: "Relation",
+                    value: member.guarantor.relation,
+                    field: "relation",
+                    editable: true,
+                  },
                   {
                     label: "Photo",
-                    value: <img src={getFullImageUrl(member.guarantor.photo)} alt="Guarantor" className="h-16 w-16 rounded-full border border-gray-300" />,
+                    value: photoFile ? (
+                      <img
+                        src={URL.createObjectURL(photoFile)}
+                        alt="Guarantor"
+                        className="h-16 w-16 rounded-full border border-gray-300"
+                      />
+                    ) : (
+                      <img
+                        src={getFullImageUrl(member.guarantor.photo)}
+                        alt="Guarantor"
+                        className="h-16 w-16 rounded-full border border-gray-300"
+                      />
+                    ),
+                    // editable: true,
+                    isImage: true,
                     field: "guarantorPhoto",
-                    editable: true,
-                    isImage: true
                   },
                   {
                     label: "Cheque Photo",
-                    value: <img src={getFullImageUrl(member.guarantor.chequePhoto)} alt="Cheque" className="h-16 w-16 rounded-md border border-gray-300" />,
-                    field: "chequePhoto",
-                    editable: true,
-                    isImage: true
+                    value: (
+                      <img
+                        src={getFullImageUrl(member.guarantor.chequePhoto)}
+                        alt="Cheque"
+                        className="h-16 w-16 rounded-md border border-gray-300"
+                      />
+                    ),
+                    // editable: true,
+                    isImage: true,
+                    field: "guarantorCheque",
                   },
                   {
                     label: "Document 1",
-                    value: <img src={getFullImageUrl(member.guarantor.extraDocuments_0)} alt="Document 1" className="h-16 w-16 rounded-md border border-gray-300" />,
+                    value: (
+                      <img
+                        src={getFullImageUrl(member.guarantor.extraDocuments_0)}
+                        alt="Document 1"
+                        className="h-16 w-16 rounded-md border border-gray-300"
+                      />
+                    ),
+                    // editable: true,
+                    isImage: true,
                     field: "extraDocuments_0",
-                    editable: true,
-                    isImage: true
                   },
                   {
                     label: "Document 2",
-                    value: <img src={getFullImageUrl(member.guarantor.extraDocuments_1)} alt="Document 2" className="h-16 w-16 rounded-md border border-gray-300" />,
+                    value: (
+                      <img
+                        src={getFullImageUrl(member.guarantor.extraDocuments_1)}
+                        alt="Document 2"
+                        className="h-16 w-16 rounded-md border border-gray-300"
+                      />
+                    ),
+                    // editable: true,
+                    isImage: true,
                     field: "extraDocuments_1",
-                    editable: true,
-                    isImage: true
                   },
                   {
                     label: "Document 3",
-                    value: <img src={getFullImageUrl(member.guarantor.extraDocuments_2)} alt="Document 2" className="h-16 w-16 rounded-md border border-gray-300" />,
+                    value: (
+                      <img
+                        src={getFullImageUrl(member.guarantor.extraDocuments_2)}
+                        alt="Document 3"
+                        className="h-16 w-16 rounded-md border border-gray-300"
+                      />
+                    ),
+                    // editable: true,
+                    isImage: true,
                     field: "extraDocuments_2",
-                    editable: true,
-                    isImage: true
                   },
                   {
                     label: "Document 4",
-                    value: <img src={getFullImageUrl(member.guarantor.extraDocuments_3)} alt="Document 3" className="h-16 w-16 rounded-md border border-gray-300" />,
+                    value: (
+                      <img
+                        src={getFullImageUrl(member.guarantor.extraDocuments_3)}
+                        alt="Document 4"
+                        className="h-16 w-16 rounded-md border border-gray-300"
+                      />
+                    ),
+                    // editable: true,
+                    isImage: true,
                     field: "extraDocuments_3",
-                    editable: true,
-                    isImage: true
                   },
                 ].map((item) => (
                   <tr key={item.label}>
-                    <td className="py-3 px-4 font-semibold text-gray-900">{item.label}</td>
+                    <td className="py-3 px-4 font-semibold text-gray-900">
+                      {item.label}
+                    </td>
                     <td className="py-3 px-4">
                       {isEditing && item.editable ? (
                         item.isImage ? (
-                          <div className="flex items-center space-x-4">
-                            <input 
-                              type="file" 
-                              onChange={(e) => handleImageChange(e, item.field)}
-                              accept="image/*"
-                              className="border border-gray-300 px-2 py-1 rounded w-full" 
+                          <div>
+                            <input
+                              type="file"
+                              name={item.field}
+                              onChange={(e) =>
+                                handleImageChange(e, "guarantor")
+                              }
+                              className="border border-gray-300 px-2 py-1 rounded w-full"
+                              multiple={false}
                             />
-                            {imageFiles[item.field] && (
-                              <img 
-                                src={URL.createObjectURL(imageFiles[item.field])}
-                                alt="Preview" 
-                                className="h-16 w-16 rounded-md border border-gray-300" 
-                              />
-                            )}
                           </div>
                         ) : (
                           <input
                             type="text"
                             value={editedMember.guarantor[item.field] || ""}
-                            onChange={(e) => handleInputChange(e, item.field, 'guarantor')}
+                            onChange={(e) =>
+                              handleInputChange(e, item.field, "guarantor")
+                            }
                             className="border border-gray-300 px-2 py-1 rounded w-full"
                           />
                         )
@@ -387,15 +503,25 @@ const CrpMemberDetails = () => {
 
         {/* Account Activity Section */}
         <div className="bg-gradient-to-r from-purple-100 to-pink-50 mt-6 p-6 rounded-xl shadow-lg border-2 border-purple-300">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">Account Activity</h2>
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Account Activity
+          </h2>
           <table className="min-w-full table-auto">
             <tbody className="divide-y divide-gray-200">
               {[
-                { label: "Created At", value: new Date(member.createdAt).toLocaleDateString() },
-                { label: "Updated At", value: new Date(member.updatedAt).toLocaleDateString() },
+                {
+                  label: "Created At",
+                  value: new Date(member.createdAt).toLocaleDateString(),
+                },
+                {
+                  label: "Updated At",
+                  value: new Date(member.updatedAt).toLocaleDateString(),
+                },
               ].map((item) => (
                 <tr key={item.label}>
-                  <td className="py-3 px-4 font-semibold text-gray-900">{item.label}</td>
+                  <td className="py-3 px-4 font-semibold text-gray-900">
+                    {item.label}
+                  </td>
                   <td className="py-3 px-4">{item.value}</td>
                 </tr>
               ))}

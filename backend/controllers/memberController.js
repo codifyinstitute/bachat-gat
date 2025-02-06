@@ -41,6 +41,7 @@ const memberController = {
         panNo,
         accNo,
         mobileNumber,
+        isNPA,
         guarantor: {
           ...guarantor,
           photo: guarantorPhoto,
