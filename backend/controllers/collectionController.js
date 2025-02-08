@@ -2,6 +2,7 @@ const Collection = require("../models/Collection");
 const Group = require("../models/Group");
 const Loan = require("../models/Loan");
 const Member = require("../models/Member");
+const mongoose = require("mongoose")
 const MemberStatement = require("../models/MemberStatement");
 const GroupStatement = require("../models/GroupStatement");
 
@@ -212,56 +213,138 @@ const collectionController = {
     }
   },
   
+  // forecloseLoan: async (req, res) => {
+  //   try {
+  //     const { loanId, memberId } = req.params;
+  //     const foreclosureCharge = 4545; // Foreclosure charge (adjust if needed)
+
+  //     console.log(`Processing foreclosure for Loan: ${loanId}, Member: ${memberId}`);
+
+  //     // Find the loan
+  //     let loan = await Loan.findOne({ _id: loanId });
+  //     if (!loan) {
+  //       return res.status(404).json({ message: "Loan not found" });
+  //     }
+
+  //     // Find the member's repayment schedule
+  //     let memberSchedule = loan.repaymentSchedules.find(
+  //       (schedule) => schedule.memberId.toString() === memberId
+  //     );
+  //     if (!memberSchedule) {
+  //       return res.status(404).json({ message: "Member repayment schedule not found" });
+  //     }
+
+  //     // Update each pending installment
+  //     let totalPendingAmount = 0;
+  //     memberSchedule.installments.forEach((installment) => {
+  //       if (installment.status !== "paid") {
+  //         totalPendingAmount += installment.amount;
+  //         installment.status = "paid";
+  //         installment.paidAmount = installment.amount;
+  //         installment.paidDate = new Date();
+  //       }
+  //     });
+
+  //     // Add foreclosure charge to the total
+  //     const totalPayable = totalPendingAmount + foreclosureCharge;
+
+  //     // Save the updated loan
+  //     await loan.save();
+
+  //     console.log(`Loan foreclosed successfully for member: ${memberId}, Total Payable: ${totalPayable}`);
+
+  //     res.json({
+  //       message: "Loan foreclosed successfully for this member",
+  //       totalPayable: totalPayable.toFixed(2),
+  //       foreclosureCharge: foreclosureCharge,
+  //     });
+  //   } catch (error) {
+  //     console.error("Error in foreclosure:", error);
+  //     res.status(500).json({ message: "Internal server error" });
+  //   }
+  // },
+
   forecloseLoan: async (req, res) => {
     try {
-      const { loanId, memberId } = req.params;
-      const foreclosureCharge = 4545; // Foreclosure charge (adjust if needed)
+        const { loanId, memberId } = req.params;
+        const foreclosureCharge = 4545; // Adjust foreclosure charge if needed
 
-      console.log(`Processing foreclosure for Loan: ${loanId}, Member: ${memberId}`);
+        console.log(`Processing foreclosure for Loan: ${loanId}, Member: ${memberId}`);
 
-      // Find the loan
-      let loan = await Loan.findOne({ _id: loanId });
-      if (!loan) {
-        return res.status(404).json({ message: "Loan not found" });
-      }
-
-      // Find the member's repayment schedule
-      let memberSchedule = loan.repaymentSchedules.find(
-        (schedule) => schedule.memberId.toString() === memberId
-      );
-      if (!memberSchedule) {
-        return res.status(404).json({ message: "Member repayment schedule not found" });
-      }
-
-      // Update each pending installment
-      let totalPendingAmount = 0;
-      memberSchedule.installments.forEach((installment) => {
-        if (installment.status !== "paid") {
-          totalPendingAmount += installment.amount;
-          installment.status = "paid";
-          installment.paidAmount = installment.amount;
-          installment.paidDate = new Date();
+        // Find the loan
+        let loan = await Loan.findOne({ _id: loanId });
+        if (!loan) {
+            return res.status(404).json({ message: "Loan not found" });
         }
-      });
 
-      // Add foreclosure charge to the total
-      const totalPayable = totalPendingAmount + foreclosureCharge;
+        // Find the member's repayment schedule
+        let memberSchedule = loan.repaymentSchedules.find(
+            (schedule) => schedule.memberId.toString() === memberId
+        );
+        if (!memberSchedule) {
+            return res.status(404).json({ message: "Member repayment schedule not found" });
+        }
 
-      // Save the updated loan
-      await loan.save();
+        // Update each pending installment
+        let totalPendingAmount = 0;
+        memberSchedule.installments.forEach((installment) => {
+            if (installment.status !== "paid") {
+                totalPendingAmount += installment.amount;
+                installment.status = "paid";
+                installment.paidAmount = installment.amount;
+                installment.paidDate = new Date();
+            }
+        });
 
-      console.log(`Loan foreclosed successfully for member: ${memberId}, Total Payable: ${totalPayable}`);
+        // Add foreclosure charge to the total
+        const totalPayable = totalPendingAmount + foreclosureCharge;
 
-      res.json({
-        message: "Loan foreclosed successfully for this member",
-        totalPayable: totalPayable.toFixed(2),
-        foreclosureCharge: foreclosureCharge,
-      });
+        // Save the updated loan
+        await loan.save();
+
+        console.log(`Loan foreclosed successfully for member: ${memberId}, Total Payable: ${totalPayable}`);
+
+        // Check if the member exists in any collection and update status
+        const collections = await Collection.find({ "payments.memberId": memberId });
+
+        for (let collection of collections) {
+            collection.payments.forEach((payment) => {
+                if (payment.memberId.toString() === memberId) {
+                    payment.status = "paid"; // Update payment status
+                }
+            });
+
+            // Recalculate collection totals
+            collection.totalEmiCollected = collection.payments.reduce(
+                (sum, payment) => sum + (payment.status === "paid" ? payment.emiAmount : 0),
+                0
+            );
+            collection.totalSavingsCollected = collection.payments.reduce(
+                (sum, payment) => sum + (payment.status === "paid" ? payment.savingsAmount : 0),
+                0
+            );
+
+            // If all payments are paid, mark collection as "completed"
+            if (collection.payments.every((payment) => payment.status === "paid")) {
+                collection.status = "completed";
+            } else {
+                collection.status = "partial";
+            }
+
+            await collection.save();
+        }
+
+        res.json({
+            message: "Loan foreclosed successfully, and member's collection status updated",
+            totalPayable: totalPayable.toFixed(2),
+            foreclosureCharge: foreclosureCharge,
+        });
     } catch (error) {
-      console.error("Error in foreclosure:", error);
-      res.status(500).json({ message: "Internal server error" });
+        console.error("Error in foreclosure:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
-  },
+},
+
 
   getAllCollections: async (req, res) => {
     try {
