@@ -12,7 +12,7 @@ const PaymentPage = () => {
   const [message, setMessage] = useState("");
   const [collections, setCollections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const [showDepositSlip, setShowDepositSlip] = useState(false);
   const [depositSlipData, setDepositSlipData] = useState({
     date: "",
@@ -25,10 +25,10 @@ const PaymentPage = () => {
   // Convert number to Indian currency words
   const convertNumberToWords = (number) => {
     const [intPart, decimalPart] = number.toString().split('.');
-    
+
     let words = toWords(parseInt(intPart));
     words = words.charAt(0).toUpperCase() + words.slice(1);
-    
+
     if (decimalPart) {
       const paise = toWords(parseInt(decimalPart));
       words += ' Rupees and ' + paise + ' Paise';
@@ -56,27 +56,27 @@ const PaymentPage = () => {
 
   const handlePayment = async (e) => {
     e.preventDefault();
-  
+
     try {
       const crpToken = localStorage.getItem("crp_token");
-  
+
       if (!crpToken) {
         setMessage("No CRP token found");
         return;
       }
-  
+
       const selectedCollection = collections.find((col) => col._id === collectionId);
       if (!selectedCollection) {
         setMessage("Collection not found");
         return;
       }
-  
+
       const selectedPayment = selectedCollection.payments.find((payment) => payment.memberId?._id === memberId);
       if (!selectedPayment) {
         setMessage("Member not found in the selected collection");
         return;
       }
-  
+
       const response = await axios.post(
         `http://localhost:5000/api/collection/${collectionId}/payments/${memberId}`,
         { paymentMethod, transactionId, remarks },
@@ -88,17 +88,17 @@ const PaymentPage = () => {
         }
       );
 
-      const memberdata = await axios.get(`http://localhost:5000/api/member/${selectedPayment.memberId._id}`,{
+      const memberdata = await axios.get(`http://localhost:5000/api/member/${selectedPayment.memberId._id}`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${crpToken}`,
         },
       })
 
-      if(!memberdata) console.log("error while fetching member account no.")
+      if (!memberdata) console.log("error while fetching member account no.")
 
 
-  
+
       setDepositSlipData({
         date: new Date().toLocaleDateString(),
         accountNumber: memberdata.data.accNo || "N/A",
@@ -191,7 +191,7 @@ const PaymentPage = () => {
       {showDepositSlip && (
         <div className="fixed inset-0 bg-gray-100 flex justify-center items-center z-50">
           <div className="relative bg-white p-4 rounded-lg">
-            <button 
+            <button
               onClick={closeDepositSlip}
               className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded"
             >

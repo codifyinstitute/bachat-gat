@@ -372,7 +372,7 @@ const CrpMemberDetails = () => {
                   field: "photo",
                   isImage: true,
                 },
-                
+
               ].map((item) => (
                 <tr key={item.label}>
                   <td className="py-3 px-4 font-semibold text-gray-900">

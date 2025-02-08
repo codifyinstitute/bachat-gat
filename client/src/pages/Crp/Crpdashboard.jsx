@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import axios from 'axios'
 
@@ -9,25 +9,25 @@ const AdminDashboard = () => {
   const totalLoan = 200000;
   const totalSavings = 300000;
   const totalInterest = 50000;
-  const totalCrpMembers=0
-  const [approvedList,setapprovedList] = useState(20);
-  const [pendingList,setpendingList] = useState(50);
-  const [completedList,setcompletedList]= useState(10)
+  const totalCrpMembers = 0
+  const [approvedList, setapprovedList] = useState(20);
+  const [pendingList, setpendingList] = useState(50);
+  const [completedList, setcompletedList] = useState(10)
 
   // Assuming the admin_token is stored in localStorage
   const adminToken = localStorage.getItem("admin_token");
   console.log("Admin Token:", adminToken);
 
-  useEffect(()=>{
-    const fetchpiedetails= async ()=>{
-      try{
-        const response =await axios.get("http://localhost:5000/api/loan/count",({
+  useEffect(() => {
+    const fetchpiedetails = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/loan/count", ({
           headers: {
             Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
           },
         }))
 
-        if(!response.data) {
+        if (!response.data) {
           console.log('the response data is not fetched, error in backend')
         }
 
@@ -36,12 +36,12 @@ const AdminDashboard = () => {
         // setpendingList(response.data.pending) 
         // setcompletedList(response.data.completed) 
         // setapprovedList(response.data.approved) 
-      }catch(error){
+      } catch (error) {
         console.log(error)
       }
     }
     fetchpiedetails()
-  },[])
+  }, [])
 
   // Chart options for various types
   const chartOptions = {
@@ -71,15 +71,15 @@ const AdminDashboard = () => {
         bottom: "10%",
         top: "20%", // Adjusted top for proper spacing
       },
-    // },
-  },
+      // },
+    },
     barChart: {
       title: { text: "Total Data Overview", left: "center" },
       tooltip: { trigger: "axis" },
       xAxis: {
         type: "category",
         data: [
-          "Users", "Amount", "Loan", "Savings", 
+          "Users", "Amount", "Loan", "Savings",
           "Interest", "CRP Members", "Pending Approvals"
         ],
       },
@@ -92,7 +92,7 @@ const AdminDashboard = () => {
           name: "Amount",
           type: "bar",
           data: [
-            totalUsers, totalAmount, totalLoan, totalSavings, 
+            totalUsers, totalAmount, totalLoan, totalSavings,
             totalInterest, totalCrpMembers, pendingList
           ],
           itemStyle: { color: "#2196F3" },
@@ -123,7 +123,7 @@ const AdminDashboard = () => {
         },
       ],
     },
-    
+
     barRaceChart: {
       title: { text: "Loan, Savings, Interest Race", left: "center" },
       tooltip: { trigger: "axis" },

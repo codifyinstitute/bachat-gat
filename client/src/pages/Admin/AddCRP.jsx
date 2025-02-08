@@ -93,9 +93,8 @@ const AddCRP = () => {
                             id="name"
                             value={formData.name}
                             onChange={handleInputChange}
-                            className={`w-full mt-2 p-3 border ${
-                                errors.name ? "border-red-500" : "border-gray-300"
-                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                            className={`w-full mt-2 p-3 border ${errors.name ? "border-red-500" : "border-gray-300"
+                                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                         />
                         {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                     </div>
@@ -110,9 +109,8 @@ const AddCRP = () => {
                             id="username"
                             value={formData.username}
                             onChange={handleInputChange}
-                            className={`w-full mt-2 p-3 border ${
-                                errors.username ? "border-red-500" : "border-gray-300"
-                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                            className={`w-full mt-2 p-3 border ${errors.username ? "border-red-500" : "border-gray-300"
+                                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                         />
                         {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
                     </div>
@@ -127,9 +125,8 @@ const AddCRP = () => {
                             id="email"
                             value={formData.email}
                             onChange={handleInputChange}
-                            className={`w-full mt-2 p-3 border ${
-                                errors.email ? "border-red-500" : "border-gray-300"
-                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                            className={`w-full mt-2 p-3 border ${errors.email ? "border-red-500" : "border-gray-300"
+                                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                         />
                         {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                     </div>
@@ -144,9 +141,8 @@ const AddCRP = () => {
                             id="mobile"
                             value={formData.mobile}
                             onChange={handleInputChange}
-                            className={`w-full mt-2 p-3 border ${
-                                errors.mobile ? "border-red-500" : "border-gray-300"
-                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                            className={`w-full mt-2 p-3 border ${errors.mobile ? "border-red-500" : "border-gray-300"
+                                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                         />
                         {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>}
                     </div>
@@ -162,9 +158,8 @@ const AddCRP = () => {
                                 id="password"
                                 value={formData.password}
                                 onChange={handleInputChange}
-                                className={`w-full mt-2 p-3 border ${
-                                    errors.password ? "border-red-500" : "border-gray-300"
-                                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                                className={`w-full mt-2 p-3 border ${errors.password ? "border-red-500" : "border-gray-300"
+                                    } rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                             />
                             <button
                                 type="button"

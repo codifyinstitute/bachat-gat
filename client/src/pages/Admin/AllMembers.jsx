@@ -32,14 +32,14 @@ const AllMembers = () => {
       } catch (err) {
         setError("Failed to fetch members data.");
         console.error(err);
-      } 
+      }
       // finally {
       //   setLoading(false); // Stop loading once data is fetched
       // }
     };
 
     fetchMembers();
-  },[adminToken]); // Ensure the token is passed into useEffect (can also use session storage, cookies, etc.)
+  }, [adminToken]); // Ensure the token is passed into useEffect (can also use session storage, cookies, etc.)
 
   // if (loading) {
   //   return <div>Loading...</div>; // Display loading message while data is being fetched
@@ -76,11 +76,10 @@ const AllMembers = () => {
                   <td className="py-3 px-4">{member.referredBy.crpName}@example.com</td>
                   <td className="py-3 px-4">
                     <span
-                      className={`px-3 py-1 text-sm font-medium rounded-full ${
-                        member.status === "active"
-                          ? "bg-green-200 text-green-700"
-                          : "bg-red-200 text-red-700"
-                      }`}
+                      className={`px-3 py-1 text-sm font-medium rounded-full ${member.status === "active"
+                        ? "bg-green-200 text-green-700"
+                        : "bg-red-200 text-red-700"
+                        }`}
                     >
                       {member.status}
                     </span>

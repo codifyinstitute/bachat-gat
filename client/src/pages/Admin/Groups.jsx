@@ -22,24 +22,24 @@ const AdminGroupsList = () => {
           "Content-Type": "application/json",
         },
       });
-  
+
       // Mapping the data and accumulating savingsAmount from the payments array
       const data = res.data.map((collection) => {
         // Extracting groupId and calculating total savingsAmount from payments
         const groupId = collection.groupId?._id; // Assuming groupId is stored in groupId.groupId
-  
+
         const totalSavingsAmount = collection.payments.reduce((acc, payment) => {
           return acc + (payment.savingsAmount || 0); // Accumulate savingsAmount from each payment
         }, 0);
-  
+
         return {
           groupId,
           savingAmount: totalSavingsAmount, // Sum of all savingsAmount in payments
         };
       });
-  
+
       console.log("Fetched data with savingsAmount:", data);
-  
+
       setSavingsData(data); // Save the fetched data
     } catch (err) {
       console.error("Error fetching collections:", err);
@@ -92,7 +92,7 @@ const AdminGroupsList = () => {
 
       setGroups(activeGroups); // Set only the active groups
       setLoansData(loansRes.data);
-      
+
       setLoading(false);
     } catch (err) {
       setError("Error fetching data");
@@ -134,23 +134,23 @@ const AdminGroupsList = () => {
   //     console.log("savingsData is empty or undefined");
   //     return 0;
   //   }
-  
+
   //   console.log("Checking savingsData for groupId:", groupId);
-  
+
   //   const saving = savingsData.find((savings) => {
   //     console.log("Comparing:", savings.groupId, "==", groupId);
   //     return savings.groupId === groupId?._id;
   //   });
-  
+
   //   if (!saving) {
   //     console.log("No matching saving record found for groupId:", groupId);
   //     return 0;
   //   }
-  
+
   //   console.log("Found saving amount:", saving.savingAmount);
   //   return saving.savingAmount;
   // };
-  
+
 
 
 
@@ -370,7 +370,7 @@ const AdminGroupsList = () => {
                                   </div>
 
                                   {loan.repaymentSchedules &&
-                                  loan.repaymentSchedules.length > 0 ? (
+                                    loan.repaymentSchedules.length > 0 ? (
                                     loan.repaymentSchedules.map(
                                       (schedule, idx) => {
                                         const members = group.members || []; // Get all members

@@ -164,11 +164,10 @@ const AllMembers = () => {
                   <td className="py-3 px-4">{member.panNo}</td>
                   <td className="py-3 px-4">
                     <button
-                      className={`px-3 py-1 text-sm font-medium rounded ${
-                        member.isNPA === "YES"
-                          ? "bg-green-300 text-black"
-                          : "bg-red-200 text-black"
-                      }`}
+                      className={`px-3 py-1 text-sm font-medium rounded ${member.isNPA === "YES"
+                        ? "bg-green-300 text-black"
+                        : "bg-red-200 text-black"
+                        }`}
                       onClick={(event) => toggleNPA(member._id, event)}
                     >
                       {member.isNPA === "YES" ? "Yes" : "No"}
@@ -176,11 +175,10 @@ const AllMembers = () => {
                   </td>
                   <td className="py-3 px-4">
                     <span
-                      className={`px-3 py-1 text-sm font-medium rounded-full ${
-                        member.status === "active"
-                          ? "bg-green-200 text-green-700"
-                          : "bg-red-200 text-red-700"
-                      }`}
+                      className={`px-3 py-1 text-sm font-medium rounded-full ${member.status === "active"
+                        ? "bg-green-200 text-green-700"
+                        : "bg-red-200 text-red-700"
+                        }`}
                     >
                       {member.status}
                     </span>

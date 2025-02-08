@@ -62,7 +62,7 @@ const AllCRP = () => {
                   <td className="py-3 px-4">{member.name}</td>
                   <td className="py-3 px-4">{member.mobile}</td>
                   <td className="py-3 px-4">{member.email}</td>
-                  
+
                 </tr>
               ))}
             </tbody>

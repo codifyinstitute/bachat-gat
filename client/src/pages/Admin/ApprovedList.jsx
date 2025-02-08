@@ -75,8 +75,8 @@ const AdminApprovalList = () => {
                                 <h3 className="text-[14px] sm:text-sm md:text-xl lg:text-xl xl:text-xl font-semibold text-gray-800">
                                     Loan ID: {loan._id}
                                 </h3> {/* Show only the first 5 characters of the Loan ID */}
-                                <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Amount: {loan.createdBy.name}</p>
-                                <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Interest Rate: {loan.groupId.name}</p>
+                                <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Amount: {loan.createdBy?.name}</p>
+                                <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Interest Rate: {loan.groupId?.name}</p>
                                 <div className="flex justify-between items-center mt-4">
                                     <button
                                         onClick={() => setExpandedLoanId(expandedLoanId === loan._id ? null : loan._id)}
@@ -89,32 +89,32 @@ const AdminApprovalList = () => {
                                 {/* Expanded Loan Details */}
                                 {expandedLoanId === loan._id && (
                                     <div className="mt-4 md:flex md:justify-between space-y-2">
-                                    <div>
-                                        <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Total Amount:</strong> ₹{loan.totalAmount}</p>
-                                        <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Per Member Amount:</strong> ₹{loan.perMemberAmount}</p>
-                                        <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Term:</strong> {loan.termMonths} months</p>
-                                        <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Start Date:</strong> {new Date(loan.startDate).toLocaleDateString()}</p>
-                                        <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Status:</strong> {loan.status}</p>
-                                        <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Approved By:</strong> {loan.approvedBy ? loan.approvedBy.username : "N/A"}</p>
-                                    </div>
+                                        <div>
+                                            <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Total Amount:</strong> ₹{loan.totalAmount}</p>
+                                            <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Per Member Amount:</strong> ₹{loan.perMemberAmount}</p>
+                                            <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Term:</strong> {loan.termMonths} months</p>
+                                            <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Start Date:</strong> {new Date(loan.startDate).toLocaleDateString()}</p>
+                                            <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Status:</strong> {loan.status}</p>
+                                            <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Approved By:</strong> {loan.approvedBy ? loan.approvedBy.username : "N/A"}</p>
+                                        </div>
 
-                                    {/* Bank Details */}
-                                    <div className="flex flex-col">
-                                    {loan.bankDetails ? (
-                                        <>
-                                            <h4 className="font-bold mt-2">Bank Details</h4>
-                                            <div className="border p-2 rounded bg-gray-50 shadow-sm md:shadow-[none] md:border-0">
-                                            <p><strong>Bank Name:</strong> {loan.bankDetails.name}</p>
-                                            <p><strong>Branch:</strong> {loan.bankDetails.branch}</p>
-                                            <p><strong>IFSC Code:</strong> {loan.bankDetails.ifsc}</p>
-                                            <p><strong>Interest Rate:</strong> {loan.bankDetails.interestRate}%</p>
-                                            </div>
-                                        </>
-                                        ) : (
-                                        <p className="text-red-500">No bank details available.</p>
-                                    )}
+                                        {/* Bank Details */}
+                                        <div className="flex flex-col">
+                                            {loan.bankDetails ? (
+                                                <>
+                                                    <h4 className="font-bold mt-2">Bank Details</h4>
+                                                    <div className="border p-2 rounded bg-gray-50 shadow-sm md:shadow-[none] md:border-0">
+                                                        <p><strong>Bank Name:</strong> {loan.bankDetails.name}</p>
+                                                        <p><strong>Branch:</strong> {loan.bankDetails.branch}</p>
+                                                        <p><strong>IFSC Code:</strong> {loan.bankDetails.ifsc}</p>
+                                                        <p><strong>Interest Rate:</strong> {loan.bankDetails.interestRate}%</p>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <p className="text-red-500">No bank details available.</p>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
                                 )}
                             </div>
                         ))}

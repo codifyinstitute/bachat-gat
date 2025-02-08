@@ -246,7 +246,7 @@ const Forclose = () => {
                                                                                                 type="number"
                                                                                                 placeholder="Enter Forclosure Amount"
                                                                                                 className="border rounded p-1 w-full mb-2"
-                                                                                                value={forcloseAmount} 
+                                                                                                value={forcloseAmount}
                                                                                                 onChange={(e) => setForcloseAmount(e.target.value)} // Update forclosure amount
                                                                                             />
                                                                                             <button

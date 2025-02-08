@@ -72,19 +72,19 @@ const PendingLoans = () => {
 
                                         {/* Bank Details */}
                                         <div className="flex flex-col">
-                                        {loan.bankDetails ? (
-                                            <>
-                                                <h4 className="font-bold mt-2">Bank Details</h4>
-                                                <div className="border p-2 rounded bg-gray-50 shadow-sm md:shadow-[none] md:border-0">
-                                                <p><strong>Bank Name:</strong> {loan.bankDetails.name}</p>
-                                                <p><strong>Branch:</strong> {loan.bankDetails.branch}</p>
-                                                <p><strong>IFSC Code:</strong> {loan.bankDetails.ifsc}</p>
-                                                <p><strong>Interest Rate:</strong> {loan.bankDetails.interestRate}%</p>
-                                                </div>
-                                            </>
+                                            {loan.bankDetails ? (
+                                                <>
+                                                    <h4 className="font-bold mt-2">Bank Details</h4>
+                                                    <div className="border p-2 rounded bg-gray-50 shadow-sm md:shadow-[none] md:border-0">
+                                                        <p><strong>Bank Name:</strong> {loan.bankDetails.name}</p>
+                                                        <p><strong>Branch:</strong> {loan.bankDetails.branch}</p>
+                                                        <p><strong>IFSC Code:</strong> {loan.bankDetails.ifsc}</p>
+                                                        <p><strong>Interest Rate:</strong> {loan.bankDetails.interestRate}%</p>
+                                                    </div>
+                                                </>
                                             ) : (
-                                            <p className="text-red-500">No bank details available.</p>
-                                        )}
+                                                <p className="text-red-500">No bank details available.</p>
+                                            )}
                                         </div>
                                     </div>
                                 )}

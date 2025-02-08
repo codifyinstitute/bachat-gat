@@ -17,16 +17,16 @@ const ApproveCollection = () => {
           setLoading(false);
           return;
         }
-  
+
         const response = await axios.get("http://localhost:5000/api/collection", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
-  
+
         console.log(response.data);
-  
+
         if (response.status === 200) {
           // Filter collections with status 'pending'
           const pendingCollections = response.data.filter(
@@ -45,11 +45,11 @@ const ApproveCollection = () => {
         setLoading(false);
       }
     };
-  
+
     fetchCollections();
   }, []);
-  
-  
+
+
 
   // Handle collection approval
   const handleApprove = async (id) => {
