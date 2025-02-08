@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 const AddMember = () => {
@@ -24,9 +24,25 @@ const AddMember = () => {
     },
   });
 
+  const [errors, setErrors] = useState({});
+
+  const validateField = (name, value) => {
+    let error = "";
+    if (name === "aadharNo" && !/^[0-9]{12}$/.test(value)) {
+      error = "Aadhar number must be 12 digits.";
+    } else if (name === "panNo" && !/^[A-Z0-9]{10}$/.test(value)) {
+      error = "PAN number must be 10 uppercase alphanumeric characters.";
+    } else if (name === "mobileNumber" && !/^[0-9]{10}$/.test(value)) {
+      error = "Mobile number must be 10 digits.";
+    }
+    return error;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    const error = validateField(name, value);
+    setErrors({ ...errors, [name]: error });
   };
 
   const handleGuarantorChange = (e) => {
@@ -35,6 +51,8 @@ const AddMember = () => {
       ...formData,
       guarantor: { ...formData.guarantor, [name]: value },
     });
+    const error = validateField(name, value);
+    setErrors({ ...errors, [`guarantor.${name}`]: error });
   };
 
   const handleFileChange = (e) => {
@@ -50,25 +68,27 @@ const AddMember = () => {
     }
   };
 
-  const validateForm = () => {
-    if (!/^[0-9]{12}$/.test(formData.aadharNo)) {
-      alert("Aadhar number must be 12 digits.");
-      return false;
-    }
-    if (!/^[A-Z0-9]{10}$/.test(formData.panNo)) {
-      alert("PAN number must be 10 uppercase alphanumeric characters.");
-      return false;
-    }
-    if (!/^[0-9]{10}$/.test(formData.mobileNumber)) {
-      alert("Mobile number must be 10 digits.");
-      return false;
-    }
-    return true;
-  };
+  useEffect(() => {
+    const newErrors = {};
+    Object.keys(formData).forEach((key) => {
+      if (key !== "guarantor" && key !== "photo") {
+        const error = validateField(key, formData[key]);
+        if (error) newErrors[key] = error;
+      }
+    });
+    Object.keys(formData.guarantor).forEach((key) => {
+      const error = validateField(key, formData.guarantor[key]);
+      if (error) newErrors[`guarantor.${key}`] = error;
+    });
+    setErrors(newErrors);
+  }, [formData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (Object.keys(errors).length > 0) {
+      alert("Please fix the errors in the form.");
+      return;
+    }
 
     const token = localStorage.getItem("crp_token");
     const formDataToSend = new FormData();
@@ -86,12 +106,16 @@ const AddMember = () => {
     });
 
     try {
-      const res = await axios.post("http://localhost:5000/api/member", formDataToSend, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await axios.post(
+        "http://localhost:5000/api/member",
+        formDataToSend,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       alert("Member added successfully");
       console.log(res.data);
       // window.location.reload();
@@ -100,34 +124,37 @@ const AddMember = () => {
     }
   };
 
-
   return (
     <div className="w-full h-[100vh] overflow-y-auto ">
       <h1 className="text-2xl mt-4 ml-16">Add Member</h1>
-      <form onSubmit={handleSubmit} className=" w-full mx-auto p-6 bg-white rounded-lg shadow-lg space-y-4 md:w-[95%] lg:w-[90%] mt-8">
-
+      <form
+        onSubmit={handleSubmit}
+        className=" w-full mx-auto p-6 bg-white rounded-lg shadow-lg space-y-4 md:w-[95%] lg:w-[90%] mt-8"
+      >
         <div className="w-full md:flex md:gap-4">
           <div className="mb-4 lg:w-[50%]">
             <label htmlFor="name">Name</label>
             <input
               type="text"
               name="name"
-              placeholder="Name"
+              placeholder="Full Name"
               onChange={handleChange}
               required
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 "
             />
+            {errors.name && <p className="text-red-500">{errors.name}</p>}
           </div>
           <div className="lg:w-[50%]">
             <label htmlFor="address">Address</label>
             <input
               type="text"
               name="address"
-              placeholder="Address"
+              placeholder="Full Address"
               onChange={handleChange}
               required
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
+            {errors.address && <p className="text-red-500">{errors.address}</p>}
           </div>
         </div>
 
@@ -141,6 +168,9 @@ const AddMember = () => {
               required
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
+            {errors.dateOfBirth && (
+              <p className="text-red-500">{errors.dateOfBirth}</p>
+            )}
           </div>
 
           <div className="lg:w-[50%]">
@@ -148,11 +178,14 @@ const AddMember = () => {
             <input
               type="text"
               name="aadharNo"
-              placeholder="Aadhar No"
+              placeholder="12-digit Aadhar No"
               onChange={handleChange}
               required
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
+            {errors.aadharNo && (
+              <p className="text-red-500">{errors.aadharNo}</p>
+            )}
           </div>
         </div>
 
@@ -162,22 +195,24 @@ const AddMember = () => {
             <input
               type="text"
               name="panNo"
-              placeholder="PAN No"
+              placeholder="10-character PAN No"
               onChange={handleChange}
               required
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
+            {errors.panNo && <p className="text-red-500">{errors.panNo}</p>}
           </div>
           <div className="mb-4 md:w-[70%] lg:w-[50%]">
-            <label htmlFor="panNo">Acc No</label>
+            <label htmlFor="accNo">Acc No</label>
             <input
               type="text"
               name="accNo"
-              placeholder="Acc No"
+              placeholder="Account No"
               onChange={handleChange}
               required
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
+            {errors.accNo && <p className="text-red-500">{errors.accNo}</p>}
           </div>
 
           <div className="lg:w-[50%]">
@@ -185,11 +220,14 @@ const AddMember = () => {
             <input
               type="text"
               name="mobileNumber"
-              placeholder="Mobile Number"
+              placeholder="10-digit Mobile No"
               onChange={handleChange}
               required
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
+            {errors.mobileNumber && (
+              <p className="text-red-500">{errors.mobileNumber}</p>
+            )}
           </div>
         </div>
 
@@ -201,22 +239,28 @@ const AddMember = () => {
               <input
                 type="text"
                 name="name"
-                placeholder="Guarantor Name"
+                placeholder="Guarantor Full Name"
                 onChange={handleGuarantorChange}
                 required
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
+              {errors["guarantor.name"] && (
+                <p className="text-red-500">{errors["guarantor.name"]}</p>
+              )}
             </div>
             <div className="lg:w-[50%]">
               <label htmlFor="guarantorMobileNo">Guarantor Mobile No</label>
               <input
                 type="text"
                 name="mobileNo"
-                placeholder="Guarantor Mobile"
+                placeholder="10-digit Mobile No"
                 onChange={handleGuarantorChange}
                 required
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
+              {errors["guarantor.mobileNo"] && (
+                <p className="text-red-500">{errors["guarantor.mobileNo"]}</p>
+              )}
             </div>
           </div>
         </div>
@@ -239,6 +283,9 @@ const AddMember = () => {
               <option value="Brother">Brother</option>
               <option value="Sister">Sister</option>
             </select>
+            {errors["guarantor.relation"] && (
+              <p className="text-red-500">{errors["guarantor.relation"]}</p>
+            )}
           </div>
           <div className="mb-4 lg:w-[50%]">
             <label htmlFor="guarantorPhoto"> Photo</label>
@@ -249,6 +296,7 @@ const AddMember = () => {
               required
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
+            {errors.photo && <p className="text-red-500">{errors.photo}</p>}
           </div>
         </div>
         <div className="w-full md:flex md:flex-col md:gap-4">
@@ -263,6 +311,11 @@ const AddMember = () => {
                 required
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
+              {errors["guarantor.guarantorPhoto"] && (
+                <p className="text-red-500">
+                  {errors["guarantor.guarantorPhoto"]}
+                </p>
+              )}
             </div>
             <div className="mb-4 lg:w-[50%]">
               <label htmlFor="guarantorCheque">Guarantor Cheque</label>
@@ -273,6 +326,11 @@ const AddMember = () => {
                 required
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
+              {errors["guarantor.guarantorCheque"] && (
+                <p className="text-red-500">
+                  {errors["guarantor.guarantorCheque"]}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -286,6 +344,9 @@ const AddMember = () => {
                 onChange={handleFileChange}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
+              {errors.extraDocuments_0 && (
+                <p className="text-red-500">{errors.extraDocuments_0}</p>
+              )}
             </div>
             <div className="mb-4 md:w-[48%]">
               <input
@@ -294,6 +355,9 @@ const AddMember = () => {
                 onChange={handleFileChange}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
+              {errors.extraDocuments_1 && (
+                <p className="text-red-500">{errors.extraDocuments_1}</p>
+              )}
             </div>
             <div className="mb-4 md:w-[48%]">
               <input
@@ -302,6 +366,9 @@ const AddMember = () => {
                 onChange={handleFileChange}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
+              {errors.extraDocuments_2 && (
+                <p className="text-red-500">{errors.extraDocuments_2}</p>
+              )}
             </div>
             <div className="mb-4 md:w-[48%]">
               <input
@@ -310,10 +377,12 @@ const AddMember = () => {
                 onChange={handleFileChange}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
+              {errors.extraDocuments_3 && (
+                <p className="text-red-500">{errors.extraDocuments_3}</p>
+              )}
             </div>
           </div>
         </div>
-
 
         <button
           type="submit"

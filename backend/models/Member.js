@@ -15,28 +15,28 @@ const guarantorSchema = new mongoose.Schema({
   },
   photo: {
     type: String,
-    required: true,
+    // required: true,
   },
   chequePhoto: {
     type: String,
-    required: true,
+    // required: true,
   },
   // extraDocuments: [String],
   extraDocuments_0: {
-    type:String,
-    required:true
+    type: String,
+    // required:true
   },
   extraDocuments_1: {
-    type:String,
-    required:true
+    type: String,
+    // required:true
   },
   extraDocuments_2: {
-    type:String,
-    required:true
+    type: String,
+    // required:true
   },
   extraDocuments_3: {
-    type:String,
-    required:true
+    type: String,
+    // required:true
   },
 });
 
@@ -71,7 +71,7 @@ const memberSchema = new mongoose.Schema(
     },
     photo: {
       type: String,
-      required: true,
+      // required: true,
     },
     aadharNo: {
       type: String,
@@ -90,11 +90,12 @@ const memberSchema = new mongoose.Schema(
     mobileNumber: {
       type: String,
       required: true,
+      unique: true,
     },
     isNPA: {
       type: String,
-      enum: ['YES', 'NO'],
-      default: 'NO'
+      enum: ["YES", "NO"],
+      default: "NO",
     },
     guarantor: guarantorSchema,
     status: {
