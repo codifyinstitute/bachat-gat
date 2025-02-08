@@ -4,15 +4,19 @@ import DepositSlip from "../../components/GenerateInvoice";
 import { toWords } from "number-to-words";
 
 const PaymentPage = () => {
-  const [collectionId, setCollectionId] = useState("");
+  const [collections, setCollections] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [message, setMessage] = useState("");
+
+  // Dropdown selections
+  const [selectedGroup, setSelectedGroup] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   const [memberId, setMemberId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
   const [transactionId, setTransactionId] = useState("");
   const [remarks, setRemarks] = useState("");
-  const [message, setMessage] = useState("");
-  const [collections, setCollections] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
 
+  // Deposit Slip Data
   const [showDepositSlip, setShowDepositSlip] = useState(false);
   const [depositSlipData, setDepositSlipData] = useState({
     date: "",
@@ -21,23 +25,6 @@ const PaymentPage = () => {
     amount: "",
     amountInWords: "",
   });
-
-  // Convert number to Indian currency words
-  const convertNumberToWords = (number) => {
-    const [intPart, decimalPart] = number.toString().split('.');
-
-    let words = toWords(parseInt(intPart));
-    words = words.charAt(0).toUpperCase() + words.slice(1);
-
-    if (decimalPart) {
-      const paise = toWords(parseInt(decimalPart));
-      words += ' Rupees and ' + paise + ' Paise';
-    } else {
-      words += ' Rupees Only';
-    }
-
-    return words;
-  };
 
   // Fetch collections when the component mounts
   useEffect(() => {
@@ -54,31 +41,49 @@ const PaymentPage = () => {
     fetchCollections();
   }, []);
 
+  // Convert number to words (Indian format)
+  const convertNumberToWords = (number) => {
+    const [intPart, decimalPart] = number.toString().split(".");
+    let words = toWords(parseInt(intPart));
+    words = words.charAt(0).toUpperCase() + words.slice(1);
+    words += decimalPart ? ` Rupees and ${toWords(parseInt(decimalPart))} Paise` : " Rupees Only";
+    return words;
+  };
+
+  // Extract unique groups
+  const uniqueGroups = [...new Set(collections.map((collection) => collection.groupId.name))];
+
+  // Filter collections based on selected group
+  const filteredCollections = collections.filter((collection) => collection.groupId.name === selectedGroup);
+
+  // Extract unique collection dates for the selected group
+  const uniqueDates = [...new Set(filteredCollections.map((collection) => new Date(collection.collectionDate).toLocaleDateString()))];
+
+  // Find the collection that matches both the selected group and date
+  const selectedCollection = filteredCollections.find(
+    (collection) => new Date(collection.collectionDate).toLocaleDateString() === selectedDate
+  );
+
+  // Get members of the selected collection
+  const members = selectedCollection ? selectedCollection.payments.map((payment) => payment.memberId) : [];
+
   const handlePayment = async (e) => {
     e.preventDefault();
-
     try {
       const crpToken = localStorage.getItem("crp_token");
-
       if (!crpToken) {
         setMessage("No CRP token found");
         return;
       }
 
-      const selectedCollection = collections.find((col) => col._id === collectionId);
-      if (!selectedCollection) {
-        setMessage("Collection not found");
-        return;
-      }
-
-      const selectedPayment = selectedCollection.payments.find((payment) => payment.memberId?._id === memberId);
+      const selectedPayment = selectedCollection?.payments.find((payment) => payment.memberId?._id === memberId);
       if (!selectedPayment) {
         setMessage("Member not found in the selected collection");
         return;
       }
 
       const response = await axios.post(
-        `http://localhost:5000/api/collection/${collectionId}/payments/${memberId}`,
+        `http://localhost:5000/api/collection/${selectedCollection._id}/payments/${memberId}`,
         { paymentMethod, transactionId, remarks },
         {
           headers: {
@@ -88,23 +93,19 @@ const PaymentPage = () => {
         }
       );
 
-      const memberdata = await axios.get(`http://localhost:5000/api/member/${selectedPayment.memberId._id}`, {
+      const memberData = await axios.get(`http://localhost:5000/api/member/${selectedPayment.memberId._id}`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${crpToken}`,
         },
-      })
-
-      if (!memberdata) console.log("error while fetching member account no.")
-
-
+      });
 
       setDepositSlipData({
         date: new Date().toLocaleDateString(),
-        accountNumber: memberdata.data.accNo || "N/A",
+        accountNumber: memberData.data.accNo || "N/A",
         name: selectedPayment.memberId.name,
         amount: selectedPayment.totalAmount.toFixed(2),
-        amountInWords: convertNumberToWords(selectedPayment.totalAmount)
+        amountInWords: convertNumberToWords(selectedPayment.totalAmount),
       });
 
       setShowDepositSlip(true);
@@ -125,36 +126,63 @@ const PaymentPage = () => {
         <p>Loading collections...</p>
       ) : (
         <form onSubmit={handlePayment} className="space-y-4">
+          {/* Select Group */}
           <select
-            value={collectionId}
-            onChange={(e) => setCollectionId(e.target.value)}
+            value={selectedGroup}
+            onChange={(e) => {
+              setSelectedGroup(e.target.value);
+              setSelectedDate("");
+              setMemberId("");
+            }}
             className="w-full p-2 border rounded"
             required
           >
-            <option value="">Select Collection</option>
-            {collections.map((collection) => (
-              <option key={collection._id} value={collection._id}>
-                {collection.groupId.name} - {new Date(collection.collectionDate).toLocaleDateString()}
+            <option value="">Select Group</option>
+            {uniqueGroups.map((groupName) => (
+              <option key={groupName} value={groupName}>
+                {groupName}
               </option>
             ))}
           </select>
 
-          <select
-            value={memberId}
-            onChange={(e) => setMemberId(e.target.value)}
-            className="w-full p-2 border rounded"
-            required
-          >
-            <option value="">Select Member</option>
-            {collections
-              .find((collection) => collection._id === collectionId)?.payments
-              .map((payment) => (
-                <option key={payment.memberId?._id} value={payment.memberId?._id}>
-                  {payment.memberId?.name || "Unnamed Member"}
+          {/* Select Date (only if a group is selected) */}
+          {selectedGroup && (
+            <select
+              value={selectedDate}
+              onChange={(e) => {
+                setSelectedDate(e.target.value);
+                setMemberId("");
+              }}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="">Select Date</option>
+              {uniqueDates.map((date) => (
+                <option key={date} value={date}>
+                  {date}
                 </option>
               ))}
-          </select>
+            </select>
+          )}
 
+          {/* Select Member (only if a date is selected) */}
+          {selectedDate && (
+            <select
+              value={memberId}
+              onChange={(e) => setMemberId(e.target.value)}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="">Select Member</option>
+              {members.map((member) => (
+                <option key={member._id} value={member._id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {/* Payment Details */}
           <select
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}
@@ -179,10 +207,7 @@ const PaymentPage = () => {
             onChange={(e) => setRemarks(e.target.value)}
             className="w-full p-2 border rounded"
           />
-          <button
-            type="submit"
-            className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button type="submit" className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700">
             Submit Payment
           </button>
         </form>
@@ -191,10 +216,7 @@ const PaymentPage = () => {
       {showDepositSlip && (
         <div className="fixed inset-0 bg-gray-100 flex justify-center items-center z-50">
           <div className="relative bg-white p-4 rounded-lg">
-            <button
-              onClick={closeDepositSlip}
-              className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded"
-            >
+            <button onClick={closeDepositSlip} className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded">
               Close
             </button>
             <DepositSlip data={depositSlipData} />

@@ -51,6 +51,7 @@ const AllCRP = () => {
                 <th className="py-3 px-4">CRP Name</th>
                 <th className="py-3 px-4">Mobile</th>
                 <th className="py-3 px-4">Email</th>
+                <th className="py-3 px-4">Password</th>
               </tr>
             </thead>
             <tbody>
@@ -62,6 +63,7 @@ const AllCRP = () => {
                   <td className="py-3 px-4">{member.name}</td>
                   <td className="py-3 px-4">{member.mobile}</td>
                   <td className="py-3 px-4">{member.email}</td>
+                  <td className="py-3 px-4">{member.password}</td>
 
                 </tr>
               ))}

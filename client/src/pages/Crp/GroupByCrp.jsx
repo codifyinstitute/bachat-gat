@@ -8,6 +8,7 @@ const CrpGroupsList = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCRP, setShowCRP] = useState(false);
+  const [savingsData,setSavingsData] = useState({})
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState(null);
   const [groups, setGroups] = useState([]);
@@ -44,11 +45,29 @@ const CrpGroupsList = () => {
 
       setGroups(activeGroups);  // Set only the active groups
       setLoansData(loansRes.data);
+      fetchSavingsData(activeGroups)
       setLoading(false);
     } catch (err) {
       setError("Error fetching data");
       setLoading(false);
     }
+  };
+
+  const fetchSavingsData = async (groups) => {
+    const savings = {};
+    for (const group of groups) {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/collection/saving/${group._id}`);
+        if (res.status === 200 && res.data.savingsAmount !== undefined) {
+          savings[group._id] = res.data.savingsAmount; // Ensure we extract the correct value
+        } else {
+          savings[group._id] = "N/A"; // Handle cases where response is unexpected
+        }
+      } catch {
+        savings[group._id] = "Not Available"; // Graceful handling of 404
+      }
+    }
+    setSavingsData(savings);
   };
 
 
@@ -79,56 +98,42 @@ const CrpGroupsList = () => {
 
 
 
-  const handleDeleteGroup = async (groupId, e) => {
-    e.stopPropagation(); // Prevent row expansion when clicking delete
+  const handleDeactivateGroup = async (groupId, e) => {
+    e.stopPropagation(); // Prevent row expansion when clicking deactivate
 
-    if (!window.confirm("Are you sure you want to delete all members and set the group status to inactive?")) {
-      return;
+    if (!window.confirm("Are you sure you want to deactivate this group and set all members to active?")) {
+        return;
     }
 
     try {
-      setDeleteError(null);
-      const crptoken = localStorage.getItem("admin_token");
+        setDeleteError(null);
+        const crptoken = localStorage.getItem("admin_token");
 
-      // Fetch group data (including members)
-      const groupData = await axios.get(`http://localhost:5000/api/groups/${groupId}`, {
-        headers: {
-          Authorization: `Bearer ${crptoken}`,
-          "Content-Type": "application/json",
-        },
-      });
+        // Send request to deactivate the group
+        const response = await axios.delete(
+            `http://localhost:5000/api/groups/del/${groupId}`,
+            {}, // No request body needed
+            {
+                headers: {
+                    Authorization: `Bearer ${crptoken}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
 
-      const group = groupData.data;
-      const memberIds = group.members.map(m => m._id || m.member); // Ensure correct ID field
+        alert(response.data.message); // Show success message from backend
 
-      if (memberIds.length === 0) {
-        throw new Error("No members to delete in this group.");
-      }
-
-      console.log('Member IDs to delete:', memberIds); // Log the member IDs to check
-
-      axios.delete(`http://localhost:5000/api/groups/${groupId}/`, {
-        headers: {
-          // Authorization: `Bearer ${crptoken}`,
-          "Content-Type": "application/json",
-        },
-      })
-      await axios.put(`http://localhost:5000/api/groups/${groupId}`, {
-        status: "inactive",
-      }, {
-        headers: {
-          Authorization: `Bearer ${crptoken}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      // Optionally, refresh the group and loans data
-      await fetchGroupsAndLoans();
+        // Refresh group and loan data
+        await fetchGroupsAndLoans();
 
     } catch (error) {
-      alert("Group members removed and group status set to inactive.");
+        console.error("Error deactivating group:", error.response?.data || error.message);
+        alert(error.response?.data?.message || "Failed to deactivate group.");
     }
-  };
+};
+
+
+
   function formatDate(isoDate) {
     const date = new Date(isoDate);
     const day = String(date.getUTCDate()).padStart(2, '0');
@@ -141,8 +146,8 @@ const CrpGroupsList = () => {
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
-  console.log(loansData)
-  console.log(groups)
+  console.log("loans",loansData)
+  console.log("grps",groups)
 
   return (
     <div className="container mx-auto p-4">
@@ -194,6 +199,7 @@ const CrpGroupsList = () => {
                 <th className="p-3 text-left">Group Name</th>
                 <th className="p-3 text-left">Address</th>
                 <th className="p-3 text-left">Loan Amt</th>
+                <th className="p-3 text-left">Saving Amt</th>
                 {showCRP && <th className="p-3 text-left">CRP Name</th>}
                 {showWhatsApp && <th className="p-3 text-left">WhatsApp Link</th>}
                 <th className="p-3 text-left">Action</th>
@@ -216,10 +222,11 @@ const CrpGroupsList = () => {
                       </td>
                       {showCRP && <td className="p-3">{group.createdBy.name || "N/A"}</td>}
                       {showWhatsApp && <td className="p-3">{group.whatsappGroupLink || "N/A"}</td>}
+                      <td className="p-3">{savingsData[group._id] || "Loading..."}</td>
                       <td className="p-3">
                         <Trash2
                           className="text-red-500 cursor-pointer"
-                          onClick={(e) => handleDeleteGroup(group._id, e)}
+                          onClick={(e) => handleDeactivateGroup(group._id, e)}
                         />
                       </td>
                     </tr>

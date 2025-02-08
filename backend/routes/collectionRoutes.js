@@ -35,5 +35,6 @@ router.post(
 );
 
 router.post('/forclose/:loanId/:memberId',collectionController.forecloseLoan)
+router.get('/saving/:groupId',collectionController.getSavingsAmountByGroup)
 
 module.exports = router;

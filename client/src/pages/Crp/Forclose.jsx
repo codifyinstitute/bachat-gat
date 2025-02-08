@@ -60,7 +60,7 @@ const Forclose = () => {
 
             const response = await axios.post(
                 `http://localhost:5000/api/collection/forclose/${loanId}/${memberId}`,
-                { forcloseAmount }, // Pass the forclosure amount in the request body
+                { forcloseAmount: Number(forcloseAmount) }, // Pass the forclosure amount in the request body
                 {
                     headers: {
                         Authorization: `Bearer ${crptoken}`,

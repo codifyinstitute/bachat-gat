@@ -167,7 +167,7 @@ exports.getAllMembersCreatedByCRP = async (req, res) => {
 
 exports.getAllCRPs = async (req, res) => {
   try {
-    const crps = await CRP.find().select("-password"); // Exclude passwords for security
+    const crps = await CRP.find(); // Exclude passwords for security
     res.json({
       message: "CRPs fetched successfully",
       crps,

@@ -1,5 +1,6 @@
 const Group = require("../models/Group");
 const Member = require("../models/Member");
+const Loan = require("../models/Loan")
 
 const groupController = {
 
@@ -369,34 +370,71 @@ const groupController = {
   //   }
   // },
 
+  // deactivateGroup: async (req, res) => {
+  //   try {
+  //     const group = await Group.findById(req.params.id);
+
+  //     if (!group) {
+  //       return res.status(404).json({ message: "Group not found" });
+  //     }
+
+  //     // Mark group as inactive
+  //     group.status = "inactive";
+  //     await group.save();
+
+  //     // Extract all member IDs from the group
+  //     const memberIds = group.members.map((m) => m.member);
+
+  //     // Update all members' status to "active"
+  //     await Member.updateMany(
+  //       { _id: { $in: memberIds } },
+  //       { $set: { status: "active" } }
+  //     );
+
+  //     res.json({
+  //       message: "Group deactivated successfully, members set to active",
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   deactivateGroup: async (req, res) => {
     try {
-      const group = await Group.findById(req.params.id);
+        const groupId = req.params.id;
 
-      if (!group) {
-        return res.status(404).json({ message: "Group not found" });
-      }
+        // Retrieve the group by ID
+        const group = await Group.findById(groupId);
+        if (!group) {
+            return res.status(404).json({ message: "Group not found" });
+        }
 
-      // Mark group as inactive
-      group.status = "inactive";
-      await group.save();
+        // Find all loans associated with the group
+        const loans = await Loan.find({ groupId });
 
-      // Extract all member IDs from the group
-      const memberIds = group.members.map((m) => m.member);
+        // Check if all loans have a status of 'closed'
+        const allLoansCompleted = !loans || loans.every(loan => loan.status === "closed");
 
-      // Update all members' status to "active"
-      await Member.updateMany(
-        { _id: { $in: memberIds } },
-        { $set: { status: "active" } }
-      );
+        if (!allLoansCompleted) {
+            return res.status(400).json({ message: "Loans are pending; cannot deactivate group" });
+        }
 
-      res.json({
-        message: "Group deactivated successfully, members set to active",
-      });
+        // Set group status to 'inactive' instead of deleting it
+        await Group.findByIdAndUpdate(groupId, { status: "inactive" });
+
+        // Update all members' status to 'active'
+        const memberIds = group.members.map(m => m.member);
+        await Member.updateMany(
+            { _id: { $in: memberIds } },
+            { $set: { status: "active" } }
+        );
+
+        res.json({ message: "Group deactivated successfully, members set to active" });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  },
+}
+
 };
 
 module.exports = groupController;
