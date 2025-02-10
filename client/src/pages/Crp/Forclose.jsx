@@ -50,14 +50,20 @@ const Forclose = () => {
     };
 
     const handleForclosure = async (loanId, memberId) => {
+        const isConfirmed = window.confirm("Are you sure you want to foreclose this installment?");
+    
+        if (!isConfirmed) {
+            return; // If the user doesn't confirm, exit the function
+        }
+    
         try {
             const crptoken = localStorage.getItem("crp_token");
-
+    
             if (!crptoken) {
                 setError("No authentication token found. Please log in.");
                 return;
             }
-
+    
             const response = await axios.post(
                 `http://localhost:5000/api/collection/forclose/${loanId}/${memberId}`,
                 { forcloseAmount: Number(forcloseAmount) }, // Pass the forclosure amount in the request body
@@ -68,16 +74,18 @@ const Forclose = () => {
                     },
                 }
             );
-
+    
             if (response.status === 200) {
                 alert("Forclosure action successful");
                 // Handle success (e.g., update state or show success message)
+                window.location.reload()
             }
         } catch (err) {
             console.error("Forclosure request failed:", err);
             setError("Error performing forclosure action");
         }
     };
+    
 
     useEffect(() => {
         fetchGroupsAndLoans();
