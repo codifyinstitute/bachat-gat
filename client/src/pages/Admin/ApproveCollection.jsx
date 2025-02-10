@@ -13,7 +13,7 @@ const ApproveCollection = () => {
       try {
         const token = localStorage.getItem("admin_token");
         if (!token) {
-          setError("No admin token found");
+          alert("No admin token found");
           setLoading(false);
           return;
         }
@@ -36,10 +36,10 @@ const ApproveCollection = () => {
         }
       } catch (error) {
         if (error.response) {
-          setError(`Error: ${error.response.status} - ${error.response.data.message || "Failed to fetch collections"}`);
+          alert(`Error: ${error.response.status} - ${error.response.data.message || "Failed to fetch collections"}`);
           console.error("Response Error:", error.response);
         } else {
-          setError("Failed to fetch collections");
+          alert("Failed to fetch collections");
         }
       } finally {
         setLoading(false);
@@ -56,7 +56,7 @@ const ApproveCollection = () => {
     try {
       const token = localStorage.getItem("admin_token");
       if (!token) {
-        setError("No admin token found");
+        alert("No admin token found");
         return;
       }
 
@@ -79,10 +79,10 @@ const ApproveCollection = () => {
     } catch (error) {
       if (error.response) {
         // Log the response error for debugging
-        setError(`Error: ${error.response.status} - ${error.response.data.message || "Failed to approve collection"}`);
+        alert(`Error: ${error.response.status} - ${error.response.data.message || "Failed to approve collection"}`);
         console.error("Response Error on Approve:", error.response);
       } else {
-        setError("Failed to approve collection");
+        alert("Failed to approve collection");
       }
     }
   };
@@ -117,12 +117,12 @@ const ApproveCollection = () => {
                   <td className="px-4 py-2">{collection.groupId?.name || "N/A"}</td>
                   <td className="px-4 py-2">{collection.totalEmiCollected}</td>
                   <td className="px-4 py-2">{new Date(collection.collectionDate).toLocaleDateString()}</td>
-                  <td className="px-4 py-2 text-center">
+                  <td className="px-4 py-2 text-center flex gap-4">
                     <button
                       onClick={() => toggleDetails(collection._id)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded"
+                      className="mt-2 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded"
                     >
-                      {selectedCollection === collection._id ? "Hide Details" : "Show Details"}
+                      {selectedCollection === collection._id ? "Hide " : "Show "}
                     </button>
                     <button
                       onClick={() => handleApprove(collection._id)}
@@ -151,7 +151,7 @@ const ApproveCollection = () => {
                           </thead>
                           <tbody>
                             {collection.payments.map((payment, index) => (
-                              <tr key={index} className="border-t">
+                              <tr key={index} className="border-t text-center">
                                 <td className="px-4 py-2">{payment.installmentNumber}</td>
                                 <td className="px-4 py-2">{payment.emiAmount}</td>
                                 <td className="px-4 py-2">{payment.savingsAmount}</td>

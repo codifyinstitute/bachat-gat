@@ -183,7 +183,6 @@
 //     }
 //   },
 
-
 //   // Delete member
 //   deleteMember: async (req, res) => {
 //     try {
@@ -208,12 +207,10 @@
 
 // };
 
-
 // module.exports = memberController;
 const Member = require("../models/Member");
 
 const memberController = {
-
   createMember: async (req, res) => {
     try {
       const {
@@ -228,16 +225,33 @@ const memberController = {
         guarantor,
       } = req.body;
 
+      // Check if mobileNumber already exists
+      const existingMember = await Member.findOne({ mobileNumber });
+      if (existingMember) {
+        return res.status(400).json({
+          message:
+            "Mobile number already exists. Please provide a unique mobile number.",
+        });
+      }
+
       // Handle file uploads
       const photo = req.files.photo[0].path;
       const guarantorPhoto = req.files.guarantorPhoto[0].path;
       const guarantorCheque = req.files.guarantorCheque[0].path;
 
       // Handle extraDocuments specifically
-      const extraDocuments_0 = req.files.extraDocuments_0 ? req.files.extraDocuments_0[0].path : null;
-      const extraDocuments_1 = req.files.extraDocuments_1 ? req.files.extraDocuments_1[0].path : null;
-      const extraDocuments_2 = req.files.extraDocuments_2 ? req.files.extraDocuments_2[0].path : null;
-      const extraDocuments_3 = req.files.extraDocuments_3 ? req.files.extraDocuments_3[0].path : null;
+      const extraDocuments_0 = req.files.extraDocuments_0
+        ? req.files.extraDocuments_0[0].path
+        : null;
+      const extraDocuments_1 = req.files.extraDocuments_1
+        ? req.files.extraDocuments_1[0].path
+        : null;
+      const extraDocuments_2 = req.files.extraDocuments_2
+        ? req.files.extraDocuments_2[0].path
+        : null;
+      const extraDocuments_3 = req.files.extraDocuments_3
+        ? req.files.extraDocuments_3[0].path
+        : null;
 
       const referredBy = {
         crpName: req.user.name,
@@ -277,12 +291,14 @@ const memberController = {
       if (error.code === 11000) {
         if (error.keyValue.aadharNo) {
           return res.status(400).json({
-            message: "Aadhar number already exists. Please provide a unique Aadhar number.",
+            message:
+              "Aadhar number already exists. Please provide a unique Aadhar number.",
           });
         }
         if (error.keyValue.panNo) {
           return res.status(400).json({
-            message: "PAN number already exists. Please provide a unique PAN number.",
+            message:
+              "PAN number already exists. Please provide a unique PAN number.",
           });
         }
       }
@@ -311,16 +327,20 @@ const memberController = {
 
         // Handle extraDocuments specifically
         if (req.files.extraDocuments_0) {
-          updates["guarantor.extraDocuments_0"] = req.files.extraDocuments_0[0].path;
+          updates["guarantor.extraDocuments_0"] =
+            req.files.extraDocuments_0[0].path;
         }
         if (req.files.extraDocuments_1) {
-          updates["guarantor.extraDocuments_1"] = req.files.extraDocuments_1[0].path;
+          updates["guarantor.extraDocuments_1"] =
+            req.files.extraDocuments_1[0].path;
         }
         if (req.files.extraDocuments_2) {
-          updates["guarantor.extraDocuments_2"] = req.files.extraDocuments_2[0].path;
+          updates["guarantor.extraDocuments_2"] =
+            req.files.extraDocuments_2[0].path;
         }
         if (req.files.extraDocuments_3) {
-          updates["guarantor.extraDocuments_3"] = req.files.extraDocuments_3[0].path;
+          updates["guarantor.extraDocuments_3"] =
+            req.files.extraDocuments_3[0].path;
         }
       }
 
@@ -387,14 +407,13 @@ const memberController = {
       res.json({
         message: "NPA status updated",
         member,
-        isNPA: member.isNPA // Explicitly return the new value
+        isNPA: member.isNPA, // Explicitly return the new value
       });
     } catch (error) {
       console.error("Backend error:", error); // Add logging
       res.status(500).json({ message: error.message });
     }
   },
-
 
   // Delete member
   deleteMember: async (req, res) => {
@@ -406,7 +425,9 @@ const memberController = {
       }
 
       if (member.status === "inactive") {
-        return res.status(400).json({ message: "This member is in a group and cannot be deleted" });
+        return res
+          .status(400)
+          .json({ message: "This member is in a group and cannot be deleted" });
       }
 
       await member.deleteOne(); // Ensure deletion is awaited
@@ -417,8 +438,6 @@ const memberController = {
       res.status(500).json({ message: "Internal Server Error" });
     }
   },
-
 };
-
 
 module.exports = memberController;

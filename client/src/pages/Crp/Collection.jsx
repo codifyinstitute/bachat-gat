@@ -21,7 +21,7 @@ const CollectionForm = () => {
         });
         setGroups(response.data);
       } catch (error) {
-        toast.error("Failed to fetch groups");
+        alert.error("Failed to fetch groups");
         console.error("Error fetching groups:", error);
       }
     };
@@ -34,7 +34,7 @@ const CollectionForm = () => {
 
     const crpToken = localStorage.getItem("crp_token");
     if (!crpToken) {
-      toast.error("No CRP token found!");
+      alert("No CRP token found!");
       return;
     }
 
@@ -60,12 +60,9 @@ const CollectionForm = () => {
 
       if (!response.ok) {
         if (result.message === "Loan already sanctioned") {
-          toast.warning("This loan has already been sanctioned.");
+          // alert("This loan has already been sanctioned.");
           alert("This loan has already been sanctioned.")
-        } else {
-          toast.error("Failed to submit collection");
-          alert('Failed to Submit.')
-        }
+        } 
         throw new Error(result.message || "Failed to submit collection");
       }
 
@@ -73,7 +70,7 @@ const CollectionForm = () => {
       alert("Collection Successfully Submitted")
       console.log(result);
     } catch (error) {
-      alert("Loan is not Approved for this Collection")
+      alert( error)
       console.error("Error submitting collection:", error);
     }
   };

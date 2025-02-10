@@ -58,7 +58,6 @@ const adminController = {
         { expiresIn: "24h" }
       );
 
-
       res.json({ token });
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -70,8 +69,19 @@ const adminController = {
     try {
       const { name, mobile, email, username, password } = req.body;
 
+      // Check if email, username, or mobile already exists (to prevent duplicate key error)
+      const existingCRP = await CRP.findOne({
+        $or: [{ email }, { mobile }],
+      });
+
+      if (existingCRP) {
+        return res.status(400).json({
+          message: "Email or Mobile number already in use",
+        });
+      }
+
       // Hash the password using bcrypt before saving it to the database
-      // const hashedPassword = await bcrypt.hash(password, 10); // 10 is the saltRounds (default recommended)
+      const hashedPassword = await bcrypt.hash(password, 10);
 
       // Create a new CRP document with hashed password
       const crp = new CRP({
@@ -83,12 +93,13 @@ const adminController = {
         createdBy: req.user.id,
       });
 
-
       await crp.save();
-      console.log(req.body);
       res.status(201).json({ message: "CRP created successfully", crp });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      if (error.code === 11000) {
+        return res.status(400).json({ message: "Duplicate entry detected" });
+      }
+      res.status(500).json({ message: "Server error" });
     }
   },
 };

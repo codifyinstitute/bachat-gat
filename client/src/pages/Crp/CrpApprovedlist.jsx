@@ -58,7 +58,7 @@ const CrpApprovedlist = () => {
 
                                 {/* Expanded Loan Details */}
                                 {expandedLoanId === loan._id && (
-                                    <div className="mt-4 md:flex space-y-2">
+                                    <div className="mt-4 md:flex space-y-2 justify-between p-4">
                                         <div>
                                             <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Total Amount:</strong> ₹{loan.totalAmount}</p>
                                             <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Per Member Amount:</strong> ₹{loan.perMemberAmount}</p>

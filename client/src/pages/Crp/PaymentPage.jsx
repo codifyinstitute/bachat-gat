@@ -173,10 +173,12 @@ const PaymentPage = () => {
               className="w-full p-2 border rounded"
               required
             >
-              <option value="">Select Member</option>
+              <option value="">
+                Select Member
+              </option>
               {members.map((member) => (
                 <option key={member._id} value={member._id}>
-                  {member.name}
+                  {"Name: " + member.name} &nbsp; {"Mob: " + member.mobileNumber}
                 </option>
               ))}
             </select>
