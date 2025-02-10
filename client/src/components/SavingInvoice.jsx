@@ -7,12 +7,13 @@ import { generateReceiptNo } from '../utils/ReceiptNo';
 const SavingInvoice = ({
     data = {
         date: "N/A",
-        accountNumber: "N/A",
-        name: "N/A",
+        membername: "N/A",
         amount: "N/A",
         amountInWords: "N/A",
         savingAmount: "N/A",
         groupName: "N/A",
+        termMonth: "N/A",
+        loanId:'N/A'
     },
 }) => {
     const slipRef = useRef(null);
@@ -48,7 +49,7 @@ const SavingInvoice = ({
                     backgroundColor: 'rgb(255, 255, 255)', // White
                     borderColor: 'rgb(209, 213, 219)', // Gray
                     width: '500px',
-                    height: '600px',
+                    height: '670px',
                 }}
             >
                 {/* Header */}
@@ -82,12 +83,14 @@ const SavingInvoice = ({
                         {[
                             { label: 'RECEIPT NO:', value: receiptNo },
                             { label: 'DATE:', value: data.date },
+                            { label: 'LOAN ID:', value: data.loanId },
                             { label: 'GROUP NAME:', value: data.groupName },
-                            { label: 'NAME:', value: data.name },
-                            { label: 'ACCOUNT NO:', value: data.accountNumber },
-                            { label: 'AMOUNT:', value: data.amount },
+                            { label: 'NAME:', value: data.membername },
+                            { label: 'SAVING AMOUNT PER MONTH:', value: data.amount },
+                            { label: 'TERM MONTH:', value: data.termMonth },
+                            { label: 'TOTAL SAVING AMOUNT:', value: data.savingAmount },
                             { label: 'IN WORDS:', value: data.amountInWords },
-                            { label: 'SAVING AMOUNT:', value: data.savingAmount },
+                            
                         ].map((row, index) => (
                             <tr className="border" key={index}>
                                 <td
