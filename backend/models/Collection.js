@@ -41,6 +41,10 @@ const paymentSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  latePaymentCharge:{
+    type:Number,
+    default:0
+  },
   paymentDate: {
     type: Date,
     default: Date.now,
@@ -48,14 +52,8 @@ const paymentSchema = new mongoose.Schema({
   paymentMethod: {
     type: String,
     enum: ["cash", "upi", "bank_transfer", "cheque"],
-    // required: true,
   },
   transactionId: String,
-  // status: {
-  //   type: String,
-  //   enum: ["pending", "completed", "failed"],
-  //   default: "pending",
-  // },
   status: {
     type: String,
     enum: ["pending", "paid", "completed", "failed"], // Add "paid"

@@ -15,6 +15,7 @@ const PaymentPage = () => {
   const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
   const [transactionId, setTransactionId] = useState("");
   const [remarks, setRemarks] = useState("");
+  const [latePaymentCharge, setLatePaymentCharge] = useState(0);
 
   // Deposit Slip Data
   const [showDepositSlip, setShowDepositSlip] = useState(false);
@@ -30,11 +31,28 @@ const PaymentPage = () => {
   useEffect(() => {
     const fetchCollections = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/collection");
-        setCollections(response.data);
+        const crpToken = localStorage.getItem("crp_token");
+        if (!crpToken) {
+          setMessage("No CRP token found");
+          setIsLoading(false);
+          return;
+        }
+
+        const response = await axios.get("http://localhost:5000/api/collection", {
+          headers: {
+            Authorization: `Bearer ${crpToken}`,
+          },
+        });
+        
+        // Check if response.data exists and is an array
+        if (Array.isArray(response.data)) {
+          setCollections(response.data);
+        } else {
+          setMessage("Invalid data format received");
+        }
         setIsLoading(false);
       } catch (error) {
-        setMessage("Failed to load collections");
+        setMessage(error.response?.data?.message || "Failed to load collections");
         setIsLoading(false);
       }
     };
@@ -43,29 +61,40 @@ const PaymentPage = () => {
 
   // Convert number to words (Indian format)
   const convertNumberToWords = (number) => {
-    const [intPart, decimalPart] = number.toString().split(".");
-    let words = toWords(parseInt(intPart));
-    words = words.charAt(0).toUpperCase() + words.slice(1);
-    words += decimalPart ? ` Rupees and ${toWords(parseInt(decimalPart))} Paise` : " Rupees Only";
-    return words;
+    try {
+      const [intPart, decimalPart] = number.toString().split(".");
+      let words = toWords(parseInt(intPart));
+      words = words.charAt(0).toUpperCase() + words.slice(1);
+      words += decimalPart ? ` Rupees and ${toWords(parseInt(decimalPart))} Paise` : " Rupees Only";
+      return words;
+    } catch (error) {
+      return "Amount in words not available";
+    }
   };
 
-  // Extract unique groups
-  const uniqueGroups = [...new Set(collections.map((collection) => collection.groupId.name))];
+  // Extract unique groups (with null check)
+  const uniqueGroups = [...new Set(collections.filter(collection => 
+    collection?.groupId?.name).map(collection => collection.groupId.name))];
 
-  // Filter collections based on selected group
-  const filteredCollections = collections.filter((collection) => collection.groupId.name === selectedGroup);
+  // Filter collections based on selected group (with null check)
+  const filteredCollections = collections.filter((collection) => 
+    collection?.groupId?.name === selectedGroup);
 
   // Extract unique collection dates for the selected group
-  const uniqueDates = [...new Set(filteredCollections.map((collection) => new Date(collection.collectionDate).toLocaleDateString()))];
+  const uniqueDates = [...new Set(filteredCollections
+    .filter(collection => collection?.collectionDate)
+    .map((collection) => new Date(collection.collectionDate).toLocaleDateString()))];
 
   // Find the collection that matches both the selected group and date
   const selectedCollection = filteredCollections.find(
-    (collection) => new Date(collection.collectionDate).toLocaleDateString() === selectedDate
+    (collection) => collection?.collectionDate && 
+    new Date(collection.collectionDate).toLocaleDateString() === selectedDate
   );
 
-  // Get members of the selected collection
-  const members = selectedCollection ? selectedCollection.payments.map((payment) => payment.memberId) : [];
+  // Get members of the selected collection (with null check)
+  const members = selectedCollection?.payments
+    ?.filter(payment => payment?.memberId)
+    .map((payment) => payment.memberId) || [];
 
   const handlePayment = async (e) => {
     e.preventDefault();
@@ -76,7 +105,15 @@ const PaymentPage = () => {
         return;
       }
 
-      const selectedPayment = selectedCollection?.payments.find((payment) => payment.memberId?._id === memberId);
+      if (!selectedCollection?._id || !memberId) {
+        setMessage("Missing required payment information");
+        return;
+      }
+
+      const selectedPayment = selectedCollection.payments.find(
+        (payment) => payment?.memberId?._id === memberId
+      );
+      
       if (!selectedPayment) {
         setMessage("Member not found in the selected collection");
         return;
@@ -84,7 +121,12 @@ const PaymentPage = () => {
 
       const response = await axios.post(
         `http://localhost:5000/api/collection/${selectedCollection._id}/payments/${memberId}`,
-        { paymentMethod, transactionId, remarks },
+        { 
+          paymentMethod, 
+          transactionId, 
+          remarks,
+          latePaymentCharge: parseFloat(latePaymentCharge) || 0 
+        },
         {
           headers: {
             "Content-Type": "application/json",
@@ -93,33 +135,33 @@ const PaymentPage = () => {
         }
       );
 
-      const memberData = await axios.get(`http://localhost:5000/api/member/${selectedPayment.memberId._id}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${crpToken}`,
-        },
-      });
+      const memberData = await axios.get(
+        `http://localhost:5000/api/member/${selectedPayment.memberId._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${crpToken}`,
+          },
+        }
+      );
+
+      // Calculate total amount including late payment charge
+      const totalAmount = selectedPayment.totalAmount + parseFloat(latePaymentCharge || 0);
 
       setDepositSlipData({
         date: new Date().toLocaleDateString(),
-        accountNumber: memberData.data.accNo || "N/A",
-        name: selectedPayment.memberId.name,
-        amount: selectedPayment.totalAmount.toFixed(2),
-        amountInWords: convertNumberToWords(selectedPayment.totalAmount),
+        accountNumber: memberData.data?.accNo || "N/A",
+        name: selectedPayment.memberId?.name || "N/A",
+        amount: totalAmount.toFixed(2),
+        amountInWords: convertNumberToWords(totalAmount),
       });
 
       setShowDepositSlip(true);
-      alert(response.data.message);
+      setMessage(response.data.message || "Payment successful");
     } catch (error) {
-      if (error.response) {
-        if (error.response.status === 400) {
-          alert(error.response.data?.message || "Invalid request: Please check your inputs.");
-        } else {
-          alert(error.response.data?.message || "Payment failed.");
-        }
-      } else {
-        alert("An unexpected error occurred. Please try again.");
-      }
+      const errorMessage = error.response?.data?.message || 
+        "An unexpected error occurred. Please try again.";
+      setMessage(errorMessage);
+      alert(errorMessage);
     }
   };
 
@@ -130,11 +172,15 @@ const PaymentPage = () => {
   return (
     <div className="container mx-auto p-4 max-w-md shadow-lg rounded-lg mt-16">
       <h2 className="text-xl font-bold mb-4">Make a Payment</h2>
+      {message && (
+        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+          {message}
+        </div>
+      )}
       {isLoading ? (
         <p>Loading collections...</p>
       ) : (
         <form onSubmit={handlePayment} className="space-y-4">
-          {/* Select Group */}
           <select
             value={selectedGroup}
             onChange={(e) => {
@@ -153,7 +199,6 @@ const PaymentPage = () => {
             ))}
           </select>
 
-          {/* Select Date (only if a group is selected) */}
           {selectedGroup && (
             <select
               value={selectedDate}
@@ -173,7 +218,6 @@ const PaymentPage = () => {
             </select>
           )}
 
-          {/* Select Member (only if a date is selected) */}
           {selectedDate && (
             <select
               value={memberId}
@@ -181,28 +225,27 @@ const PaymentPage = () => {
               className="w-full p-2 border rounded"
               required
             >
-              <option value="">
-                Select Member
-              </option>
+              <option value="">Select Member</option>
               {members.map((member) => (
                 <option key={member._id} value={member._id}>
-                  {"Name: " + member.name} &nbsp; {"Mob: " + member.mobileNumber}
+                  {member.name} - {member.mobileNumber}
                 </option>
               ))}
             </select>
           )}
 
-          {/* Payment Details */}
           <select
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}
             className="w-full p-2 border rounded"
+            required
           >
             <option value="bank_transfer">Bank Transfer</option>
             <option value="cash">Cash</option>
             <option value="cheque">Cheque</option>
             <option value="upi">UPI</option>
           </select>
+
           <input
             type="text"
             placeholder="Transaction ID (if applicable)"
@@ -210,6 +253,17 @@ const PaymentPage = () => {
             onChange={(e) => setTransactionId(e.target.value)}
             className="w-full p-2 border rounded"
           />
+
+          <input
+            type="number"
+            placeholder="Late Payment Charge (if applicable)"
+            value={latePaymentCharge}
+            onChange={(e) => setLatePaymentCharge(e.target.value)}
+            className="w-full p-2 border rounded"
+            min="0"
+            step="0.01"
+          />
+
           <input
             type="text"
             placeholder="Remarks"
@@ -217,7 +271,12 @@ const PaymentPage = () => {
             onChange={(e) => setRemarks(e.target.value)}
             className="w-full p-2 border rounded"
           />
-          <button type="submit" className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+
+          <button 
+            type="submit" 
+            className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            disabled={!selectedCollection || !memberId}
+          >
             Submit Payment
           </button>
         </form>
@@ -226,7 +285,10 @@ const PaymentPage = () => {
       {showDepositSlip && (
         <div className="fixed inset-0 bg-gray-100 flex justify-center items-center z-50">
           <div className="relative bg-white p-4 rounded-lg">
-            <button onClick={closeDepositSlip} className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded">
+            <button 
+              onClick={closeDepositSlip} 
+              className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded"
+            >
               Close
             </button>
             <DepositSlip data={depositSlipData} />
