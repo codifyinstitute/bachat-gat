@@ -3,6 +3,8 @@ import axios from "axios";
 import { Trash2 } from "lucide-react";
 import SavingInvoice from "../../components/SavingInvoice";
 import { toWords } from "number-to-words";
+import SavingInvoice from "../../components/SavingInvoice";
+import { toWords } from "number-to-words";
 
 const AdminGroupsList = () => {
   const [loansData, setLoansData] = useState([]);
@@ -104,7 +106,7 @@ const AdminGroupsList = () => {
     return loansData.filter((loan) => loan.groupId?._id === groupId);
   };
 
-  
+
   const filteredGroups = groups.filter((group) => {
     const groupNameMatch = group.name
       ?.toLowerCase()
@@ -228,6 +230,60 @@ const AdminGroupsList = () => {
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
+
+  const convertNumberToWords = (number) => {
+    const [intPart, decimalPart] = number.toString().split(".");
+    let words = toWords(parseInt(intPart));
+    words = words.charAt(0).toUpperCase() + words.slice(1);
+    words += decimalPart ? ` Rupees and ${toWords(parseInt(decimalPart))} Paise` : " Rupees Only";
+    return words;
+  };
+
+  const handlesavinginvoice = (group, loanid, member, savingAmount, interestMonth) => {
+    const currentDate = new Date().toLocaleDateString();
+
+    console.log(loanid._id)
+
+    const memberSchedule = loanid.repaymentSchedules.find(schedule =>
+      schedule.memberId._id === member._id
+    );
+
+    if (!memberSchedule) {
+      alert("Member not found in repayment schedules.");
+      return;
+    }
+
+    // Check if all installments are paid
+    const allPaid = memberSchedule.installments.every(installment => installment.status === "paid");
+
+    if (!member || !member.name) {
+      alert("Member name is missing!");
+      return;
+    }
+
+    setSavingInvoiceData({
+      date: currentDate,
+      membername: member.name,
+      amount: savingAmount || "N/A",
+      amountInWords: savingAmount ? convertNumberToWords(savingAmount * interestMonth) : "N/A",
+      savingAmount: savingAmount * interestMonth || "N/A",
+      groupName: group.name,
+      termMonth: interestMonth || "N/A",
+      loanId: loanid._id || "N/A"
+    });
+
+    if (allPaid) {
+      setShowSavingInvoice(true);
+    }else{
+      alert('member has not paid all installments')
+    }
+
+  };
+
+  console.log(savingInvoiceData)
+  const closeSavingInvoice = () => {
+    setShowSavingInvoice(false);
+  };
 
   return (
       <div className="container mx-auto p-4">
@@ -374,54 +430,54 @@ const AdminGroupsList = () => {
   
                                     {loan.repaymentSchedules &&
                                     loan.repaymentSchedules.length > 0 ? (
-                                      loan.repaymentSchedules.map((schedule, idx) => {
-                                        const members = group.members || [];
-                                        const member = members[idx % members.length]?.member;
-  
-                                        return (
-                                          <div key={idx} className="p-2">
-                                            <p>
-                                              <strong>
-                                                Installment Schedule {idx + 1}:
-                                              </strong>
-                                            </p>
-  
-                                            {member ? (
-                                              <div className="w-full flex justify-between mb-2">
-                                                <p>
-                                                  <strong>Member Name:</strong>{" "}
-                                                  {member.name}
-                                                </p>
-                                                <p>
-                                                  <strong>Member Mobile:</strong>{" "}
-                                                  {member.mobileNumber}
-                                                </p>
-                                              </div>
-                                            ) : (
-                                              <p className="text-red-500">
-                                                No corresponding member found.
+                                    loan.repaymentSchedules.map((schedule, idx) => {
+                                      const members = group.members || [];
+                                      const member = members[idx % members.length]?.member;
+
+                                      return (
+                                        <div key={idx} className="p-2">
+                                          <p>
+                                            <strong>
+                                              Installment Schedule {idx + 1}:
+                                            </strong>
+                                          </p>
+
+                                          {member ? (
+                                            <div className="w-full flex justify-between mb-2">
+                                              <p>
+                                                <strong>Member Name:</strong>{" "}
+                                                {member.name}
                                               </p>
-                                            )}
-  
-                                            <table className="w-full border-collapse border border-gray-400">
-                                              <thead>
-                                                <tr className="bg-gray-200">
-                                                  <th className="border border-gray-400 px-2 py-1">
-                                                    #
-                                                  </th>
-                                                  <th className="border border-gray-400 px-2 py-1">
-                                                    Due Date
-                                                  </th>
-                                                  <th className="border border-gray-400 px-2 py-1">
-                                                    Amount (₹)
-                                                  </th>
-                                                  <th className="border border-gray-400 px-2 py-1">
-                                                    Principal (₹)
-                                                  </th>
-                                                  <th className="border border-gray-400 px-2 py-1">
-                                                    Interest (₹)
-                                                  </th>
-                                                  {/* <th className="border border-gray-400 px-2 py-1">
+                                              <p>
+                                                <strong>Member Mobile:</strong>{" "}
+                                                {member.mobileNumber}
+                                              </p>
+                                            </div>
+                                          ) : (
+                                            <p className="text-red-500">
+                                              No corresponding member found.
+                                            </p>
+                                          )}
+
+                                          <table className="w-full border-collapse border border-gray-400">
+                                            <thead>
+                                              <tr className="bg-gray-200">
+                                                <th className="border border-gray-400 px-2 py-1">
+                                                  #
+                                                </th>
+                                                <th className="border border-gray-400 px-2 py-1">
+                                                  Due Date
+                                                </th>
+                                                <th className="border border-gray-400 px-2 py-1">
+                                                  Amount (₹)
+                                                </th>
+                                                <th className="border border-gray-400 px-2 py-1">
+                                                  Principal (₹)
+                                                </th>
+                                                <th className="border border-gray-400 px-2 py-1">
+                                                  Interest (₹)
+                                                </th>
+                                                {/* <th className="border border-gray-400 px-2 py-1">
                                                     Savings (₹)
                                                   </th> */}
                                                   <th className="border border-gray-400 px-2 py-1">
