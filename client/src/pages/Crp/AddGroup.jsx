@@ -23,7 +23,7 @@ const CreateGroupForm = () => {
         }
 
         const response = await axios.get(
-          "https://bachatapi.codifyinstitute.org/api/crp/membycrp",
+          "http://localhost:5000/api/crp/membycrp",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -96,7 +96,7 @@ const CreateGroupForm = () => {
 
     try {
       const response = await axios.post(
-        "https://bachatapi.codifyinstitute.org/api/groups",
+        "http://localhost:5000/api/groups",
         groupData,
         {
           headers: {

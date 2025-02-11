@@ -15,7 +15,7 @@ const CrpApprovedlist = () => {
         try {
             const token = localStorage.getItem("crp_token");
 
-            const response = await axios.get("https://bachatapi.codifyinstitute.org/api/loan", {
+            const response = await axios.get("http://localhost:5000/api/loan", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",

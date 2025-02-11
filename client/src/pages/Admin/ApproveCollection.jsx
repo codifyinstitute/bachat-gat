@@ -18,7 +18,7 @@ const ApproveCollection = () => {
           return;
         }
 
-        const response = await axios.get("https://bachatapi.codifyinstitute.org/api/collection", {
+        const response = await axios.get("http://localhost:5000/api/collection", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -61,7 +61,7 @@ const ApproveCollection = () => {
       }
 
       const response = await axios.post(
-        `https://bachatapi.codifyinstitute.org/api/collection/${id}/approve`,
+        `http://localhost:5000/api/collection/${id}/approve`,
         {},
         {
           headers: {

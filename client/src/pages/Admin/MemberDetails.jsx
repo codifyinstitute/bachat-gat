@@ -57,7 +57,7 @@ const MemberDetails = () => {
     const fetchMember = async () => {
       try {
         const token = localStorage.getItem("admin_token");
-        const response = await fetch(`https://bachatapi.codifyinstitute.org/api/member/${id}`, {
+        const response = await fetch(`http://localhost:5000/api/member/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -88,7 +88,7 @@ const MemberDetails = () => {
   const getFullImageUrl = (imagePath) => {
     if (!imagePath) return "";
     const relativePath = imagePath.replace(/\\/g, "/").replace(/^.*?uploads\//, "uploads/");
-    return `https://bachatapi.codifyinstitute.org/${relativePath}`;
+    return `http://localhost:5000/${relativePath}`;
   };
 
   if (!member) return <p className="text-center mt-10">Loading member details...</p>;

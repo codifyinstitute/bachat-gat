@@ -24,7 +24,7 @@ const GroupsList = () => {
     }
 
     try {
-      const response = await axios.get('https://bachatapi.codifyinstitute.org/api/groups/created-by-crp', {
+      const response = await axios.get('http://localhost:5000/api/groups/created-by-crp', {
         headers: {
           Authorization: `Bearer ${crpToken}`,
           'Content-Type': 'application/json',
@@ -42,7 +42,7 @@ const GroupsList = () => {
   // Fetch loans when the component mounts
   const fetchLoans = async () => {
     try {
-      const response = await axios.get('https://bachatapi.codifyinstitute.org/api/loan', {
+      const response = await axios.get('http://localhost:5000/api/loan', {
         headers: {
           Authorization: `Bearer ${crpToken}`,
           'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ const GroupsList = () => {
         try {
           const memberId = typeof member.member._id === 'object' ? member.member._id.toString() : member.member._id;
 
-          const response = await axios.get(`https://bachatapi.codifyinstitute.org/api/member/${memberId}`, {
+          const response = await axios.get(`http://localhost:5000/api/member/${memberId}`, {
             headers: {
               Authorization: `Bearer ${crpToken}`,
               'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ const GroupsList = () => {
   try {
     // Toggle the NPA status on the backend
     const response = await axios.put(
-      `https://bachatapi.codifyinstitute.org/api/member/${_id}/toggle-npa`,
+      `http://localhost:5000/api/member/${_id}/toggle-npa`,
       {},
       { headers: { Authorization: `Bearer ${crpToken}` } }
     );

@@ -41,7 +41,7 @@ const Login = () => {
 
       // If email is filled, log in as CRP
       if (formData.email) {
-        const response = await axios.post('https://bachatapi.codifyinstitute.org/api/crp/login', formData, {
+        const response = await axios.post('http://localhost:5000/api/crp/login', formData, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -54,7 +54,7 @@ const Login = () => {
         }
       } else if (formData.username) {
         // If username is filled, log in as Admin
-        const response = await axios.post('https://bachatapi.codifyinstitute.org/api/admin/login', formData, {
+        const response = await axios.post('http://localhost:5000/api/admin/login', formData, {
           headers: {
             'Content-Type': 'application/json',
           },

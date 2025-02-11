@@ -67,7 +67,7 @@ const CrpMemberDetails = () => {
     const fetchMember = async () => {
       try {
         const token = localStorage.getItem("crp_token");
-        const response = await fetch(`https://bachatapi.codifyinstitute.org/api/member/${id}`, {
+        const response = await fetch(`http://localhost:5000/api/member/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -119,7 +119,7 @@ const CrpMemberDetails = () => {
     const relativePath = imagePath
       .replace(/\\/g, "/")
       .replace(/^.*?uploads\//, "uploads/");
-    return `https://bachatapi.codifyinstitute.org/${relativePath}`;
+    return `http://localhost:5000/${relativePath}`;
   };
 
   const handleEditClick = () => {
@@ -220,7 +220,7 @@ const CrpMemberDetails = () => {
         formData.append("guarantor.extraDocuments_3", fileextraDocuments_3);
 
       const response = await fetch(
-        `https://bachatapi.codifyinstitute.org/api/member/${member._id}`,
+        `http://localhost:5000/api/member/${member._id}`,
         {
           method: "PUT",
           headers: {

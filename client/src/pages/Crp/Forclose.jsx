@@ -23,13 +23,13 @@ const Forclose = () => {
             }
 
             const [groupsRes, loansRes] = await Promise.all([
-                axios.get("https://bachatapi.codifyinstitute.org/api/groups/created-by-crp", {
+                axios.get("http://localhost:5000/api/groups/created-by-crp", {
                     headers: {
                         Authorization: `Bearer ${crptoken}`,
                         "Content-Type": "application/json",
                     },
                 }),
-                axios.get("https://bachatapi.codifyinstitute.org/api/loan", {
+                axios.get("http://localhost:5000/api/loan", {
                     headers: {
                         Authorization: `Bearer ${crptoken}`,
                         "Content-Type": "application/json",
@@ -65,7 +65,7 @@ const Forclose = () => {
             }
     
             const response = await axios.post(
-                `https://bachatapi.codifyinstitute.org/api/collection/forclose/${loanId}/${memberId}`,
+                `http://localhost:5000/api/collection/forclose/${loanId}/${memberId}`,
                 { forcloseAmount: Number(forcloseAmount) }, // Pass the forclosure amount in the request body
                 {
                     headers: {

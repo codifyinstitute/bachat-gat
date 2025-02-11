@@ -31,7 +31,7 @@ const AdminGroupsList = () => {
     const savings = {};
     for (const group of groups) {
       try {
-        const res = await axios.get(`https://bachatapi.codifyinstitute.org/api/collection/saving/${group._id}`);
+        const res = await axios.get(`http://localhost:5000/api/collection/saving/${group._id}`);
         if (res.status === 200 && res.data.savingsAmount !== undefined) {
           savings[group._id] = res.data.savingsAmount; // Ensure we extract the correct value
         } else {
@@ -55,13 +55,13 @@ const AdminGroupsList = () => {
       }
 
       const [groupsRes, loansRes] = await Promise.all([
-        axios.get("https://bachatapi.codifyinstitute.org/api/groups/created-by-crp", {
+        axios.get("http://localhost:5000/api/groups/created-by-crp", {
           headers: {
             Authorization: `Bearer ${crptoken}`,
             "Content-Type": "application/json",
           },
         }),
-        axios.get("https://bachatapi.codifyinstitute.org/api/loan", {
+        axios.get("http://localhost:5000/api/loan", {
           headers: {
             Authorization: `Bearer ${crptoken}`,
             "Content-Type": "application/json",
@@ -144,7 +144,7 @@ const AdminGroupsList = () => {
   
       // Send request to deactivate the group
       const response = await axios.delete(
-        `https://bachatapi.codifyinstitute.org/api/groups/del/${groupId}`,
+        `http://localhost:5000/api/groups/del/${groupId}`,
         {}, // No request body needed
         {
           headers: {

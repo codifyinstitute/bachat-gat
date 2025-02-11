@@ -107,7 +107,7 @@ const AddMember = () => {
 
     try {
       const res = await axios.post(
-        "https://bachatapi.codifyinstitute.org/api/member",
+        "http://localhost:5000/api/member",
         formDataToSend,
         {
           headers: {

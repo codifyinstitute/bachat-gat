@@ -17,7 +17,7 @@ const AllMembers = () => {
     const fetchMembers = async () => {
       try {
         // Add Authorization header with Bearer token
-        const response = await axios.get("https://bachatapi.codifyinstitute.org/api/member", {
+        const response = await axios.get("http://localhost:5000/api/member", {
           headers: {
             Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
           },

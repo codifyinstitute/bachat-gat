@@ -19,7 +19,7 @@ const AllMembers = () => {
       try {
         // Add Authorization header with Bearer token
         const response = await axios.get(
-          "https://bachatapi.codifyinstitute.org/api/crp/membycrp",
+          "http://localhost:5000/api/crp/membycrp",
           {
             headers: {
               Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
@@ -62,7 +62,7 @@ const AllMembers = () => {
 
     try {
       const response = await axios.delete(
-        `https://bachatapi.codifyinstitute.org/api/member/${_id}`,
+        `http://localhost:5000/api/member/${_id}`,
         {
           headers: {
             Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
@@ -78,7 +78,7 @@ const AllMembers = () => {
 
         // Fetch updated members list from API after deletion
         const updatedResponse = await axios.get(
-          "https://bachatapi.codifyinstitute.org/api/crp/membycrp",
+          "http://localhost:5000/api/crp/membycrp",
           {
             headers: {
               Authorization: `Bearer ${adminToken}`,
@@ -113,7 +113,7 @@ const AllMembers = () => {
   //   event.stopPropagation();
   //   try {
   //     const response = await axios.put(
-  //       `https://bachatapi.codifyinstitute.org/api/member/${_id}/toggle-npa`,
+  //       `http://localhost:5000/api/member/${_id}/toggle-npa`,
   //       {},
   //       { headers: { Authorization: `Bearer ${adminToken}` } }
   //     );

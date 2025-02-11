@@ -16,7 +16,7 @@ const AllCRP = () => {
     // Fetch members data from backend API
     const fetchMembers = async () => {
       try {
-        const response = await axios.get("https://bachatapi.codifyinstitute.org/api/crp/allcrp", {
+        const response = await axios.get("http://localhost:5000/api/crp/allcrp", {
           headers: {
             Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
           },

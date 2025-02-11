@@ -30,7 +30,7 @@ const PaymentPage = () => {
   useEffect(() => {
     const fetchCollections = async () => {
       try {
-        const response = await axios.get("https://bachatapi.codifyinstitute.org/api/collection");
+        const response = await axios.get("http://localhost:5000/api/collection");
         setCollections(response.data);
         setIsLoading(false);
       } catch (error) {
@@ -83,7 +83,7 @@ const PaymentPage = () => {
       }
 
       const response = await axios.post(
-        `https://bachatapi.codifyinstitute.org/api/collection/${selectedCollection._id}/payments/${memberId}`,
+        `http://localhost:5000/api/collection/${selectedCollection._id}/payments/${memberId}`,
         { paymentMethod, transactionId, remarks },
         {
           headers: {
@@ -93,7 +93,7 @@ const PaymentPage = () => {
         }
       );
 
-      const memberData = await axios.get(`https://bachatapi.codifyinstitute.org/api/member/${selectedPayment.memberId._id}`, {
+      const memberData = await axios.get(`http://localhost:5000/api/member/${selectedPayment.memberId._id}`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${crpToken}`,
