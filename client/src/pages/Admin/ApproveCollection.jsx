@@ -18,7 +18,7 @@ const ApproveCollection = () => {
           return;
         }
 
-        const response = await axios.get("http://localhost:5000/api/collection", {
+        const response = await axios.get("https://bachatapi.codifyinstitute.org/api/collection", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -36,7 +36,7 @@ const ApproveCollection = () => {
         }
       } catch (error) {
         if (error.response) {
-          alert(`Error: ${error.response.status} - ${error.response.data.message || "Failed to fetch collections"}`);
+          alert(`${error.response.data.message || "Failed to fetch collections"}`);
           console.error("Response Error:", error.response);
         } else {
           alert("Failed to fetch collections");
@@ -61,7 +61,7 @@ const ApproveCollection = () => {
       }
 
       const response = await axios.post(
-        `http://localhost:5000/api/collection/${id}/approve`,
+        `https://bachatapi.codifyinstitute.org/api/collection/${id}/approve`,
         {},
         {
           headers: {
@@ -79,7 +79,7 @@ const ApproveCollection = () => {
     } catch (error) {
       if (error.response) {
         // Log the response error for debugging
-        alert(`Error: ${error.response.status} - ${error.response.data.message || "Failed to approve collection"}`);
+        alert(`${error.response.data.message || "Failed to approve collection"}`);
         console.error("Response Error on Approve:", error.response);
       } else {
         alert("Failed to approve collection");

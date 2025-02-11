@@ -107,7 +107,7 @@ const AddMember = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/member",
+        "https://bachatapi.codifyinstitute.org/api/member",
         formDataToSend,
         {
           headers: {
@@ -131,7 +131,20 @@ const AddMember = () => {
         onSubmit={handleSubmit}
         className=" w-full mx-auto p-6 bg-white rounded-lg shadow-lg space-y-4 md:w-[95%] lg:w-[90%] mt-8"
       >
+
+        
         <div className="w-full md:flex md:gap-4">
+          <div className="mb-4 lg:w-[50%]">
+            <label htmlFor="guarantorPhoto"> Photo <span className="text-gray-500">(ONLY .JPEG, .JPG, .PNG)</span></label>
+            <input
+              type="file"
+              name="photo"
+              onChange={handleFileChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.photo && <p className="text-red-500">{errors.photo}</p>}
+          </div>
           <div className="mb-4 lg:w-[50%]">
             <label htmlFor="name">Name</label>
             <input
@@ -144,6 +157,10 @@ const AddMember = () => {
             />
             {errors.name && <p className="text-red-500">{errors.name}</p>}
           </div>
+          
+        </div>
+
+        <div className="w-full md:flex md:gap-4">
           <div className="lg:w-[50%]">
             <label htmlFor="address">Address</label>
             <input
@@ -156,9 +173,6 @@ const AddMember = () => {
             />
             {errors.address && <p className="text-red-500">{errors.address}</p>}
           </div>
-        </div>
-
-        <div className="w-full md:flex md:gap-4">
           <div className="mb-4 lg:w-[50%]">
             <label htmlFor="dateOfBirth">Date Of Birth</label>
             <input
@@ -172,7 +186,10 @@ const AddMember = () => {
               <p className="text-red-500">{errors.dateOfBirth}</p>
             )}
           </div>
+          
+        </div>
 
+        <div className="w-full md:flex md:gap-4">
           <div className="lg:w-[50%]">
             <label htmlFor="aadharNo">Aadhar No</label>
             <input
@@ -187,9 +204,6 @@ const AddMember = () => {
               <p className="text-red-500">{errors.aadharNo}</p>
             )}
           </div>
-        </div>
-
-        <div className="w-full md:flex md:gap-4">
           <div className="mb-4 md:w-[70%] lg:w-[50%]">
             <label htmlFor="panNo">PAN No</label>
             <input
@@ -202,19 +216,21 @@ const AddMember = () => {
             />
             {errors.panNo && <p className="text-red-500">{errors.panNo}</p>}
           </div>
-          <div className="mb-4 md:w-[70%] lg:w-[50%]">
+          
+        </div>
+        <div className="w-full md:flex md:gap-4">
+        <div className="mb-4 md:w-[70%] lg:w-[50%]">
             <label htmlFor="accNo">Acc No</label>
             <input
               type="text"
               name="accNo"
               placeholder="Account No"
               onChange={handleChange}
-              required
+              // required
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
             {errors.accNo && <p className="text-red-500">{errors.accNo}</p>}
           </div>
-
           <div className="lg:w-[50%]">
             <label htmlFor="mobileNumber">Mobile Number</label>
             <input
@@ -287,26 +303,17 @@ const AddMember = () => {
               <p className="text-red-500">{errors["guarantor.relation"]}</p>
             )}
           </div>
-          <div className="mb-4 lg:w-[50%]">
-            <label htmlFor="guarantorPhoto"> Photo</label>
-            <input
-              type="file"
-              name="photo"
-              onChange={handleFileChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.photo && <p className="text-red-500">{errors.photo}</p>}
-          </div>
+          
         </div>
         <div className="w-full md:flex md:flex-col md:gap-4">
           <h3 className="text-lg font-semibold">Upload Documents</h3>
           <div className="md:flex gap-4">
             <div className="mb-4 lg:w-[50%]">
-              <label htmlFor="guarantorPhoto">Guarantor Photo</label>
+              <label htmlFor="guarantorPhoto">Guarantor Photo<span className="text-gray-500">(ONLY .JPEG, .JPG, .PNG)</span></label>
               <input
                 type="file"
                 name="guarantorPhoto"
+                placeholder=".jpg, .jpeg., .png format only "
                 onChange={handleFileChange}
                 required
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
@@ -318,10 +325,11 @@ const AddMember = () => {
               )}
             </div>
             <div className="mb-4 lg:w-[50%]">
-              <label htmlFor="guarantorCheque">Guarantor Cheque</label>
+              <label htmlFor="guarantorCheque">Guarantor Cheque<span className="text-gray-500">(ONLY .JPEG, .JPG, .PNG)</span></label>
               <input
                 type="file"
                 name="guarantorCheque"
+                placeholder=".jpg, .jpeg., .png format only "
                 onChange={handleFileChange}
                 required
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
@@ -338,9 +346,11 @@ const AddMember = () => {
           <h3>Extra Documents (Images)</h3>
           <div className="md:flex flex-wrap md:gap-4">
             <div className="mb-4 md:w-[48%]">
+            <label htmlFor="">Document 1<span className="text-gray-500">(ONLY .JPEG, .JPG, .PNG)</span></label>
               <input
                 type="file"
                 name="extraDocuments_0"
+                placeholder=".jpg, .jpeg., .png format only "
                 onChange={handleFileChange}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
@@ -349,9 +359,11 @@ const AddMember = () => {
               )}
             </div>
             <div className="mb-4 md:w-[48%]">
+              <label htmlFor="">Document 2<span className="text-gray-500">(ONLY .JPEG, .JPG, .PNG)</span></label>
               <input
                 type="file"
                 name="extraDocuments_1"
+                placeholder=".jpg, .jpeg., .png format only "
                 onChange={handleFileChange}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
@@ -360,9 +372,11 @@ const AddMember = () => {
               )}
             </div>
             <div className="mb-4 md:w-[48%]">
+            <label htmlFor="">Document 3<span className="text-gray-500">(ONLY .JPEG, .JPG, .PNG)</span></label>
               <input
                 type="file"
                 name="extraDocuments_2"
+                placeholder=".jpg, .jpeg., .png format only "
                 onChange={handleFileChange}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
@@ -371,8 +385,10 @@ const AddMember = () => {
               )}
             </div>
             <div className="mb-4 md:w-[48%]">
+            <label htmlFor="">Document 4<span className="text-gray-500">(ONLY .JPEG, .JPG, .PNG)</span></label>
               <input
                 type="file"
+                placeholder=".jpg, .jpeg., .png format only "
                 name="extraDocuments_3"
                 onChange={handleFileChange}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"

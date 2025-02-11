@@ -23,7 +23,7 @@ const CreateGroupForm = () => {
         }
 
         const response = await axios.get(
-          "http://localhost:5000/api/crp/membycrp",
+          "https://bachatapi.codifyinstitute.org/api/crp/membycrp",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -63,7 +63,7 @@ const CreateGroupForm = () => {
     setMessage("");
 
     console.log("Selected Members:", selectedMembers.length);
-    if (selectedMembers.length !== 3) {
+    if (selectedMembers.length < 3 || selectedMembers.length > 10) {
       // Correcting the validation to exactly 10 members
       setMessage("You must select exactly 10 members to create a group.");
       setLoading(false);
@@ -96,7 +96,7 @@ const CreateGroupForm = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/groups",
+        "https://bachatapi.codifyinstitute.org/api/groups",
         groupData,
         {
           headers: {
@@ -120,7 +120,87 @@ const CreateGroupForm = () => {
     }
   };
 
-  return (
+//   return (
+//     <div className="p-4 max-w-md mx-auto bg-white shadow-md rounded h-[fit-content] overflow-y-auto mt-16 xl:min-h-[600px] min-h-[500px]">
+//       <h1 className="text-xl font-bold mb-4">Create Group</h1>
+//       <form onSubmit={handleSubmit}>
+//         <div className="mb-3">
+//           <label className="block text-sm font-medium">Group Name</label>
+//           <input
+//             type="text"
+//             className="w-full border p-2 rounded"
+//             value={name}
+//             onChange={(e) => setName(e.target.value)}
+//             required
+//           />
+//         </div>
+//         <div className="mb-3">
+//           <label className="block text-sm font-medium">Address</label>
+//           <input
+//             type="text"
+//             className="w-full border p-2 rounded"
+//             value={address}
+//             onChange={(e) => setAddress(e.target.value)}
+//             required
+//           />
+//         </div>
+//         {/* <div className="mb-3">
+//             <label className="block text-sm font-medium">CRP Name</label>
+//             <input
+//               type="text"
+//               className="w-full border p-2 rounded"
+//               value={crpname}
+//               onChange={(e) => setCrpname(e.target.value)}
+//               required
+//             />
+//           </div> */}
+//         <div className="mb-3">
+//           <label className="block text-sm font-medium">WhatsApp Link</label>
+//           <input
+//             type="text"
+//             className="w-full border p-2 rounded"
+//             value={whtslink}
+//             onChange={(e) => setWhstlink(e.target.value)}
+//             required
+//           />
+//         </div>
+//         <div className="mb-3">
+//           <label className="block text-sm font-medium">Members</label>
+//           <Select
+//             isMulti
+//             options={allMembers}
+//             value={selectedMembers}
+//             onChange={(selectedOptions) =>
+//               setSelectedMembers(selectedOptions || [])
+//             }
+//             maxMenuHeight={250}
+//             isSearchable
+//             closeMenuOnSelect={false}
+//             placeholder="Select Members (Exactly 10)"
+//             isDisabled={loading}
+//             noOptionsMessage={() => "No members available"}
+//             isClearable
+//           />
+//           {selectedMembers.length < 3 || selectedMembers.length >= 10 && (
+//             <p className="text-red-500 mt-2">
+//               You need to select minimun 3 and exactly 10 members.
+//             </p>
+//           )}
+//         </div>
+//         <button
+//           type="submit"
+//           style={{ pointerEvents: "auto", zIndex: 10 }}
+//           className="bg-blue-500 text-white p-2 rounded w-full"
+//           disabled={loading || selectedMembers.length <3 || selectedMembers.length >= 10}
+//         >
+//           {loading ? "Creating..." : "Create Group"}
+//         </button>
+//       </form>
+//       {message && <p className="mt-4 text-center">{message}</p>}
+//     </div>
+//   );
+
+return (
     <div className="p-4 max-w-md mx-auto bg-white shadow-md rounded h-[fit-content] overflow-y-auto mt-16 xl:min-h-[600px] min-h-[500px]">
       <h1 className="text-xl font-bold mb-4">Create Group</h1>
       <form onSubmit={handleSubmit}>
@@ -181,9 +261,10 @@ const CreateGroupForm = () => {
             noOptionsMessage={() => "No members available"}
             isClearable
           />
-          {selectedMembers.length !== 1 && selectedMembers.length > 0 && (
+          {/* Show error if the selected members count is outside the range */}
+          {(selectedMembers.length < 3 || selectedMembers.length > 10) && (
             <p className="text-red-500 mt-2">
-              You need to select minimun 3 and exactly 10 members.
+              You need to select minimum 3 and maximum 10 members.
             </p>
           )}
         </div>
@@ -191,7 +272,7 @@ const CreateGroupForm = () => {
           type="submit"
           style={{ pointerEvents: "auto", zIndex: 10 }}
           className="bg-blue-500 text-white p-2 rounded w-full"
-          disabled={loading || selectedMembers.length !== 3}
+          disabled={loading || selectedMembers.length < 3 || selectedMembers.length > 10}
         >
           {loading ? "Creating..." : "Create Group"}
         </button>
@@ -199,6 +280,7 @@ const CreateGroupForm = () => {
       {message && <p className="mt-4 text-center">{message}</p>}
     </div>
   );
+  
 };
 
 export default CreateGroupForm;

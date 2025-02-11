@@ -27,7 +27,7 @@ const LoanSanctionForm = () => {
   useEffect(() => {
     const fetchBanks = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/banks");
+        const response = await axios.get("https://bachatapi.codifyinstitute.org/api/banks");
         setBanks(response.data);
       } catch (err) {
         setError("Failed to fetch banks.");
@@ -45,7 +45,7 @@ const LoanSanctionForm = () => {
   const fetchGroups = async () => {
     try {
       const token = localStorage.getItem("crp_token");
-      const response = await axios.get("http://localhost:5000/api/groups/created-by-crp", {
+      const response = await axios.get("https://bachatapi.codifyinstitute.org/api/groups/created-by-crp", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setGroups(response.data);
@@ -93,7 +93,7 @@ const LoanSanctionForm = () => {
     const token = localStorage.getItem("crp_token");
 
     try {
-      const response = await axios.post("http://localhost:5000/api/loan", loanDetails, {
+      const response = await axios.post("https://bachatapi.codifyinstitute.org/api/loan", loanDetails, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

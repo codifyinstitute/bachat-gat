@@ -34,7 +34,7 @@ const Sidebar = ({ role }) => {
       { name: "Approved Loans", path: "/crp/crpapprovedlist",icon: <CheckCircle className="text-[#12c20f]"/>,},
       { name: "Pending Loans", path: "/crp/pending-loans", icon: <CircleDotDashed className="text-[#ffaf7a]" />,},
       { name: "Collections", path: "/crp/collection", icon: <Boxes  /> },
-      // { name: "Payments", path: "/crp/payment", icon: <CheckCircle /> },
+      { name: "NPAs", path: "/crp/npalist", icon: <CheckCircle /> },
       { name: "PaymentPage", path: "/crp/PaymentPage", icon: <Landmark /> },
       
     ],
@@ -93,10 +93,7 @@ const Sidebar = ({ role }) => {
             <LogOut />
             Logout
           </button>
-
-
       </aside>
-
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto bg-gray-100">
         <Outlet />

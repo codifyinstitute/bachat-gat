@@ -13,7 +13,7 @@ const CollectionForm = () => {
     const fetchGroups = async () => {
       try {
         const token = localStorage.getItem("crp_token");
-        const response = await axios.get("http://localhost:5000/api/groups/created-by-crp", {
+        const response = await axios.get("https://bachatapi.codifyinstitute.org/api/groups/created-by-crp", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -47,7 +47,7 @@ const CollectionForm = () => {
     console.log(payload)
 
     try {
-      const response = await fetch("http://localhost:5000/api/collection", {
+      const response = await fetch("https://bachatapi.codifyinstitute.org/api/collection", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${crpToken}`,

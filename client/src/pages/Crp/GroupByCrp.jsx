@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Trash2 } from "lucide-react";
+import SavingInvoice from "../../components/SavingInvoice";
+import { toWords } from "number-to-words";
 
-const CrpGroupsList = () => {
+const AdminGroupsList = () => {
   const [loansData, setLoansData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,13 +15,23 @@ const CrpGroupsList = () => {
   const [groups, setGroups] = useState([]);
   const [deleteError, setDeleteError] = useState(null);
   const [savingsData, setSavingsData] = useState({});
-
+  const [showSavingInvoice, setShowSavingInvoice] = useState(false);
+  const [savingInvoiceData, setSavingInvoiceData] = useState({
+    date: "",
+    membername: "",
+    amount: "",
+    amountInWords: "",
+    savingAmount: "",
+    groupName: "",
+    termMonth: "",
+    loanId:""
+  });
 
   const fetchSavingsData = async (groups) => {
     const savings = {};
     for (const group of groups) {
       try {
-        const res = await axios.get(`http://localhost:5000/api/collection/saving/${group._id}`);
+        const res = await axios.get(`https://bachatapi.codifyinstitute.org/api/collection/saving/${group._id}`);
         if (res.status === 200 && res.data.savingsAmount !== undefined) {
           savings[group._id] = res.data.savingsAmount; // Ensure we extract the correct value
         } else {
@@ -43,13 +55,13 @@ const CrpGroupsList = () => {
       }
 
       const [groupsRes, loansRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/groups/created-by-crp", {
+        axios.get("https://bachatapi.codifyinstitute.org/api/groups/created-by-crp", {
           headers: {
             Authorization: `Bearer ${crptoken}`,
             "Content-Type": "application/json",
           },
         }),
-        axios.get("http://localhost:5000/api/loan", {
+        axios.get("https://bachatapi.codifyinstitute.org/api/loan", {
           headers: {
             Authorization: `Bearer ${crptoken}`,
             "Content-Type": "application/json",
@@ -103,22 +115,37 @@ const CrpGroupsList = () => {
     return groupNameMatch || memberMatch;
   });
 
-  const handleDeleteGroup = async (groupId, e) => {
-    e.stopPropagation(); // Prevent row expansion when clicking delete
-
+  const handleDeactivateGroup = async (groupId, e) => {
+    e.stopPropagation(); // Prevent row expansion when clicking deactivate
+  
+    // First, check if all loans for the group are 'closed'
+    const groupLoans = getLoanDetails(groupId);
+  
+    // Check if any loan is not closed
+    const hasOpenLoans = groupLoans.some((loan) => loan.status !== "closed");
+  
+    if (hasOpenLoans) {
+      alert("Cannot deactivate group: Some loans are still pending.");
+      return;
+    }
+  
+    // Ask for confirmation to deactivate the group
     if (
       !window.confirm(
-        "Are you sure you want to delete all members and set the group status to inactive?"
+        "Are you sure you want to deactivate this group and set all members to active?"
       )
-    )
-
+    ) {
+      return;
+    }
+  
     try {
       setDeleteError(null);
       const crptoken = localStorage.getItem("admin_token");
-
-      // Fetch group data (including members)
-      const groupData = await axios.get(
-        `http://localhost:5000/api/groups/${groupId}`,
+  
+      // Send request to deactivate the group
+      const response = await axios.delete(
+        `https://bachatapi.codifyinstitute.org/api/groups/del/${groupId}`,
+        {}, // No request body needed
         {
           headers: {
             Authorization: `Bearer ${crptoken}`,
@@ -126,36 +153,77 @@ const CrpGroupsList = () => {
           },
         }
       );
-
-      const group = groupData.data;
-      const memberIds = group.members.map((m) => m._id || m.member); // Ensure correct ID field
-      if (memberIds.length === 0) {
-        throw new Error("No members to delete in this group.");
-      }
-
-      axios.delete(`http://localhost:5000/api/groups/${groupId}/`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // alert("Group members removed and group status set to inactive.")
-      });
-      await axios.put(
-        `http://localhost:5000/api/groups/${groupId}`,
-        {
-          status: "inactive",
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${crptoken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
+  
+      alert(response.data.message); // Show success message from backend
+  
+      // Refresh group and loan data
       await fetchGroupsAndLoans();
     } catch (error) {
-      alert("Loans Pending in this group, Cannot be deleted!!");
+      console.error(
+        "Error deactivating group:",
+        error.response?.data || error.message
+      );
+      alert(error.response?.data?.message || "Failed to deactivate group.");
     }
+  };
+
+  const convertNumberToWords = (number) => {
+    const [intPart, decimalPart] = number.toString().split(".");
+    let words = toWords(parseInt(intPart));
+    words = words.charAt(0).toUpperCase() + words.slice(1);
+    words += decimalPart ? ` Rupees and ${toWords(parseInt(decimalPart))} Paise` : " Rupees Only";
+    return words;
+  };
+
+  const handlesavinginvoice = (group, loanid, member, savingAmount, interestMonth) => {
+    const currentDate = new Date().toLocaleDateString();
+
+    console.log(savingAmount)
+
+    if(savingAmount=="Not Available"){
+      alert('The Collection Is Not Initialized')
+      return;
+    }
+
+    const memberSchedule = loanid.repaymentSchedules.find(schedule =>
+      schedule.memberId._id === member._id
+    );
+
+    if (!memberSchedule) {
+      alert("Member not found in repayment schedules.");
+      return;
+    }
+
+    // Check if all installments are paid
+    const allPaid = memberSchedule.installments.every(installment => installment.status === "paid");
+
+    if (!member || !member.name) {
+      alert("Member name is missing!");
+      return;
+    }
+
+    setSavingInvoiceData({
+      date: currentDate,
+      membername: member.name,
+      amount: savingAmount || "N/A",
+      amountInWords: savingAmount ? convertNumberToWords(savingAmount * interestMonth) : "N/A",
+      savingAmount: savingAmount * interestMonth || "N/A",
+      groupName: group.name,
+      termMonth: interestMonth || "N/A",
+      loanId: loanid._id || "N/A"
+    });
+
+
+    if (allPaid) {
+      setShowSavingInvoice(true);
+    }else{
+      alert('member has not paid all installments')
+    }
+
+  };
+  console.log(savingInvoiceData)
+  const closeSavingInvoice = () => {
+    setShowSavingInvoice(false);
   };
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
@@ -242,7 +310,7 @@ const CrpGroupsList = () => {
                         <td className="p-3">
                           <Trash2
                             className="text-red-500 cursor-pointer"
-                            onClick={(e) => handleDeleteGroup(group._id, e)}
+                            onClick={(e) => handleDeactivateGroup(group._id, e)}
                           />
                         </td>
                       </tr>
@@ -397,6 +465,12 @@ const CrpGroupsList = () => {
                                                 })}
                                               </tbody>
                                             </table>
+                                            <button
+                                            onClick={() => handlesavinginvoice(group, loan, member, savingsData[group._id], loan.termMonths)}
+                                            className="bg-blue-500 py-1 px-3 text-gray-100 rounded-md mt-3 transition-all duration-150 hover:scale-102 hover:text-white"
+                                          >
+                                            Print Saving Invoice
+                                          </button>
                                           </div>
                                         );
                                       })
@@ -419,8 +493,21 @@ const CrpGroupsList = () => {
             </table>
           </div>
         )}
+        {showSavingInvoice && (
+        <div className="fixed inset-0 bg-gray-100 flex justify-center items-center z-50">
+          <div className="relative bg-white p-4 rounded-lg">
+            <button
+              onClick={closeSavingInvoice}
+              className="absolute top-8 right-2 bg-red-500 text-white px-3 py-1 rounded"
+            >
+              X
+            </button>
+            <SavingInvoice data={savingInvoiceData} />
+          </div>
+        </div>
+      )}
       </div>
     );
 };
 
-export default CrpGroupsList;
+export default AdminGroupsList;

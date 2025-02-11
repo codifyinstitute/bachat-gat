@@ -51,7 +51,7 @@ const AddCRP = () => {
   //         }
 
   //         await axios.post(
-  //           "http://localhost:5000/api/admin/create-crp",
+  //           "https://bachatapi.codifyinstitute.org/api/admin/create-crp",
   //           formData,
   //           {
   //             headers: {
@@ -90,7 +90,7 @@ const AddCRP = () => {
         }
 
         await axios.post(
-          "http://localhost:5000/api/admin/create-crp",
+          "https://bachatapi.codifyinstitute.org/api/admin/create-crp",
           formData,
           {
             headers: {

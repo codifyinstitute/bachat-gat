@@ -16,7 +16,7 @@ const AdminApprovalList = () => {
         try {
             const token = localStorage.getItem("admin_token");
 
-            const response = await axios.get("http://localhost:5000/api/loan", {
+            const response = await axios.get("https://bachatapi.codifyinstitute.org/api/loan", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
@@ -40,7 +40,7 @@ const AdminApprovalList = () => {
 
             // Sending POST request to approve the loan
             await axios.post(
-                `http://localhost:5000/api/loan/${loanId}/approve`,
+                `https://bachatapi.codifyinstitute.org/api/loan/${loanId}/approve`,
                 {},
                 {
                     headers: {

@@ -19,7 +19,7 @@ const AdminGroupsList = () => {
     const savings = {};
     for (const group of groups) {
       try {
-        const res = await axios.get(`http://localhost:5000/api/collection/saving/${group._id}`);
+        const res = await axios.get(`https://bachatapi.codifyinstitute.org/api/collection/saving/${group._id}`);
         if (res.status === 200 && res.data.savingsAmount !== undefined) {
           savings[group._id] = res.data.savingsAmount; // Ensure we extract the correct value
         } else {
@@ -43,13 +43,13 @@ const AdminGroupsList = () => {
       }
 
       const [groupsRes, loansRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/groups/", {
+        axios.get("https://bachatapi.codifyinstitute.org/api/groups/", {
           headers: {
             Authorization: `Bearer ${crptoken}`,
             "Content-Type": "application/json",
           },
         }),
-        axios.get("http://localhost:5000/api/loan", {
+        axios.get("https://bachatapi.codifyinstitute.org/api/loan", {
           headers: {
             Authorization: `Bearer ${crptoken}`,
             "Content-Type": "application/json",
@@ -103,22 +103,37 @@ const AdminGroupsList = () => {
     return groupNameMatch || memberMatch;
   });
 
-  const handleDeleteGroup = async (groupId, e) => {
-    e.stopPropagation(); // Prevent row expansion when clicking delete
-
+  const handleDeactivateGroup = async (groupId, e) => {
+    e.stopPropagation(); // Prevent row expansion when clicking deactivate
+  
+    // First, check if all loans for the group are 'closed'
+    const groupLoans = getLoanDetails(groupId);
+  
+    // Check if any loan is not closed
+    const hasOpenLoans = groupLoans.some((loan) => loan.status !== "closed");
+  
+    if (hasOpenLoans) {
+      alert("Cannot deactivate group: Some loans are still pending.");
+      return;
+    }
+  
+    // Ask for confirmation to deactivate the group
     if (
       !window.confirm(
-        "Are you sure you want to delete all members and set the group status to inactive?"
+        "Are you sure you want to deactivate this group and set all members to active?"
       )
-    )
-
+    ) {
+      return;
+    }
+  
     try {
       setDeleteError(null);
       const crptoken = localStorage.getItem("admin_token");
-
-      // Fetch group data (including members)
-      const groupData = await axios.get(
-        `http://localhost:5000/api/groups/${groupId}`,
+  
+      // Send request to deactivate the group
+      const response = await axios.delete(
+        `https://bachatapi.codifyinstitute.org/api/groups/del/${groupId}`,
+        {}, // No request body needed
         {
           headers: {
             Authorization: `Bearer ${crptoken}`,
@@ -126,37 +141,20 @@ const AdminGroupsList = () => {
           },
         }
       );
-
-      const group = groupData.data;
-      const memberIds = group.members.map((m) => m._id || m.member); // Ensure correct ID field
-      if (memberIds.length === 0) {
-        throw new Error("No members to delete in this group.");
-      }
-
-      axios.delete(`http://localhost:5000/api/groups/${groupId}/`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // alert("Group members removed and group status set to inactive.")
-      });
-      await axios.put(
-        `http://localhost:5000/api/groups/${groupId}`,
-        {
-          status: "inactive",
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${crptoken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
+  
+      alert(response.data.message); // Show success message from backend
+  
+      // Refresh group and loan data
       await fetchGroupsAndLoans();
     } catch (error) {
-      alert("Loans Pending in this group, Cannot be deleted!!");
+      console.error(
+        "Error deactivating group:",
+        error.response?.data || error.message
+      );
+      alert(error.response?.data?.message || "Failed to deactivate group.");
     }
   };
+  
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
@@ -242,7 +240,7 @@ const AdminGroupsList = () => {
                         <td className="p-3">
                           <Trash2
                             className="text-red-500 cursor-pointer"
-                            onClick={(e) => handleDeleteGroup(group._id, e)}
+                            onClick={(e) => handleDeactivateGroup(group._id, e)}
                           />
                         </td>
                       </tr>

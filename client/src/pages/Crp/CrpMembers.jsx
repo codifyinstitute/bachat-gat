@@ -19,7 +19,7 @@ const AllMembers = () => {
       try {
         // Add Authorization header with Bearer token
         const response = await axios.get(
-          "http://localhost:5000/api/crp/membycrp",
+          "https://bachatapi.codifyinstitute.org/api/crp/membycrp",
           {
             headers: {
               Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
@@ -62,7 +62,7 @@ const AllMembers = () => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/member/${_id}`,
+        `https://bachatapi.codifyinstitute.org/api/member/${_id}`,
         {
           headers: {
             Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
@@ -78,7 +78,7 @@ const AllMembers = () => {
 
         // Fetch updated members list from API after deletion
         const updatedResponse = await axios.get(
-          "http://localhost:5000/api/crp/membycrp",
+          "https://bachatapi.codifyinstitute.org/api/crp/membycrp",
           {
             headers: {
               Authorization: `Bearer ${adminToken}`,
@@ -109,29 +109,29 @@ const AllMembers = () => {
     }
   };
 
-  const toggleNPA = async (_id, event) => {
-    event.stopPropagation();
-    try {
-      const response = await axios.put(
-        `http://localhost:5000/api/member/${_id}/toggle-npa`,
-        {},
-        { headers: { Authorization: `Bearer ${adminToken}` } }
-      );
+  // const toggleNPA = async (_id, event) => {
+  //   event.stopPropagation();
+  //   try {
+  //     const response = await axios.put(
+  //       `https://bachatapi.codifyinstitute.org/api/member/${_id}/toggle-npa`,
+  //       {},
+  //       { headers: { Authorization: `Bearer ${adminToken}` } }
+  //     );
 
-      console.log("Updated Member Response:", response.data); // 🔍 Debugging log
+  //     console.log("Updated Member Response:", response.data); // 🔍 Debugging log
 
-      setMembers(
-        members.map((member) =>
-          member._id === _id
-            ? { ...member, isNPA: member.isNPA === "NO" ? "YES" : "NO" } // Update to use strings
-            : member
-        )
-      );
-    } catch (error) {
-      console.error("Error updating NPA status:", error);
-      alert("Failed to update NPA status.");
-    }
-  };
+  //     setMembers(
+  //       members.map((member) =>
+  //         member._id === _id
+  /////           ? { ...member, isNPA: member.isNPA === "NO" ? "YES" : "NO" } 
+  //           : member
+  //       )
+  //     );
+  //   } catch (error) {
+  //     console.error("Error updating NPA status:", error);
+  //     alert("Failed to update NPA status.");
+  //   }
+  // };
 
   return (
     <div className="flex flex-col items-center mt-14 min-h-screen bg-gray-100 p-4">
@@ -163,15 +163,15 @@ const AllMembers = () => {
                   <td className="py-3 px-4">{member.mobileNumber}</td>
                   <td className="py-3 px-4">{member.panNo}</td>
                   <td className="py-3 px-4">
-                    <button
+                    <span
                       className={`px-3 py-1 text-sm font-medium rounded ${member.isNPA === "YES"
                         ? "bg-green-300 text-black"
                         : "bg-red-200 text-black"
                         }`}
-                      onClick={(event) => toggleNPA(member._id, event)}
+                      // onClick={(event) => toggleNPA(member._id, event)}
                     >
                       {member.isNPA === "YES" ? "Yes" : "No"}
-                    </button>
+                    </span>
                   </td>
                   <td className="py-3 px-4">
                     <span

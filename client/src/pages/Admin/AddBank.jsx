@@ -17,7 +17,7 @@ const BankList = () => {
   useEffect(() => {
     const fetchBanks = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/banks");
+        const response = await axios.get("https://bachatapi.codifyinstitute.org/api/banks");
         setBanks(response.data);
       } catch (err) {
         setError("Failed to fetch bank data.");
@@ -42,10 +42,11 @@ const BankList = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/banks", formData);
+      const response = await axios.post("https://bachatapi.codifyinstitute.org/api/banks", formData);
       setBanks([...banks, response.data]); // Update list with new bank
       setFormData({ name: "", branch: "", ifsc: "", interestRate: "", additionalDetails: "" });
       setError("");
+      window.location.reload();
     } catch (err) {
       setError("Failed to add bank. Please try again.");
     }
@@ -54,7 +55,7 @@ const BankList = () => {
   // Handle Delete Bank
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/banks/${id}`);
+      await axios.delete(`https://bachatapi.codifyinstitute.org/api/banks/${id}`);
       setBanks(banks.filter((bank) => bank._id !== id)); // Remove from UI
     } catch (err) {
       setError("Failed to delete bank.");

@@ -27,8 +27,8 @@ import ApproveCollection from "./pages/Admin/ApproveCollection";
 import Crpdashboard from "./pages/Crp/Crpdashboard";
 import AddBank from "./pages/Admin/AddBank";
 import AllCRP from "./pages/Admin/AllCRP";
-import Forclose from "./pages/Crp/Forclose"
-
+import Forclose from "./pages/Crp/Forclose";
+import Npalist from "./pages/Crp/Npalist";
 AOS.init();
 
 function App() {
@@ -59,7 +59,7 @@ function App() {
         <Route path="pending-loans" element={<PendingLoans />} />
         <Route path="collection" element={<Collection />} />
         <Route path="crpapprovedlist" element={<CrpApprovedlist />} />
-        {/* <Route path="payment" element={<Payment />} /> */}
+        <Route path="npalist" element={<Npalist />} />
         <Route path="paymentPage" element={<PaymentPage />} />
         <Route path="GroupByCrp" element={<GroupByCrp />} />
         <Route path="CrpHome" element={<Crpdashboard />} />
