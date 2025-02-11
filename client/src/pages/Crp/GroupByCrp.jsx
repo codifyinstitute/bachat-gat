@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Trash2 } from "lucide-react";
-import SavingInvoice from "../../components/SavingInvoice";
 import { toWords } from "number-to-words";
 import SavingInvoice from "../../components/SavingInvoice";
-import { toWords } from "number-to-words";
 
 const AdminGroupsList = () => {
   const [loansData, setLoansData] = useState([]);
@@ -169,64 +167,6 @@ const AdminGroupsList = () => {
     }
   };
 
-  const convertNumberToWords = (number) => {
-    const [intPart, decimalPart] = number.toString().split(".");
-    let words = toWords(parseInt(intPart));
-    words = words.charAt(0).toUpperCase() + words.slice(1);
-    words += decimalPart ? ` Rupees and ${toWords(parseInt(decimalPart))} Paise` : " Rupees Only";
-    return words;
-  };
-
-  const handlesavinginvoice = (group, loanid, member, savingAmount, interestMonth) => {
-    const currentDate = new Date().toLocaleDateString();
-
-    console.log(savingAmount)
-
-    if(savingAmount=="Not Available"){
-      alert('The Collection Is Not Initialized')
-      return;
-    }
-
-    const memberSchedule = loanid.repaymentSchedules.find(schedule =>
-      schedule.memberId._id === member._id
-    );
-
-    if (!memberSchedule) {
-      alert("Member not found in repayment schedules.");
-      return;
-    }
-
-    // Check if all installments are paid
-    const allPaid = memberSchedule.installments.every(installment => installment.status === "paid");
-
-    if (!member || !member.name) {
-      alert("Member name is missing!");
-      return;
-    }
-
-    setSavingInvoiceData({
-      date: currentDate,
-      membername: member.name,
-      amount: savingAmount || "N/A",
-      amountInWords: savingAmount ? convertNumberToWords(savingAmount * interestMonth) : "N/A",
-      savingAmount: savingAmount * interestMonth || "N/A",
-      groupName: group.name,
-      termMonth: interestMonth || "N/A",
-      loanId: loanid._id || "N/A"
-    });
-
-
-    if (allPaid) {
-      setShowSavingInvoice(true);
-    }else{
-      alert('member has not paid all installments')
-    }
-
-  };
-  console.log(savingInvoiceData)
-  const closeSavingInvoice = () => {
-    setShowSavingInvoice(false);
-  };
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
