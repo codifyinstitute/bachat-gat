@@ -29,6 +29,9 @@ import AddBank from "./pages/Admin/AddBank";
 import AllCRP from "./pages/Admin/AllCRP";
 import Forclose from "./pages/Crp/Forclose";
 import Npalist from "./pages/Crp/Npalist";
+import CrpNpa from "./pages/Crp/CrpNpalist"
+import AdminNpalist from "./pages/Admin/AdminNpalist";
+// import AdminNpalist from "./pages/Admin/AdminNpalist";
 AOS.init();
 
 function App() {
@@ -48,6 +51,9 @@ function App() {
         <Route path="approvedlist" element={<ApprovedList />} />
         <Route path="approvecollection" element={<ApproveCollection/>}/>
         <Route path="addbank" element={<AddBank/>}/>
+        <Route path="adminnpalist" element={<AdminNpalist/>}/>
+        {/* <Route path="adminnpalist" element={<AdminNpalist/>} /> */}
+
       </Route>
 
       <Route path="crp/*" element={<Sidebar role="crp" />}>
@@ -64,6 +70,7 @@ function App() {
         <Route path="GroupByCrp" element={<GroupByCrp />} />
         <Route path="CrpHome" element={<Crpdashboard />} />
         <Route path="Crpforclose" element={<Forclose />} />
+        <Route path="crpnpalist" element={<CrpNpa />} />
       </Route>
     </Routes>
   );
