@@ -25,5 +25,7 @@ router.get(
   loanController.generateRepaymentSchedulePDF
 );
 
+router.delete('/deleteloan/:loanId',loanController.deleteLoan)
+
 
 module.exports = router;

@@ -54,6 +54,8 @@ const loanController = {
         termMonths,
         startDate,
         bankDetails,
+        loanAccountNo,
+        savingAccountNo,
       } = req.body;
 
       // Validate group exists and is active
@@ -76,6 +78,11 @@ const loanController = {
         return res
           .status(400)
           .json({ message: "Complete bank details are required" });
+      }
+
+      // Validate Account Numbers
+      if (!loanAccountNo || !savingAccountNo) {
+        return res.status(400).json({ message: "Both loan and saving account numbers are required" });
       }
 
       // Check if the group already has a loan with the same bank details
@@ -117,6 +124,8 @@ const loanController = {
         repaymentSchedules,
         createdBy: req.user.id,
         bankDetails, // Save bank details
+        loanAccountNo,
+        savingAccountNo,
       });
 
       await loan.save();
@@ -329,6 +338,24 @@ const loanController = {
       res.status(500).json({ message: error.message });
     }
   },
+  
+  deleteLoan : async (req, res) => {
+  try {
+    const { loanId } = req.params;
+
+    // Check if loan exists
+    const loan = await Loan.findById(loanId);
+    if (!loan) {
+      return res.status(404).json({ message: "Loan not found" });
+    }
+
+    // Delete the loan
+    await Loan.findByIdAndDelete(loanId);
+    res.status(200).json({ message: "Loan deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting loan", error: error.message });
+  }
+},
 };
 
 module.exports = loanController;
