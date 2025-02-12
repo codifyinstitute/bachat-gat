@@ -7,6 +7,8 @@ const LoanSanctionForm = () => {
     totalAmount: "",
     interestRate: "",
     termMonths: "",
+    loanacc:"",
+    savingsacc:"",
     startDate: "",
     bankDetails: {
       name: "",
@@ -140,6 +142,29 @@ const LoanSanctionForm = () => {
             className="w-full border p-2"
             value={loanDetails.totalAmount}
             onChange={(e) => handleChange("totalAmount", e.target.value)}
+            placeholder="Enter Total Amount"
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label className="block text-sm font-medium">Loan Acc NO</label>
+          <input
+            type="number"
+            className="w-full border p-2"
+            value={loanDetails.loanacc}
+            onChange={(e) => handleChange("loanacc", e.target.value)}
+            placeholder="Loan Account Number"
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label className="block text-sm font-medium">Saving Acc no.</label>
+          <input
+            type="number"
+            className="w-full border p-2"
+            value={loanDetails.savingsacc}
+            onChange={(e) => handleChange("savingsacc", e.target.value)}
+            placeholder="Savings Account Number"
             required
           />
         </div>
@@ -184,6 +209,7 @@ const LoanSanctionForm = () => {
             className="w-full border p-2"
             value={loanDetails.termMonths}
             onChange={(e) => handleChange("termMonths", e.target.value)}
+            placeholder="Enter Months "
             required
           />
         </div>

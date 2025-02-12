@@ -240,10 +240,10 @@ const PaymentPage = () => {
             className="w-full p-2 border rounded"
             required
           >
-            <option value="bank_transfer">Bank Transfer</option>
-            <option value="cash">Cash</option>
-            <option value="cheque">Cheque</option>
+            <option value="bank_transfer">Cash</option>
             <option value="upi">UPI</option>
+            {/* <option value="cheque">Cheque</option> */}
+            {/* <option value="cash">Cash</option> */}
           </select>
 
           <input

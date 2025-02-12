@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { CheckCircle, Eye } from "lucide-react";
+import { CheckCircle, Eye,Trash } from "lucide-react";
 
 const AdminApprovalList = () => {
     const [loans, setLoans] = useState([]);
@@ -85,6 +85,11 @@ const AdminApprovalList = () => {
                                     >
                                         <Eye className="w-4 h-4 sm:w-5 sm:h-5 mr-1" /> {expandedLoanId === loan._id ? "Hide" : "View"}
                                     </button>
+                                    <div className="flex gap-4">
+                                        <button
+                                        className="bg-red-500 text-white px-3 py-1 text-sm rounded flex items-center justify-center">
+                                            <Trash className="w-4 h-4 sm:w-5 sm:h-5 mr-1" /> {loading ? "Deleting..." : "Delete"}
+                                        </button>
                                     <button
                                         onClick={() => approveLoan(loan._id)}
                                         disabled={loading}
@@ -92,6 +97,7 @@ const AdminApprovalList = () => {
                                     >
                                         <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1" /> {loading ? "Approving..." : "Approve"}
                                     </button>
+                                    </div>
                                 </div>
 
                                 {/* Expanded Loan Details */}

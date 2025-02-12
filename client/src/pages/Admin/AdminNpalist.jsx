@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
-const AdminNpalist = () => {
+const CrpNpalist = () => {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(''); // State for search input
+  const [currentPage, setCurrentPage] = useState(1);
+  const membersPerPage = 15;
 
   useEffect(() => {
     // Fetch data from API when the component mounts
@@ -73,6 +75,33 @@ const AdminNpalist = () => {
     member.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Calculate the indices for the current page
+  const indexOfLastMember = currentPage * membersPerPage;
+  const indexOfFirstMember = indexOfLastMember - membersPerPage;
+  const currentMembers = filteredMembers.slice(indexOfFirstMember, indexOfLastMember);
+
+  // Calculate total number of pages
+  const totalPages = Math.ceil(filteredMembers.length / membersPerPage);
+
+  // Handle page change
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Handle print
+  const handlePrint = () => {
+    const printContents = document.getElementById('printable').innerHTML;
+    const originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+  };
+
+  // Clear search input
+  const handleClearSearch = () => {
+    setSearchQuery('');
+  };
+
   // Render loading state or member list
   if (loading) {
     return (
@@ -89,21 +118,42 @@ const AdminNpalist = () => {
       <h1 className="text-3xl font-bold text-center mb-6">Members List</h1>
 
       {/* Search Bar */}
-      <div className="mb-6">
-        <input
-          type="text"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-          placeholder="Search members by name..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)} // Update search query state on change
-        />
+      <div className='flex w-full justify-between'>
+        <div className="mb-6 w-[50%] relative">
+          <input
+            type="text"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+            placeholder="Search members by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)} // Update search query state on change
+          />
+          {searchQuery && (
+            <button
+              onClick={handleClearSearch}
+              className="absolute right-4 top-2 text-gray-500"
+            >
+              X
+            </button>
+          )}
+        </div>
+
+        {/* Print Button */}
+        <div className="mb-6 text-center">
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            onClick={handlePrint}
+          >
+            Print Members List
+          </button>
+        </div>
       </div>
 
       {/* Table for displaying members */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" id="printable">
         <table className="min-w-full table-auto text-left border-collapse">
           <thead className="bg-blue-600 text-white">
             <tr>
+              <th className="px-4 py-2 text-center">Sr. No.</th>
               <th className="px-4 py-2 text-center">Name</th>
               <th className="px-4 py-2 text-center">Phone</th>
               <th className="px-4 py-2 text-center">NPA Status</th>
@@ -114,8 +164,9 @@ const AdminNpalist = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredMembers.map((member) => (
+            {currentMembers.map((member, index) => (
               <tr key={member._id} className="border-b hover:bg-gray-50">
+                <td className="px-4 py-2 text-center">{index + 1 + (currentPage - 1) * membersPerPage}</td>
                 <td className="px-4 py-2 text-center">{member.name}</td>
                 <td className="px-4 py-2 text-center">{member.mobileNumber}</td>
                 <td className="px-4 py-2 text-center">
@@ -136,8 +187,26 @@ const AdminNpalist = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-center mt-6">
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded-l-lg hover:bg-blue-600"
+          disabled={currentPage === 1}
+          onClick={() => handlePageChange(currentPage - 1)}
+        >
+          Prev
+        </button>
+        <button
+          className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600"
+          disabled={currentPage === totalPages}
+          onClick={() => handlePageChange(currentPage + 1)}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };
 
-export default AdminNpalist;
+export default CrpNpalist;
