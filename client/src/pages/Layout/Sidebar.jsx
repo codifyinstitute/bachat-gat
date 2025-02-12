@@ -19,6 +19,7 @@ const Sidebar = ({ role }) => {
       { name: "Approve Loans", path: "/admin/approvallist", icon: <HandCoins className="text-[#ffaf7a]"/>,},
       { name: "Approve Collection", path: "/admin/approvecollection", icon: <Boxes className="text-[#ffaf7a]"/> },
       { name: "Approved Loans", path: "/admin/approvedlist",icon: <CheckCircle className="text-[#12c20f]"/>,},
+      { name: "NPA List", path: "/admin/AdminNpalist", icon: <Landmark /> },
       { name: "Add Bank", path: "/admin/addbank", icon: <Landmark /> },
     ],
 
@@ -35,6 +36,7 @@ const Sidebar = ({ role }) => {
       { name: "Pending Loans", path: "/crp/pending-loans", icon: <CircleDotDashed className="text-[#ffaf7a]" />,},
       { name: "Collections", path: "/crp/collection", icon: <Boxes  /> },
       { name: "NPAs", path: "/crp/npalist", icon: <CheckCircle /> },
+      { name: "NPA List", path: "/crp/crpnpalist", icon: <Landmark /> },
       { name: "PaymentPage", path: "/crp/PaymentPage", icon: <Landmark /> },
       
     ],

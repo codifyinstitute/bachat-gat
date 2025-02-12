@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-const AdminNpalist = () => {
+const CrpNpalist = () => {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(''); // State for search input
@@ -8,7 +8,7 @@ const AdminNpalist = () => {
   useEffect(() => {
     // Fetch data from API when the component mounts
     const fetchMembers = async () => {
-      const crpToken = localStorage.getItem('admin_token'); // Retrieve CRP token
+      const crpToken = localStorage.getItem('crp_token'); // Retrieve CRP token
 
       if (!crpToken) {
         alert("CRP Token not found in local storage!");
@@ -17,7 +17,7 @@ const AdminNpalist = () => {
       }
 
       try {
-        const response = await fetch('http://localhost:5000/api/member', {
+        const response = await fetch('http://localhost:5000/api/crp/membycrp', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${crpToken}`, // Add the token in the headers
@@ -140,4 +140,4 @@ const AdminNpalist = () => {
   );
 };
 
-export default AdminNpalist;
+export default CrpNpalist;
