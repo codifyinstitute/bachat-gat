@@ -95,6 +95,7 @@ const CrpNpalist = () => {
     document.body.innerHTML = printContents;
     window.print();
     document.body.innerHTML = originalContents;
+    window.location.reload()
   };
 
   // Clear search input

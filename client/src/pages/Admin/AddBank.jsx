@@ -54,6 +54,13 @@ const BankList = () => {
 
   // Handle Delete Bank
   const handleDelete = async (id) => {
+    // Show confirmation dialog before proceeding
+    const confirmed = window.confirm("Are you sure you want to delete this bank?");
+    
+    if (!confirmed) {
+      return; // Exit if the user clicks "Cancel"
+    }
+  
     try {
       await axios.delete(`http://localhost:5000/api/banks/${id}`);
       setBanks(banks.filter((bank) => bank._id !== id)); // Remove from UI
@@ -61,7 +68,6 @@ const BankList = () => {
       setError("Failed to delete bank.");
     }
   };
-
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-bold text-center mb-4">Bank List</h2>

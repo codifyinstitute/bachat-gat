@@ -7,8 +7,8 @@ const LoanSanctionForm = () => {
     totalAmount: "",
     interestRate: "",
     termMonths: "",
-    loanacc:"",
-    savingsacc:"",
+    loanAccountNo:"",
+    savingAccountNo:"",
     startDate: "",
     bankDetails: {
       name: "",
@@ -50,12 +50,17 @@ const LoanSanctionForm = () => {
       const response = await axios.get("http://localhost:5000/api/groups/created-by-crp", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setGroups(response.data);
+  
+      // Filter groups where status is "active"
+      const activeGroups = response.data.filter(group => group.status === "active");
+  
+      setGroups(activeGroups);
     } catch (error) {
       console.error("Error fetching groups:", error);
       setMessage("Failed to fetch groups.");
     }
   };
+  
 
   const handleChange = (field, value) => {
     setLoanDetails((prev) => ({ ...prev, [field]: value }));
@@ -112,7 +117,7 @@ const LoanSanctionForm = () => {
       setLoading(false);
     }
   };
-  console.log("object", loanDetails)
+  // console.log("object", loanDetails)
 
   return (
     <div className="p-4 max-w-md h-[90vh] mt-10 overflow-y-auto mx-auto">
@@ -149,10 +154,10 @@ const LoanSanctionForm = () => {
         <div className="mb-3">
           <label className="block text-sm font-medium">Loan Acc NO</label>
           <input
-            type="number"
+            type="text"
             className="w-full border p-2"
-            value={loanDetails.loanacc}
-            onChange={(e) => handleChange("loanacc", e.target.value)}
+            value={loanDetails.loanAccountNo}
+            onChange={(e) => handleChange("loanAccountNo", e.target.value)}
             placeholder="Loan Account Number"
             required
           />
@@ -160,10 +165,10 @@ const LoanSanctionForm = () => {
         <div className="mb-3">
           <label className="block text-sm font-medium">Saving Acc no.</label>
           <input
-            type="number"
+            type="text"
             className="w-full border p-2"
-            value={loanDetails.savingsacc}
-            onChange={(e) => handleChange("savingsacc", e.target.value)}
+            value={loanDetails.savingAccountNo}
+            onChange={(e) => handleChange("savingAccountNo", e.target.value)}
             placeholder="Savings Account Number"
             required
           />

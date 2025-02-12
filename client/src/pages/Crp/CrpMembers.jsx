@@ -8,6 +8,8 @@ const AllMembers = () => {
   const navigate = useNavigate(); // Get navigate function
   const [members, setMembers] = useState([]); // State to store fetched members
   const [error, setError] = useState(null); // State to store any error
+  const [searchTerm, setSearchTerm] = useState(""); // State to store the search term
+  const [filteredMembers, setFilteredMembers] = useState([]); // State to store filtered members
 
   // Assuming the admin_token is stored in localStorage
   const adminToken = localStorage.getItem("crp_token");
@@ -31,12 +33,22 @@ const AllMembers = () => {
 
         // Handle different response formats
         if (Array.isArray(response.data)) {
-          setMembers(response.data); // Array of members
+          // Sort members by 'createdAt' field (most recent first)
+          const sortedMembers = response.data.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          );
+          setMembers(sortedMembers); // Set sorted members
+          setFilteredMembers(sortedMembers); // Set filtered members initially
         } else if (
           response.data.members &&
           Array.isArray(response.data.members)
         ) {
-          setMembers(response.data.members); // Nested 'members' array
+          // Sort members by 'createdAt' field (most recent first)
+          const sortedMembers = response.data.members.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          );
+          setMembers(sortedMembers); // Set sorted members
+          setFilteredMembers(sortedMembers); // Set filtered members initially
         } else {
           setError("The response data is not in the expected format.");
         }
@@ -48,6 +60,20 @@ const AllMembers = () => {
 
     fetchMembers();
   }, [adminToken]); // Ensure the token is passed into useEffect (can also use session storage, cookies, etc.)
+
+  // Filter members based on the search term
+  useEffect(() => {
+    if (searchTerm === "") {
+      setFilteredMembers(members); // If the search term is empty, show all members
+    } else {
+      setFilteredMembers(
+        members.filter((member) =>
+          member.name.toLowerCase().includes(searchTerm.toLowerCase()) // Search by member name
+        )
+      );
+    }
+  }, [searchTerm, members]); 
+
 
   if (error) {
     return <div>{error}</div>; // Display error message if there's an issue
@@ -86,7 +112,13 @@ const AllMembers = () => {
           }
         );
 
-        setMembers(updatedResponse.data.members || updatedResponse.data || []); // Ensure correct format
+        // Sort the members again after deletion
+        const sortedMembers = updatedResponse.data.members || updatedResponse.data;
+        const sortedByCreatedAt = sortedMembers.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+
+        setMembers(sortedByCreatedAt); // Update sorted members
       } else if (response.status === 400 && response.data.message) {
         // Alert the message if response status is 400
         alert(response.data.message);
@@ -139,6 +171,15 @@ const AllMembers = () => {
         <h1 className="text-2xl font-semibold text-gray-700 mb-4">
           All Members
         </h1>
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search members by name"
+            className="w-full p-3 border rounded-lg"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} // Update searchTerm on input change
+          />
+        </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white">
@@ -153,7 +194,7 @@ const AllMembers = () => {
               </tr>
             </thead>
             <tbody>
-              {members.map((member) => (
+              {filteredMembers.map((member) => (
                 <tr
                   key={member._id}
                   onClick={() => navigate(`/crp/Crp-memdetails/${member._id}`)} // Navigate to details page

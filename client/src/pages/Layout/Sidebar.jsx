@@ -17,7 +17,7 @@ const Sidebar = ({ role }) => {
       { name: "All CRP", path: "/admin/all-crp", icon: <Users /> },
       { name: "Group-wise Members", path: "/admin/groups", icon: <List /> },
       { name: "Approve Loans", path: "/admin/approvallist", icon: <HandCoins className="text-[#ffaf7a]"/>,},
-      { name: "Approve Collection", path: "/admin/approvecollection", icon: <Boxes className="text-[#ffaf7a]"/> },
+      // { name: "Approve Collection", path: "/admin/approvecollection", icon: <Boxes className="text-[#ffaf7a]"/> },
       { name: "Approved Loans", path: "/admin/approvedlist",icon: <CheckCircle className="text-[#12c20f]"/>,},
       { name: "NPA List", path: "/admin/AdminNpalist", icon: <Landmark /> },
       { name: "Add Bank", path: "/admin/addbank", icon: <Landmark /> },

@@ -7,6 +7,8 @@ const AllCRP = () => {
   const navigate = useNavigate(); // Get navigate function
   const [members, setMembers] = useState([]); // State to store fetched members
   const [error, setError] = useState(null); // State to store any error
+  const [searchTerm, setSearchTerm] = useState(""); // State to store search term
+  const [filteredMembers, setFilteredMembers] = useState([]); // State to store filtered members
 
   // Assuming the admin_token is stored in localStorage
   const adminToken = localStorage.getItem("admin_token");
@@ -26,7 +28,9 @@ const AllCRP = () => {
         if (!response.data || !response.data.crps) {
           setError("The response data is not in the expected format.");
         } else {
-          setMembers(response.data.crps); // Extract the 'crps' array
+          const sortedCrps = response.data.crps.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort by most recent first
+          setMembers(sortedCrps); // Extract the 'crps' array
+          setFilteredMembers(sortedCrps); // Set the filtered list as well
         }
       } catch (err) {
         setError("Failed to fetch members data.");
@@ -37,6 +41,19 @@ const AllCRP = () => {
     fetchMembers();
   }, [adminToken]);
 
+  // Filter members based on the search term
+  useEffect(() => {
+    if (searchTerm === "") {
+      setFilteredMembers(members); // If the search term is empty, show all members
+    } else {
+      setFilteredMembers(
+        members.filter((member) =>
+          member.name.toLowerCase().includes(searchTerm.toLowerCase()) // Search by member name
+        )
+      );
+    }
+  }, [searchTerm, members]);
+
   return (
     <div className="flex flex-col items-center mt-14 min-h-screen bg-gray-100 p-4">
       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
@@ -44,6 +61,19 @@ const AllCRP = () => {
 
         {error && <p className="text-red-500">{error}</p>}
 
+
+        {/* Search Bar */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search CRPs by name"
+            className="w-full p-3 border rounded-lg"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} // Update searchTerm on input change
+          />
+        </div>
+
+        {/* Table for CRP members */}
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white">
             <thead>
@@ -55,18 +85,24 @@ const AllCRP = () => {
               </tr>
             </thead>
             <tbody>
-              {members.map((member) => (
-                <tr
-                  key={member._id}
-                  className="border-b hover:bg-gray-100 cursor-pointer transition"
-                >
-                  <td className="py-3 px-4">{member.name}</td>
-                  <td className="py-3 px-4">{member.mobile}</td>
-                  <td className="py-3 px-4">{member.email}</td>
-                  <td className="py-3 px-4">{member.password}</td>
-
+              {filteredMembers.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="text-center py-4">No members found</td>
                 </tr>
-              ))}
+              ) : (
+                filteredMembers.map((member) => (
+                  <tr
+                    key={member._id}
+                    className="border-b hover:bg-gray-100 cursor-pointer transition"
+                    // onClick={() => navigate(`/crp/crp-details/${member._id}`)} // Navigate to details page
+                  >
+                    <td className="py-3 px-4">{member.name}</td>
+                    <td className="py-3 px-4">{member.mobile}</td>
+                    <td className="py-3 px-4">{member.email}</td>
+                    <td className="py-3 px-4">{member.password}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

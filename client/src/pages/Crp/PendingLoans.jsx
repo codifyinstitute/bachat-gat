@@ -7,6 +7,7 @@ const PendingLoans = () => {
     const [expandedLoanId, setExpandedLoanId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");  // State for the search term
 
     useEffect(() => {
         fetchLoans();
@@ -24,25 +25,52 @@ const PendingLoans = () => {
             });
 
             const pendingLoans = response.data.filter((loan) => loan.status === "pending");
-            setLoans(pendingLoans);
+
+            // Sort the loans based on creation date (most recent first)
+            const sortedLoans = pendingLoans.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            setLoans(sortedLoans);
         } catch (error) {
             console.error("Error fetching loans:", error);
             alert("Failed to fetch loans.");
         }
     };
-    console.log(loans)
+
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    // Filter loans based on the search term
+    const filteredLoans = loans.filter((loan) => {
+        return (
+            loan._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            loan.totalAmount.toString().includes(searchTerm.toLowerCase()) ||
+            loan.interestRate.toString().includes(searchTerm.toLowerCase())
+        );
+    });
 
     return (
         <div className="p-4 sm:p-6 max-w-7xl mx-auto bg-gray-100 min-h-screen">
             <h1 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">Pending Loans</h1>
             {message && <p className="text-green-600 text-center mb-4">{message}</p>}
 
+            {/* Search Bar */}
+            <div className="mb-4">
+                <input
+                    type="text"
+                    className="p-2 w-full sm:w-1/2 mx-auto border border-gray-300 rounded-md"
+                    placeholder="Search by Loan ID, Amount, or Interest Rate"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                />
+            </div>
+
             <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6">
-                {loans.length === 0 ? (
+                {filteredLoans.length === 0 ? (
                     <p className="text-center text-gray-500">No pending loans available.</p>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 gap-4">
-                        {loans.map((loan) => (
+                        {filteredLoans.map((loan) => (
                             <div key={loan._id} className="bg-white p-2 md:p-4 lg:p-4 rounded-lg shadow">
                                 <h3 className="text-[14px] sm:text-sm md:text-xl lg:text-xl xl:text-xl font-semibold text-gray-800">
                                     Loan ID: {loan._id}

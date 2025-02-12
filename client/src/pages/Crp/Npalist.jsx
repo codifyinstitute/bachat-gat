@@ -11,6 +11,7 @@ const GroupsList = () => {
   const [memberDetails, setMemberDetails] = useState([]); // For storing detailed member info
   const [loans, setLoans] = useState([]); // For storing loan data
   const [showInstallments, setShowInstallments] = useState({}); // Track visibility of installments per member
+  // const [searchQuery, setSearchQuery] = useState('');  
 
   // Fetch CRP token from localStorage
   const crpToken = localStorage.getItem('crp_token');
@@ -22,7 +23,7 @@ const GroupsList = () => {
       setLoading(false);
       return;
     }
-
+  
     try {
       const response = await axios.get('http://localhost:5000/api/groups/created-by-crp', {
         headers: {
@@ -30,8 +31,10 @@ const GroupsList = () => {
           'Content-Type': 'application/json',
         },
       });
-
-      setGroups(response.data); // Set groups to the fetched data
+  
+      // Filter groups to include only those with status 'active'
+      const activeGroups = response.data.filter(group => group.status === 'active');
+      setGroups(activeGroups); // Set active groups to the state
       setLoading(false); // Stop loading
     } catch (err) {
       setError('Error fetching groups!');

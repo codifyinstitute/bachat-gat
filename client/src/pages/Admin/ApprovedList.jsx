@@ -7,6 +7,7 @@ const AdminApprovalList = () => {
     const [expandedLoanId, setExpandedLoanId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");  // State for the search term
 
     useEffect(() => {
         fetchLoans();
@@ -23,58 +24,58 @@ const AdminApprovalList = () => {
                 },
             });
 
-            const pendingLoans = response.data.filter((loan) => loan.status === "approved");
-            setLoans(pendingLoans);
+            // Filter only approved loans
+            const approvedLoans = response.data.filter((loan) => loan.status === "approved");
+
+            // Sort the loans based on creation date (most recent first)
+            const sortedLoans = approvedLoans.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            setLoans(sortedLoans);
         } catch (error) {
             console.error("Error fetching loans:", error);
             alert("Failed to fetch loans.");
         }
     };
 
-    // const approveLoan = async (loanId) => {
-    //     setLoading(true);
-    //     setMessage("");
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
 
-    //     try {
-    //         const token = localStorage.getItem("admin_token");
-
-    //         // Sending POST request to approve the loan
-    //         await axios.post(
-    //             `http://localhost:5000/api/loan/${loanId}/approve`,
-    //             {},
-    //             {
-    //                 headers: {
-    //                     Authorization: `Bearer ${token}`,
-    //                     "Content-Type": "application/json",
-    //                 },
-    //             }
-    //         );
-
-    //         setMessage("Loan approved successfully!");
-    //         fetchLoans(); // Refresh loan list after approval
-    //     } catch (error) {
-    //         console.error("Error approving loan:", error);
-    //         setMessage("Error approving loan.");
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
+    // Filter loans based on the search term
+    const filteredLoans = loans.filter((loan) => {
+        return (
+            loan._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            loan.createdBy?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            loan.groupId?.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    });
 
     return (
         <div className="p-4 sm:p-6 max-w-7xl mx-auto bg-gray-100 min-h-screen">
             <h1 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">Admin Approval List</h1>
             {message && <p className="text-green-600 text-center mb-4">{message}</p>}
 
+            {/* Search Bar */}
+            <div className="mb-4">
+                <input
+                    type="text"
+                    className="p-2 w-full sm:w-1/2 mx-auto border border-gray-300 rounded-md"
+                    placeholder="Search by Loan ID, Name, or Group"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                />
+            </div>
+
             <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6">
-                {loans.length === 0 ? (
-                    <p className="text-center text-gray-500">Approved loans.</p>
+                {filteredLoans.length === 0 ? (
+                    <p className="text-center text-gray-500">No loans found.</p>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 gap-4">
-                        {loans.map((loan) => (
+                        {filteredLoans.map((loan) => (
                             <div key={loan._id} className="bg-white p-2 md:p-4 lg:p-4 rounded-lg shadow">
                                 <h3 className="text-[14px] sm:text-sm md:text-xl lg:text-xl xl:text-xl font-semibold text-gray-800">
                                     Loan ID: {loan._id}
-                                </h3> {/* Show only the first 5 characters of the Loan ID */}
+                                </h3> 
                                 <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Amount: {loan.createdBy?.name}</p>
                                 <p className="text-[13px] sm:text-[16px] md:text-[16px] text-gray-600">Interest Rate: {loan.groupId?.name}</p>
                                 <div className="flex justify-between items-center mt-4">

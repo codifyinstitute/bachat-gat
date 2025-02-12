@@ -60,8 +60,8 @@ const loanSchema = new mongoose.Schema(
       ref: "CRP",
       required: true,
     },
-    loanAccountNo: { type: String, required: true },
-    savingAccountNo: { type: String, required: true },
+    loanAccountNo: { type: String},
+    savingAccountNo: { type: String},
   },
   { timestamps: true }
 );

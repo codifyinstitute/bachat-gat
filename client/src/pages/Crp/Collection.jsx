@@ -10,24 +10,33 @@ const CollectionForm = () => {
   const [savingsAmount, setSavingsAmount] = useState(""); // ✅ New state for savings amount
 
   useEffect(() => {
-    const fetchGroups = async () => {
+    const fetchActiveGroups = async () => {
       try {
         const token = localStorage.getItem("crp_token");
+        if (!token) {
+          alert("Authorization token is missing.");
+          return;
+        }
+  
         const response = await axios.get("http://localhost:5000/api/groups/created-by-crp", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
-        setGroups(response.data);
+  
+        // Filter groups where status is 'active'
+        const activeGroups = response.data.filter(group => group.status === "active");
+        setGroups(activeGroups);
       } catch (error) {
-        alert.error("Failed to fetch groups");
+        alert("Failed to fetch groups");
         console.error("Error fetching groups:", error);
       }
     };
-
-    fetchGroups();
+  
+    fetchActiveGroups();
   }, []);
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
