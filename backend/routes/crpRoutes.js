@@ -5,7 +5,7 @@ const auth = require("../middleware/auth");
 
 // CRP routes
 router.post("/login", crpController.login);
-router.get("/allcrp",auth(["admin"]),crpController.getAllCRPs);
+router.get("/allcrp",auth(["admin", "crp"]),crpController.getAllCRPs);
 router.get("/profile", auth(["crp"]), crpController.getProfile);
 router.get("/membycrp", auth(["crp"]), crpController.getAllMembersCreatedByCRP);
 router.put("/profile", auth(["crp"]), crpController.updateProfile);
