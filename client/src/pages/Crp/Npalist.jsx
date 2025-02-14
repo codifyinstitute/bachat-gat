@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import dayjs from "dayjs";
 
 const GroupsList = () => {
   const [groups, setGroups] = useState([]);
@@ -23,7 +24,7 @@ const GroupsList = () => {
       setLoading(false);
       return;
     }
-  
+
     try {
       const response = await axios.get('http://localhost:5000/api/groups/created-by-crp', {
         headers: {
@@ -31,7 +32,7 @@ const GroupsList = () => {
           'Content-Type': 'application/json',
         },
       });
-  
+
       // Filter groups to include only those with status 'active'
       const activeGroups = response.data.filter(group => group.status === 'active');
       setGroups(activeGroups); // Set active groups to the state
@@ -111,56 +112,56 @@ const GroupsList = () => {
 
   // Handle NPA toggle
   const toggleNPA = async (_id, event, memberInstallments, currentNPAStatus) => {
-  event.stopPropagation();
+    event.stopPropagation();
 
-  // Determine confirmation message based on the current NPA status
-  const confirmationMessage = currentNPAStatus === 'YES'
-    ? 'Are you sure you want to remove this member as NPA?'
-    : 'Are you sure you want to add this member as NPA?';
+    // Determine confirmation message based on the current NPA status
+    const confirmationMessage = currentNPAStatus === 'YES'
+      ? 'Are you sure you want to remove this member as NPA?'
+      : 'Are you sure you want to add this member as NPA?';
 
-  // Show confirmation dialog
-  if (!window.confirm(confirmationMessage)) {
-    return; // Exit the function if the user cancels
-  }
-
-  // If the current status is YES, check if all installments are paid
-  if (currentNPAStatus === 'YES') {
-    const allPaid = memberInstallments.every((installment) => installment.status === 'paid');
-
-    if (!allPaid) {
-      alert("Cannot remove NPA unless all installments are paid.");
-      return; // Exit the function if not all installments are paid
+    // Show confirmation dialog
+    if (!window.confirm(confirmationMessage)) {
+      return; // Exit the function if the user cancels
     }
-  }
 
-  // Check if there are 2 consecutive pending installments
-  const canToggleNPA = hasTwoConsecutivePendingInstallments(memberInstallments);
-  if (!canToggleNPA && currentNPAStatus === 'NO') {
-    alert("Cannot mark NPA unless there are 2 consecutive pending installments.");
-    return;
-  }
+    // If the current status is YES, check if all installments are paid
+    if (currentNPAStatus === 'YES') {
+      const allPaid = memberInstallments.every((installment) => installment.status === 'paid');
 
-  try {
-    // Toggle the NPA status on the backend
-    const response = await axios.put(
-      `http://localhost:5000/api/member/${_id}/toggle-npa`,
-      {},
-      { headers: { Authorization: `Bearer ${crpToken}` } }
-    );
+      if (!allPaid) {
+        alert("Cannot remove NPA unless all installments are paid.");
+        return; // Exit the function if not all installments are paid
+      }
+    }
 
-    // Update the member's NPA status in the UI
-    setMemberDetails((prevMembers) =>
-      prevMembers.map((member) =>
-        member._id === _id
-          ? { ...member, isNPA: currentNPAStatus === 'NO' ? 'YES' : 'NO' }
-          : member
-      )
-    );
-  } catch (error) {
-    console.error('Error updating NPA status:', error);
-    alert('Failed to update NPA status.');
-  }
-};
+    // Check if there are 2 consecutive pending installments
+    const canToggleNPA = hasTwoConsecutivePendingInstallments(memberInstallments);
+    if (!canToggleNPA && currentNPAStatus === 'NO') {
+      alert("Cannot mark NPA unless there are 2 consecutive pending installments.");
+      return;
+    }
+
+    try {
+      // Toggle the NPA status on the backend
+      const response = await axios.put(
+        `http://localhost:5000/api/member/${_id}/toggle-npa`,
+        {},
+        { headers: { Authorization: `Bearer ${crpToken}` } }
+      );
+
+      // Update the member's NPA status in the UI
+      setMemberDetails((prevMembers) =>
+        prevMembers.map((member) =>
+          member._id === _id
+            ? { ...member, isNPA: currentNPAStatus === 'NO' ? 'YES' : 'NO' }
+            : member
+        )
+      );
+    } catch (error) {
+      console.error('Error updating NPA status:', error);
+      alert('Failed to update NPA status.');
+    }
+  };
 
   // Toggle the visibility of installments for a specific member
   const toggleInstallments = (memberId) => {
@@ -275,7 +276,7 @@ const GroupsList = () => {
                                   <p>Total Amount: {installment.amount}</p>
                                   <p>Status: {installment.status}</p>
                                   {installment.dueDate && (
-                                    <p>Due Date: {formatDate(installment.dueDate)}</p>
+                                    <p>Due Date: {dayjs(installment.dueDate).format('DD/MM/YYYY')}</p>
                                   )}
                                 </div>
                               ))}

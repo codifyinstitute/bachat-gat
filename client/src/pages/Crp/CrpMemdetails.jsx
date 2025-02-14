@@ -274,14 +274,14 @@ const CrpMemberDetails = () => {
     return <p className="text-center mt-10">Loading member details...</p>;
 
   return (
-    <div className="w-full p-0 bg-gradient-to-r from-blue-50 to-purple-100 min-h-screen">
+    <div className="w-full p-0 bg-gradient-to-r from-blue-50 to-purple-100 min-h-screen mt-10 md:mt-4 lg:mt-2">
       <div className="w-full bg-white shadow-lg rounded-lg px-4 py-5 mx-auto">
         {error && (
           <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
             {error}
           </div>
         )}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center ">
           <h1 className="text-xl font-bold text-gray-800 mb-4">
             Member Details
           </h1>
@@ -350,7 +350,6 @@ const CrpMemberDetails = () => {
                   label: "Status",
                   value: member.status,
                   field: "status",
-                  // editable: true,
                 },
                 {
                   label: "Photo",
@@ -372,14 +371,20 @@ const CrpMemberDetails = () => {
                   field: "photo",
                   isImage: true,
                 },
-
               ].map((item) => (
                 <tr key={item.label}>
                   <td className="py-3 px-4 font-semibold text-gray-900">
                     {item.label}
                   </td>
                   <td className="py-3 px-4 flex justify-between items-center">
-                    {isEditing && item.editable ? (
+                    {item.label === "ID" ? (
+                      <>
+                        {/* For small screens, show truncated ID */}
+                        <span className="md:hidden">{member._id.substring(0, 4) + '...'}</span>
+                        {/* For medium screens and up, show full ID */}
+                        <span className="hidden md:inline">{member._id}</span>
+                      </>
+                    ) : isEditing && item.editable ? (
                       item.isImage ? (
                         <input
                           type="file"
@@ -397,23 +402,21 @@ const CrpMemberDetails = () => {
                     ) : (
                       item.value
                     )}
+
                     {!isEditing && typeof item.value === "string" && (
-                      <button
-                        onClick={() => handleCopy(item.value, item.label)}
-                      >
+                      <button onClick={() => handleCopy(item.value, item.label)}>
                         <Copy className="w-5 h-5 text-gray-600 hover:text-gray-800 ml-2" />
                       </button>
                     )}
                     {copiedField === item.label && (
-                      <span className="text-green-600 ml-2 text-sm">
-                        Copied!
-                      </span>
+                      <span className="text-green-600 ml-2 text-sm">Copied!</span>
                     )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
         </div>
 
         {/* Guarantor Section */}
@@ -447,12 +450,11 @@ const CrpMemberDetails = () => {
                     label: "Photo",
                     value: (
                       <ImageComponent
-                        src={getFullImageUrl(member.guarantor.photo)}
+                        src={member.guarantor.photo ? getFullImageUrl(member.guarantor.photo) : "https://dummyimage.com/300"}
                         alt="Guarantor"
                         className="h-16 w-16 rounded-full border border-gray-300"
                       />
                     ),
-                    // editable: true,
                     isImage: true,
                     field: "guarantorPhoto",
                   },
@@ -460,12 +462,11 @@ const CrpMemberDetails = () => {
                     label: "Cheque Photo",
                     value: (
                       <ImageComponent
-                        src={getFullImageUrl(member.guarantor.chequePhoto)}
+                        src={member.guarantor.chequePhoto ? getFullImageUrl(member.guarantor.chequePhoto) : "https://dummyimage.com/300"}
                         alt="Cheque"
                         className="h-16 w-16 rounded-md border border-gray-300"
                       />
                     ),
-                    // editable: true,
                     isImage: true,
                     field: "guarantorCheque",
                   },
@@ -473,12 +474,11 @@ const CrpMemberDetails = () => {
                     label: "Document 1",
                     value: (
                       <ImageComponent
-                        src={getFullImageUrl(member.guarantor.extraDocuments_0)}
+                        src={member.guarantor.extraDocuments_0 ? getFullImageUrl(member.guarantor.extraDocuments_0) : "https://dummyimage.com/300"}
                         alt="Document 1"
                         className="h-16 w-16 rounded-md border border-gray-300"
                       />
                     ),
-                    // editable: true,
                     isImage: true,
                     field: "extraDocuments_0",
                   },
@@ -486,12 +486,11 @@ const CrpMemberDetails = () => {
                     label: "Document 2",
                     value: (
                       <ImageComponent
-                        src={getFullImageUrl(member.guarantor.extraDocuments_1)}
+                        src={member.guarantor.extraDocuments_1 ? getFullImageUrl(member.guarantor.extraDocuments_1) : "https://dummyimage.com/300"}
                         alt="Document 2"
                         className="h-16 w-16 rounded-md border border-gray-300"
                       />
                     ),
-                    // editable: true,
                     isImage: true,
                     field: "extraDocuments_1",
                   },
@@ -499,12 +498,11 @@ const CrpMemberDetails = () => {
                     label: "Document 3",
                     value: (
                       <ImageComponent
-                        src={getFullImageUrl(member.guarantor.extraDocuments_2)}
+                        src={member.guarantor.extraDocuments_2 ? getFullImageUrl(member.guarantor.extraDocuments_2) : "https://dummyimage.com/300"}
                         alt="Document 3"
                         className="h-16 w-16 rounded-md border border-gray-300"
                       />
                     ),
-                    // editable: true,
                     isImage: true,
                     field: "extraDocuments_2",
                   },
@@ -512,15 +510,15 @@ const CrpMemberDetails = () => {
                     label: "Document 4",
                     value: (
                       <ImageComponent
-                        src={getFullImageUrl(member.guarantor.extraDocuments_3)}
+                        src={member.guarantor.extraDocuments_3 ? getFullImageUrl(member.guarantor.extraDocuments_3) : "https://dummyimage.com/300"}
                         alt="Document 4"
                         className="h-16 w-16 rounded-md border border-gray-300"
                       />
                     ),
-                    // editable: true,
                     isImage: true,
                     field: "extraDocuments_3",
                   },
+                  
                 ].map((item) => (
                   <tr key={item.label}>
                     <td className="py-3 px-4 font-semibold text-gray-900">

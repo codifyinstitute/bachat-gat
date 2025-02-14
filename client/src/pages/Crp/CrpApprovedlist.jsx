@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import dayjs from "dayjs";
 import { CheckCircle, Eye } from "lucide-react";
 
 const CrpApprovedlist = () => {
@@ -93,7 +94,9 @@ const CrpApprovedlist = () => {
                                             <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Total Amount:</strong> ₹{loan.totalAmount}</p>
                                             <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Per Member Amount:</strong> ₹{loan.perMemberAmount}</p>
                                             <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Term:</strong> {loan.termMonths} months</p>
-                                            <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Start Date:</strong> {new Date(loan.startDate).toLocaleDateString()}</p>
+                                            <p className="text-[14px] sm:text-[16px] md:text-[16px]">
+                                                <strong>Start Date:</strong> {dayjs(loan.startDate).format('DD/MM/YYYY')}
+                                            </p>
                                             <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Status:</strong> {loan.status}</p>
                                             <p className="text-[14px] sm:text-[16px] md:text-[16px]"><strong>Approved By:</strong> {loan.approvedBy ? loan.approvedBy.username : "N/A"}</p>
                                         </div>
