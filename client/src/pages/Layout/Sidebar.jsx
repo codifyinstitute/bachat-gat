@@ -37,6 +37,7 @@ const Sidebar = ({ role }) => {
       { name: "Collections", path: "/crp/collection", icon: <Boxes  /> },
       { name: "NPAs", path: "/crp/npalist", icon: <CheckCircle /> },
       { name: "NPA List", path: "/crp/crpnpalist", icon: <Landmark /> },
+      { name: "WithdrawSavings", path: "/crp/withdrawsavings", icon: <Landmark /> },
       { name: "PaymentPage", path: "/crp/PaymentPage", icon: <Landmark /> },
       
     ],

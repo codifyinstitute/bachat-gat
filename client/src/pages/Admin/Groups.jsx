@@ -264,7 +264,6 @@ const AdminGroupsList = () => {
                 const groupLoans = getLoanDetails(group._id);
                 const crpMobile = getCrpMobile(group.createdBy._id);
 
-                { console.log("first", groupLoans) }
                 return (
                   <React.Fragment key={group._id}>
                     <tr
@@ -279,19 +278,38 @@ const AdminGroupsList = () => {
                         {/* {console.log("first", groupLoans)} */}
                       </td>
                       <td className="p-3">
-                        {(() => {
-                          // First, calculate the total number of repaymentSchedules across all groupLoans
-                          const totalRepaymentSchedules = groupLoans.reduce((total, loan) => {
-                            return total + (Array.isArray(loan.repaymentSchedules) ? loan.repaymentSchedules.length : 0);
-                          }, 0);
+                        <td className="p-3">
+                          {(() => {
+                            // Initialize a variable to track total members across all loans in the group
+                            const totalMembers = groupLoans.reduce((total, loan) => {
+                              // Log the entire loan object for debugging
 
-                          // Then, multiply the totalRepaymentSchedules by the savingsData for the group
-                          const savingsAmount = savingsData[group._id] || 0;
-                          const totalSavings = totalRepaymentSchedules > 0 ? savingsAmount * totalRepaymentSchedules : "N/A";
+                              // Ensure repaymentSchedules exists and is an array
+                              const repaymentSchedules = Array.isArray(loan.repaymentSchedules) ? loan.repaymentSchedules : [];
 
-                          return totalSavings;
-                        })()}
+                              // Flatten all installments from repaymentSchedules
+                              const installments = repaymentSchedules.flatMap(schedule => schedule.installments || []);
+
+                              // Count the total number of installments (members in this case)
+                              const memberCount = installments.length;
+
+                              // Return the total member count, aggregating across all loans
+                              return total + memberCount;
+                            }, 0);
+
+                            // Get the savings amount for the group
+                            const savingsAmount = savingsData[group._id] || 0;
+
+                            // Multiply the total members by the savings amount to get total savings
+                            const totalSavings = totalMembers > 0 ? savingsAmount * totalMembers : "N/A";
+
+                            // Log the final result for debugging
+
+                            return totalSavings;
+                          })()}
+                        </td>
                       </td>
+
 
                       {showCRP && (
                         <div>
@@ -393,10 +411,11 @@ const AdminGroupsList = () => {
                                             <ChevronRight className="w-4 h-4" />
                                           }
                                           <div className="flex-1 ml-2">
-                                            <div className="grid grid-cols-3 gap-4">
+                                            <div className="grid grid-cols-4 gap-4">
                                               <p><strong>Member Name:</strong> {member?.name || "N/A"}</p>
                                               <p><strong>Mobile:</strong> {member?.mobileNumber || "N/A"}</p>
                                               <p><strong>Savings/Month:</strong> {savingsAmount}</p>
+                                              <p><strong>Savings Handed:</strong> {"N/A"}</p>
                                             </div>
                                           </div>
                                         </div>

@@ -31,6 +31,7 @@ import Forclose from "./pages/Crp/Forclose";
 import Npalist from "./pages/Crp/Npalist";
 import CrpNpa from "./pages/Crp/CrpNpalist"
 import AdminNpalist from "./pages/Admin/AdminNpalist";
+import WithdraSavings from "./pages/Crp/WithdrawSavings";
 // import AdminNpalist from "./pages/Admin/AdminNpalist";
 AOS.init();
 
@@ -71,6 +72,7 @@ function App() {
         <Route path="CrpHome" element={<Crpdashboard />} />
         <Route path="Crpforclose" element={<Forclose />} />
         <Route path="crpnpalist" element={<CrpNpa />} />
+        <Route path="WithdrawSavings" element={<WithdraSavings />} />
       </Route>
     </Routes>
   );
