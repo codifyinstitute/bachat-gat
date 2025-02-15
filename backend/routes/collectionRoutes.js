@@ -12,6 +12,8 @@ router.post(
   collectionController.recordPayment
 );
 
+router.put('/resetsavingamount/:groupId/:loanId',collectionController.resetTotalSavings)
+
 router.get(
   "/monthly",
   auth(["admin", "crp"]),

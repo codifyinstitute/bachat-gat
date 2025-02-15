@@ -30,7 +30,7 @@ app.use("/api/groups", groupRoutes);
 app.use("/api/loan", loanRoutes); // Use loan routes
 app.use("/api/collection", require("./routes/collectionRoutes")); // Import collection routes
 app.use("/api/banks", bankRoutes);
-app.use("/api/withdraw",withdrawRoutes)
+app.use("/api/withdraw",withdrawRoutes);
 // Connect to database
 connectDB();
 
