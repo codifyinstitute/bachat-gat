@@ -21,6 +21,13 @@ const createSaving = async (req, res) => {
       return res.status(400).json({ message: "All required fields must be filled" });
     }
 
+    // Check if the loanId already exists in SavingWithdraw
+    const existingSaving = await Saving.findOne({ loanId });
+
+    if (existingSaving) {
+      return res.status(400).json({ message: "Already withdrawn the saving amount" });
+    }
+
     // Create new saving document
     const newSaving = new Saving({
       loanId,
@@ -41,6 +48,7 @@ const createSaving = async (req, res) => {
   }
 };
 
+
 // @desc Get all savings
 // @route GET /api/savings
 // @access Public
@@ -54,9 +62,6 @@ const getAllSavings = async (req, res) => {
   }
 };
 
-// @desc Get a single saving by ID
-// @route GET /api/savings/:id
-// @access Public
 const getSavingByCrp = async (req, res) => {
   try {
     const saving = await Saving.findById(req.params.id).populate("loanId groupId memberList.memberId");
