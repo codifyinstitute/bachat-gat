@@ -117,7 +117,7 @@ const AddMember = () => {
         }
       );
       alert("Member added successfully");
-      console.log(res.data);
+      // console.log(res.data);
       // window.location.reload();
     } catch (error) {
       alert(error.response?.data?.message || "Error adding member");

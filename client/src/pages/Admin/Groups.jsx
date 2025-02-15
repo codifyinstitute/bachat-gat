@@ -76,7 +76,7 @@ const AdminGroupsList = () => {
         setCrpData(crpRes.data.crps); // Set CRP data if it's an array
       } else if (crpRes.data && crpRes.data.crps) {
         // If it's an object, we directly set the CRP as is
-        console.log("CRP Data is not an array:", crpRes.data);
+        // console.log("CRP Data is not an array:", crpRes.data);
         setCrpData(crpRes.data.crps); // Treat it as an object or as needed
       } else {
         console.error("Unexpected CRP Data format:", crpRes.data);

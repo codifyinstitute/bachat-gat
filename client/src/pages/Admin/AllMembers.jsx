@@ -97,7 +97,7 @@ const AllMembers = () => {
       );
 
       if (response.status === 200) {
-        console.log("Member deleted successfully");
+        // console.log("Member deleted successfully");
 
         // Show success notification
         alert("Member deleted successfully!");
@@ -123,7 +123,7 @@ const AllMembers = () => {
         // Alert the message if response status is 400
         alert(response.data.message);
       } else {
-        console.log("Deletion of member failed");
+        // console.log("Deletion of member failed");
         alert("Failed to delete the member.");
       }
     } catch (error) {

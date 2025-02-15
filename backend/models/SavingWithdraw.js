@@ -43,10 +43,10 @@ const SavingSchema = new mongoose.Schema({
                 type: String,
                 required: true,
               },
-              mobileNo: {
-                type: String,
-                required: true,
-              },
+            //   mobileNo: {
+            //     type: String,
+            //     required: true,
+            //   },
               withdrawAmount:{
                 type:String,
                 required:true

@@ -53,7 +53,7 @@ const CollectionForm = () => {
       savingsAmount: Number(savingsAmount), // ✅ Include savingsAmount in the payload
     };
 
-    console.log(payload)
+    // console.log(payload)
 
     try {
       const response = await fetch("http://localhost:5000/api/collection", {
@@ -77,7 +77,7 @@ const CollectionForm = () => {
 
       toast.success("Collection submitted successfully!");
       alert("Collection Successfully Submitted")
-      console.log(result);
+      // console.log(result);
     } catch (error) {
       alert( error)
       console.error("Error submitting collection:", error);

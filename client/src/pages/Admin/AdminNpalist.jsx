@@ -32,7 +32,7 @@ const CrpNpalist = () => {
 
         const data = await response.json();
 
-        console.log('Fetched Data:', data); // Log the entire response object
+        // console.log('Fetched Data:', data); // Log the entire response object
 
         // Now we inspect the structure of 'data'
         if (Array.isArray(data)) {

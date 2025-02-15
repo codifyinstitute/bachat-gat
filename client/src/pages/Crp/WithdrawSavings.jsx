@@ -117,19 +117,43 @@ const WithdrawSavings = () => {
 
   const handleWithdraw = () => {
     // Collect the necessary data
+
+    const isConfirmed = window.confirm("Do you want to withdraw the savings?");
+  if (!isConfirmed) {
+    console.log("Withdrawal canceled by user.");
+    return; // Stop the function if user cancels
+  }
+    // Ensure selectedCollection exists and payments are available
+    const selectedCollectionData = collections.find(collection => collection._id === selectedCollection);
+
+    if (!selectedCollectionData || !selectedCollectionData.payments || selectedCollectionData.payments.length === 0) {
+      console.error("Invalid collection data or empty payments array");
+      return;
+    }
+    const totsaving = selectedCollectionData.totalSavingsCollected * selectedCollectionData.payments.length || 'N/A';
     const data = {
       loanId: selectedLoan,
       groupId: selectedGroup,
       bankName: loanBankDetails ? loanBankDetails.name : '',
       groupName: groups.find(group => group._id === selectedGroup)?.name,
-      loanStatus: 'active', // Assuming the loan is active when making the withdrawal
+      loanStatus: 'closed', // Assuming the loan is active when making the withdrawal
       withdrawStatus: 'yes',
-      totalSavingAmount: collections.find(collection => collection._id === selectedCollection)?.totalSavingsCollected || '0',
+      totalSavingAmount: totsaving|| 'N/A',
+
       memberList: groupMembers.map((memberObj) => {
         const { member } = memberObj;
-        // Assuming you are mapping from repayment schedules to get the withdraw amount.
-        const withdrawAmount = member.repaymentSchedules?.find(schedule => schedule.memberId === member._id)?.amount || 0;
-        
+
+        // Find the corresponding collection
+        const selectedCollectionData = collections.find(collection => collection._id === selectedCollection);
+
+        // Filter the payments for the current member
+        const memberPayments = selectedCollectionData?.payments.filter(payment => payment.installmentNumber * payment.savingsAmount) || [];
+
+        // Calculate the total withdraw amount for the current member by multiplying savingsAmount with installmentNumber
+        const withdrawAmount = memberPayments.reduce((total, payment) => {
+          return total + (payment.savingsAmount * payment.installmentNumber); // Multiply savingsAmount by installmentNumber
+        }, 0);
+
         return {
           memberId: member._id,
           name: member.name,
@@ -138,25 +162,37 @@ const WithdrawSavings = () => {
         };
       })
     };
-  
-    // Send POST request to withdraw savings
-    axios
-      .post("http://localhost:5000/api/withdraw/", data, {
-        headers: {
-          Authorization: `Bearer ${crptoken}`,
-          "Content-Type": "application/json",
-        },
-      })
+    axios.post('http://localhost:5000/api/withdraw/', data, {
+      headers: {
+        Authorization: `Bearer ${crptoken}`,
+        'Content-Type': 'application/json',
+      },
+    })
       .then((response) => {
-        console.log("Withdraw Successful", response.data);
-        // You can also handle success, such as showing a success message
+        alert('Withdrawal Successful');
+        axios.put(`http://localhost:5000/api/collection/resetsavingamount/${selectedGroup}/${selectedLoan}`, {
+          headers: {
+            Authorization: `Bearer ${crptoken}`,
+            'Content-Type': 'application/json',
+          },
+        })
+          .then((resetResponse) => {
+            console.log('Saving amount reset successfully');
+          })
+          .catch((error) => {
+            console.error('Error resetting saving amount:', error);
+          });
       })
       .catch((error) => {
-        console.error("Error withdrawing savings:", error);
-        // Handle errors here (e.g., showing an error message)
+        alert('Error withdrawing savings', error);
       });
+    // Log the data or send it to your API
+    // console.log(data);
   };
-  
+
+
+
+
 
   // Helper function to truncate long IDs
   const truncateId = (id) => {
@@ -170,7 +206,7 @@ const WithdrawSavings = () => {
 
         <div className="w-full flex gap-4 items-end">
           {/* Group Dropdown */}
-          <div className="w-[full]">
+          <div className="w-[50%]">
             <div className="mb-4 max-w-lg">
               <label htmlFor="group" className="block text-gray-600 mb-2">Select Group</label>
               <select

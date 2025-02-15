@@ -89,10 +89,10 @@ const AdminGroupsList = () => {
         setCrpData(crpRes.data.crps); // Set CRP data if it's an array
       } else if (crpRes.data && crpRes.data.crps) {
         // If it's an object, we directly set the CRP as is
-        console.log("CRP Data is not an array:", crpRes.data);
+        // console.log("CRP Data is not an array:", crpRes.data);
         setCrpData(crpRes.data.crps); // Treat it as an object or as needed
       } else {
-        console.error("Unexpected CRP Data format:", crpRes.data);
+        // console.error("Unexpected CRP Data format:", crpRes.data);
         setCrpData([]); // Default to an empty array if data is not in expected format
       }
 
@@ -227,7 +227,7 @@ const AdminGroupsList = () => {
   const handlesavinginvoice = (group, loanid, member, savingAmount, interestMonth) => {
     const currentDate = new Date().toLocaleDateString();
 
-    console.log(loanid._id)
+    // console.log(loanid._id)
 
     const memberSchedule = loanid.repaymentSchedules.find(schedule =>
       schedule.memberId._id === member._id
@@ -265,7 +265,7 @@ const AdminGroupsList = () => {
 
   };
 
-  console.log(savingInvoiceData)
+  // console.log(savingInvoiceData)
   const closeSavingInvoice = () => {
     setShowSavingInvoice(false);
   };
@@ -331,7 +331,7 @@ const AdminGroupsList = () => {
                 const groupLoans = getLoanDetails(group._id);
                 const crpMobile = getCrpMobile(group.createdBy._id);
 
-                { console.log("first", groupLoans) }
+                // { console.log("first", groupLoans) }
                 return (
                   <React.Fragment key={group._id}>
                     <tr

@@ -25,7 +25,7 @@ const ApproveCollection = () => {
           },
         });
 
-        console.log(response.data);
+        // console.log(response.data);
 
         if (response.status === 200) {
           // Filter collections with status 'pending'

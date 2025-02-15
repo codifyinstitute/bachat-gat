@@ -13,7 +13,7 @@ const AllMembers = () => {
 
   // Assuming the admin_token is stored in localStorage
   const adminToken = localStorage.getItem("crp_token");
-  console.log(adminToken);
+  // console.log(adminToken);
 
   useEffect(() => {
     // Fetch members data from backend API
@@ -29,7 +29,7 @@ const AllMembers = () => {
           }
         );
 
-        console.log("API Response:", response.data); // Log the full response
+        // console.log("API Response:", response.data); // Log the full response
 
         // Handle different response formats
         if (Array.isArray(response.data)) {
@@ -97,7 +97,7 @@ const AllMembers = () => {
       );
 
       if (response.status === 200) {
-        console.log("Member deleted successfully");
+        // console.log("Member deleted successfully");
 
         // Show success notification
         alert("Member deleted successfully!");
@@ -123,7 +123,7 @@ const AllMembers = () => {
         // Alert the message if response status is 400
         alert(response.data.message);
       } else {
-        console.log("Deletion of member failed");
+        // console.log("Deletion of member failed");
         alert("Failed to delete the member.");
       }
     } catch (error) {

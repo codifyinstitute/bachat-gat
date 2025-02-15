@@ -175,7 +175,7 @@ const CrpMemberDetails = () => {
           break;
       }
     }
-    console.log("Updated File:", file.name); // Log the actual selected file
+    // console.log("Updated File:", file.name); // Log the actual selected file
   };
 
   const handleSave = async () => {

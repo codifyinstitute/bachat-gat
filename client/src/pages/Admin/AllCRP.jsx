@@ -12,7 +12,7 @@ const AllCRP = () => {
 
   // Assuming the admin_token is stored in localStorage
   const adminToken = localStorage.getItem("admin_token");
-  console.log("Admin Token:", adminToken);
+  // console.log("Admin Token:", adminToken);
 
   useEffect(() => {
     // Fetch members data from backend API
@@ -23,7 +23,7 @@ const AllCRP = () => {
             Authorization: `Bearer ${adminToken}`, // Pass the token in the Authorization header
           },
         });
-        console.log("API Response:", response.data);
+        // console.log("API Response:", response.data);
 
         if (!response.data || !response.data.crps) {
           setError("The response data is not in the expected format.");

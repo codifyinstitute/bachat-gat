@@ -78,7 +78,7 @@ const CreateGroupForm = () => {
     fetchGroupNames();
   }, []);
 
-  console.log("first",existingGroupNames)
+  // console.log("first",existingGroupNames)
 
   // Function to handle group name change and check if it's available
   const handleNameChange = async (e) => {
