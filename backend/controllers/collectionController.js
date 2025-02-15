@@ -378,8 +378,7 @@ const collectionController = {
     }
   },
 
-
-
+  
   getAllCollections: async (req, res) => {
     try {
       const { groupId } = req.query;

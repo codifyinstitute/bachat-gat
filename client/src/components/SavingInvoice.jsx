@@ -131,7 +131,7 @@ const SavingInvoice = ({
 
             {/* Download PDF Button */}
             <div
-                className="mt-8 text-center"
+                className="mt-2 text-center"
                 style={{ width: '500px', display: 'flex', justifyContent: 'center' }}
             >
                 <button
