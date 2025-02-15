@@ -2,6 +2,7 @@ const Loan = require("../models/Loan");
 const Group = require("../models/Group");
 const Member = require("../models/Member");
 const pdfKit = require("pdfkit");
+const DeletedLoan = require("../models/DeleteLoan");
 const fs = require("fs");
 
 const loanController = {
@@ -339,23 +340,46 @@ const loanController = {
     }
   },
   
-  deleteLoan : async (req, res) => {
-  try {
-    const { loanId } = req.params;
-
-    // Check if loan exists
-    const loan = await Loan.findById(loanId);
-    if (!loan) {
-      return res.status(404).json({ message: "Loan not found" });
+  deleteLoan: async (req, res) => {
+    try {
+      const { loanId } = req.params;
+  
+      // Check if loan exists
+      const loan = await Loan.findById(loanId);
+      if (!loan) {
+        return res.status(404).json({ message: "Loan not found" });
+      }
+  
+      // Save the loan data in DeletedLoan before deleting
+      const deletedLoan = new DeletedLoan({
+        originalLoanId: loan._id,
+        groupId: loan.groupId,
+        totalAmount: loan.totalAmount,
+        perMemberAmount: loan.perMemberAmount,
+        interestRate: loan.interestRate,
+        termMonths: loan.termMonths,
+        startDate: loan.startDate,
+        bankDetails: loan.bankDetails,
+        repaymentSchedules: loan.repaymentSchedules,
+        status: loan.status,
+        approvedBy: loan.approvedBy,
+        approvedDate: loan.approvedDate,
+        createdBy: loan.createdBy,
+        loanAccountNo: loan.loanAccountNo,
+        savingAccountNo: loan.savingAccountNo,
+        deletedBy: loan.approvedBy, // Track who deleted the loan
+      });
+  
+      await deletedLoan.save();
+  
+      // Delete the original loan
+      await Loan.findByIdAndDelete(loanId);
+  
+      res.status(200).json({ message: "Loan deleted successfully and backed up" });
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting loan", error: error.message });
     }
-
-    // Delete the loan
-    await Loan.findByIdAndDelete(loanId);
-    res.status(200).json({ message: "Loan deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting loan", error: error.message });
-  }
-},
+  },
 };
 
 module.exports = loanController;
