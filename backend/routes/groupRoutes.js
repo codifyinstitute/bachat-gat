@@ -22,7 +22,7 @@ router.get(
 // Then define your dynamic route (to prevent misinterpretation)
 router.get("/:id", auth(["admin", "crp"]), groupController.getGroup);
 
-router.get("/", auth(["admin"]), groupController.getAllGroups);
+router.get("/", auth(["admin", "crp"]), groupController.getAllGroups);
 
 router.delete("/:groupId/members/:memberId", groupController.removeMember);
 

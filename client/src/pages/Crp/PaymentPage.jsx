@@ -15,7 +15,8 @@ const PaymentPage = () => {
   const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
   const [transactionId, setTransactionId] = useState("");
   const [remarks, setRemarks] = useState("");
-  const [latePaymentCharge, setLatePaymentCharge] = useState(0);
+  const [latePaymentCharge, setLatePaymentCharge] = useState();
+  const [groups, setGroups] = useState([]);  // State to store groups
 
   // Deposit Slip Data
   const [showDepositSlip, setShowDepositSlip] = useState(false);
@@ -27,9 +28,9 @@ const PaymentPage = () => {
     amountInWords: "",
   });
 
-  // Fetch collections when the component mounts
+  // Fetch collections and groups when the component mounts
   useEffect(() => {
-    const fetchCollections = async () => {
+    const fetchData = async () => {
       try {
         const crpToken = localStorage.getItem("crp_token");
         if (!crpToken) {
@@ -38,25 +39,44 @@ const PaymentPage = () => {
           return;
         }
 
-        const response = await axios.get("http://localhost:5000/api/collection", {
-          headers: {
-            Authorization: `Bearer ${crpToken}`,
-          },
-        });
-        
-        // Check if response.data exists and is an array
-        if (Array.isArray(response.data)) {
-          setCollections(response.data);
-        } else {
-          setMessage("Invalid data format received");
-        }
+        // Fetch groups
+        const groupsResponse = await axios.get(
+          "http://localhost:5000/api/groups/created-by-crp",
+          {
+            headers: {
+              Authorization: `Bearer ${crpToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        // Fetch collections
+        const collectionsResponse = await axios.get(
+          "http://localhost:5000/api/collection",
+          {
+            headers: {
+              Authorization: `Bearer ${crpToken}`,
+            },
+          }
+        );
+
+        // Filter the groups to include only those with status 'active' 
+        // and where referredBy.crpId matches createdBy._id
+        const filteredGroups = groupsResponse.data.filter(group =>
+          group.status === "active" && group.referredBy?.crpId === group.createdBy?._id
+        );
+
+        // Set the filtered groups and collections
+        setGroups(filteredGroups);
+        setCollections(collectionsResponse.data);
         setIsLoading(false);
       } catch (error) {
-        setMessage(error.response?.data?.message || "Failed to load collections");
+        setMessage(error.response?.data?.message || "Failed to load data");
         setIsLoading(false);
       }
     };
-    fetchCollections();
+
+    fetchData();
   }, []);
 
   // Convert number to words (Indian format)
@@ -73,22 +93,29 @@ const PaymentPage = () => {
   };
 
   // Extract unique groups (with null check)
-  const uniqueGroups = [...new Set(collections.filter(collection => 
-    collection?.groupId?.name).map(collection => collection.groupId.name))];
+  const uniqueGroups = [
+    ...new Set(groups.map(group => group?.name).filter(Boolean))
+  ];
 
   // Filter collections based on selected group (with null check)
-  const filteredCollections = collections.filter((collection) => 
-    collection?.groupId?.name === selectedGroup);
+  const filteredCollections = collections.filter(
+    (collection) => collection?.groupId?.name === selectedGroup
+  );
 
   // Extract unique collection dates for the selected group
-  const uniqueDates = [...new Set(filteredCollections
-    .filter(collection => collection?.collectionDate)
-    .map((collection) => new Date(collection.collectionDate).toLocaleDateString()))];
+  const uniqueDates = [
+    ...new Set(
+      filteredCollections
+        .filter((collection) => collection?.collectionDate)
+        .map((collection) => new Date(collection.collectionDate).toLocaleDateString())
+    ),
+  ];
 
   // Find the collection that matches both the selected group and date
   const selectedCollection = filteredCollections.find(
-    (collection) => collection?.collectionDate && 
-    new Date(collection.collectionDate).toLocaleDateString() === selectedDate
+    (collection) =>
+      collection?.collectionDate &&
+      new Date(collection.collectionDate).toLocaleDateString() === selectedDate
   );
 
   // Get members of the selected collection (with null check)
@@ -240,9 +267,7 @@ const PaymentPage = () => {
             className="w-full p-2 border rounded"
             required
           >
-            <option value="bank_transfer">Bank Transfer</option>
-            <option value="cash">Cash</option>
-            <option value="cheque">Cheque</option>
+            <option value="bank_transfer">Cash</option>
             <option value="upi">UPI</option>
           </select>
 

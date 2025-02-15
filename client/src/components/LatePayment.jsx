@@ -23,21 +23,34 @@ const LatePayment = ({ memberid }) => {
         }
     }, [memberid]);
 
+    const formatDate = (date) => {
+        const d = new Date(date);
+        const day = d.getDate().toString().padStart(2, '0'); // Get day and pad with leading zero if necessary
+        const month = (d.getMonth() + 1).toString().padStart(2, '0'); // Get month and pad with leading zero if necessary
+        const year = d.getFullYear(); // Get full year
+
+        return `${day}/${month}/${year}`;
+    };
+
+
     return (
-        <div className="mt-3 p-2 border rounded">
+        <div className="my-3">
             <h4 className="font-semibold mb-2">Late Payments:</h4>
             {data.length > 0 ? (
-                <table className="w-full border-collapse border border-gray-300">
+                <table className="w-full">
                     <thead>
-                        <tr className="bg-gray-100">
+                        <tr className="bg-gray-300">
                             <th className="border border-gray-300 px-4 py-2 text-left">Date</th>
                             <th className="border border-gray-300 px-4 py-2 text-left">Amount (₹)</th>
                         </tr>
                     </thead>
                     <tbody>
                         {data.map((payment, index) => (
-                            <tr key={index} className="border border-gray-300">
-                                <td className="border border-gray-300 px-4 py-2">{payment.paymentDate}</td>
+                            <tr key={index} className="border border-gray-400">
+                                <td className="border border-gray-300 px-4 py-2">
+                                    {formatDate(payment.paymentDate)}
+                                </td>
+
                                 <td className="border border-gray-300 px-4 py-2">₹{payment.latePaymentCharge}</td>
                             </tr>
                         ))}

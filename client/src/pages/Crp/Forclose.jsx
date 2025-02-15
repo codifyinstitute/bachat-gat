@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import dayjs from "dayjs";
 
 const Forclose = () => {
     const [loansData, setLoansData] = useState([]);
@@ -51,19 +52,19 @@ const Forclose = () => {
 
     const handleForclosure = async (loanId, memberId) => {
         const isConfirmed = window.confirm("Are you sure you want to foreclose this installment?");
-    
+
         if (!isConfirmed) {
             return; // If the user doesn't confirm, exit the function
         }
-    
+
         try {
             const crptoken = localStorage.getItem("crp_token");
-    
+
             if (!crptoken) {
                 setError("No authentication token found. Please log in.");
                 return;
             }
-    
+
             const response = await axios.post(
                 `http://localhost:5000/api/collection/forclose/${loanId}/${memberId}`,
                 { forcloseAmount: Number(forcloseAmount) }, // Pass the forclosure amount in the request body
@@ -74,7 +75,7 @@ const Forclose = () => {
                     },
                 }
             );
-    
+
             if (response.status === 200) {
                 alert("Forclosure action successful");
                 // Handle success (e.g., update state or show success message)
@@ -85,7 +86,7 @@ const Forclose = () => {
             setError("Error performing forclosure action");
         }
     };
-    
+
 
     useEffect(() => {
         fetchGroupsAndLoans();
@@ -200,7 +201,7 @@ const Forclose = () => {
                                                                         <p><strong>Status:</strong> {loan.status}</p>
                                                                     </div>
                                                                     <div className="w-full flex justify-between mb-2">
-                                                                        <p><strong>Start Date:</strong> {new Date(loan.startDate).toLocaleDateString()}</p>
+                                                                        <p><strong>Start Date:</strong> {dayjs(loan.startDate).format('DD/MM/YYYY')}</p>
                                                                         <p><strong>Term (Months):</strong> {loan.termMonths}</p>
                                                                     </div>
                                                                     <div className="w-full flex justify-between mb-2">
@@ -236,7 +237,9 @@ const Forclose = () => {
                                                                                             {schedule.installments.map((inst, index) => (
                                                                                                 <tr key={inst._id} className="text-center">
                                                                                                     <td className="border border-gray-400 px-2 py-1">{index + 1}</td>
-                                                                                                    <td className="border border-gray-400 px-2 py-1">{formatDate(inst.dueDate)}</td>
+                                                                                                    <td className="border border-gray-400 px-2 py-1">
+                                                                                                        {dayjs(inst.dueDate).format('DD/MM/YYYY')}
+                                                                                                    </td>
                                                                                                     <td className="border border-gray-400 px-2 py-1">{inst.amount.toFixed(2)}</td>
                                                                                                     <td className="border border-gray-400 px-2 py-1">{inst.principal.toFixed(2)}</td>
                                                                                                     <td className="border border-gray-400 px-2 py-1">{inst.interest.toFixed(2)}</td>
