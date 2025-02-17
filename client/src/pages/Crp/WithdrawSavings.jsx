@@ -198,7 +198,8 @@ const WithdrawSavings = () => {
     })
       .then((response) => {
         alert('Withdrawal Successful');
-        handlesavinginvoice(data.totalSavingAmount,data.groupName,3,data.loanId)
+        handlesavinginvoice(data.totalSavingAmount,data.groupName,loanTermMonths,data.loanId)
+        setShowSavingInvoice(true);
         // axios.put(`http://localhost:5000/api/collection/resetsavingamount/${selectedGroup}/${selectedLoan}`, {
         //   headers: {
         //     Authorization: `Bearer ${crptoken}`,
