@@ -19,17 +19,20 @@ const AdminGroupsList = () => {
   const [deleteError, setDeleteError] = useState(null);
   const [savingsData, setSavingsData] = useState({});
   const [crpData, setCrpData] = useState([]); // State to store CRP data
-    const [showSavingInvoice, setShowSavingInvoice] = useState(false);
-    const [savingInvoiceData, setSavingInvoiceData] = useState({
-      date: "",
-      membername: "",
-      amount: "",
-      amountInWords: "",
-      savingAmount: "",
-      groupName: "",
-      termMonth: "",
-      loanId:""
-    });
+  const [showSavingInvoice, setShowSavingInvoice] = useState(false);
+  const [savingInvoiceData, setSavingInvoiceData] = useState({
+    date: "",
+    membername: "",
+    amount: "",
+    amountInWords: "",
+    savingAmount: "",
+    groupName: "",
+    termMonth: "",
+    loanId:""
+  });
+  const [withdrawalsData, setWithdrawalsData] = useState([]);
+
+  // fetchWithdrawSavings()
 
 
   const fetchSavingsData = async (groups) => {
@@ -92,7 +95,7 @@ const AdminGroupsList = () => {
         // console.log("CRP Data is not an array:", crpRes.data);
         setCrpData(crpRes.data.crps); // Treat it as an object or as needed
       } else {
-        console.error("Unexpected CRP Data format:", crpRes.data);
+        // console.error("Unexpected CRP Data format:", crpRes.data);
         setCrpData([]); // Default to an empty array if data is not in expected format
       }
 
@@ -265,7 +268,7 @@ const AdminGroupsList = () => {
 
   };
 
-  console.log(savingInvoiceData)
+  // console.log(savingInvoiceData)
   const closeSavingInvoice = () => {
     setShowSavingInvoice(false);
   };
