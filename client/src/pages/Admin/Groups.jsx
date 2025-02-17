@@ -28,11 +28,13 @@ const AdminGroupsList = () => {
     savingAmount: "",
     groupName: "",
     termMonth: "",
-    loanId:""
+    loanId: ""
   });
-  const [withdrawalsData, setWithdrawalsData] = useState([]);
+  const [withdrawData, setWithdrawData] = useState([]);
+  // const [matchedWithdraw, setMatchedWithdraw] = useState(null);
+  const [matchedWithdrawData, setMatchedWithdrawData] = useState({});
 
-  // fetchWithdrawSavings()
+
 
 
   const fetchSavingsData = async (groups) => {
@@ -120,6 +122,7 @@ const AdminGroupsList = () => {
     fetchGroupsAndLoans();
   }, []);
 
+
   const handleSearch = (e) => {
     setSearchTerm(e.target.value.toLowerCase());
   };
@@ -162,6 +165,44 @@ const AdminGroupsList = () => {
     );
     return groupNameMatch || memberMatch;
   });
+
+
+  const fetchWithdrawData = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/withdraw/all");
+      if (!response.ok) {
+        console.error("Failed to fetch withdraw data");
+        return;
+      }
+      const data = await response.json();
+
+      setWithdrawData(data); 
+      const matchedWithdraws = data.map((withdrawItem) => {
+        const matchingGroup = groups.find((group) => group._id === withdrawItem.groupId._id);
+        if (matchingGroup) {
+          return {
+            ...withdrawItem,
+            groupName: matchingGroup.name,
+          };
+        }
+        return null;
+      }).filter((item) => item !== null);
+      setMatchedWithdrawData(matchedWithdraws);
+
+    } catch (error) {
+      console.error("Error fetching withdraw data:", error);
+    }
+  };
+
+
+
+  useEffect(() => {
+    fetchWithdrawData();
+  })
+
+
+  // console.log("first", withdrawData)
+  // console.log("sec", matchedWithdrawData)
 
   const handleDeactivateGroup = async (groupId, e) => {
     e.stopPropagation(); // Prevent row expansion when clicking deactivate
@@ -262,7 +303,7 @@ const AdminGroupsList = () => {
 
     if (allPaid) {
       setShowSavingInvoice(true);
-    }else{
+    } else {
       alert('member has not paid all installments')
     }
 
@@ -350,31 +391,14 @@ const AdminGroupsList = () => {
                       <td className="p-3">
                         <td className="p-3">
                           {(() => {
-                            // Initialize a variable to track total members across all loans in the group
                             const totalMembers = groupLoans.reduce((total, loan) => {
-                              // Log the entire loan object for debugging
-
-                              // Ensure repaymentSchedules exists and is an array
                               const repaymentSchedules = Array.isArray(loan.repaymentSchedules) ? loan.repaymentSchedules : [];
-
-                              // Flatten all installments from repaymentSchedules
                               const installments = repaymentSchedules.flatMap(schedule => schedule.installments || []);
-
-                              // Count the total number of installments (members in this case)
                               const memberCount = installments.length;
-
-                              // Return the total member count, aggregating across all loans
                               return total + memberCount;
                             }, 0);
-
-                            // Get the savings amount for the group
                             const savingsAmount = savingsData[group._id] || 0;
-
-                            // Multiply the total members by the savings amount to get total savings
                             const totalSavings = totalMembers > 0 ? savingsAmount * totalMembers : "N/A";
-
-                            // Log the final result for debugging
-
                             return totalSavings;
                           })()}
                         </td>
@@ -416,6 +440,9 @@ const AdminGroupsList = () => {
                           {groupLoans.length > 0 ? (
                             groupLoans.map((loan, i) => {
                               const member = group.members[i]?.member;
+                              const matchedWithdraw = withdrawData.find(
+                                (withdraw) => withdraw.groupId === group._id && withdraw.loanId === loan._id
+                              );
                               return (
                                 <div key={i} className="py-2 px-4 border-b">
                                   <div className="flex justify-between ml-4">
@@ -441,20 +468,20 @@ const AdminGroupsList = () => {
                                       <p>
                                         <strong>Status:</strong> {loan.status}
                                       </p>
-                                    </div>
-                                    <div className="w-[30%] mb-2">
                                       <p>
                                         <strong>D.O.C:</strong> {dayjs(loan.startDate).format('DD/MM/YYYY')}
                                       </p>
+                                    </div>
+                                    <div className="w-[30%] mb-2">
 
                                       <p>
                                         <strong>Term (Months):</strong>{" "}
                                         {loan.termMonths}
                                       </p>
                                       <p>
-                                        <strong>Per Member Amount:</strong>{" "}
-                                        {loan.perMemberAmount}
+                                        <strong>Per Member Amount:</strong> {loan.perMemberAmount.toFixed(2)}
                                       </p>
+
                                       <p>
                                         <strong>IFSC Code:</strong>{" "}
                                         {loan.bankDetails?.ifsc || "N/A"}
@@ -463,6 +490,28 @@ const AdminGroupsList = () => {
                                         <strong>Bank Name:</strong>{" "}
                                         {loan.bankDetails?.name}
                                       </p>
+
+                                      {matchedWithdrawData && matchedWithdrawData.length > 0 && (
+                                        <div className=" mb-2">
+                                          {matchedWithdrawData.map((withdraw) => {
+                                            if (withdraw.groupId && withdraw.groupId._id === loan.groupId._id) {
+                                              // { console.log("first", withdraw) }
+                                              return (
+                                                <React.Fragment key={withdraw._id}>
+                                                  <p><strong>Total Saving Amount:</strong> {withdraw.totalSavingAmount || "N/A"}</p>
+                                                  <p><strong>Withdraw Status:</strong> {withdraw.withdrawStatus || "N/A"}</p>
+                                                  {/* {withdraw.memberList.map((member, idx) => (
+                                                    <p key={idx}><strong>{member.name}'s Withdraw Amount:</strong> {member.withdrawAmount || "N/A"}</p>
+                                                  ))} */}
+                                                </React.Fragment>
+                                              );
+                                            }
+                                            return null; // Return null if no matching groupId found
+                                          })}
+                                        </div>
+                                      )}
+
+
                                     </div>
                                   </div>
 
@@ -485,7 +534,24 @@ const AdminGroupsList = () => {
                                               <p><strong>Member Name:</strong> {member?.name || "N/A"}</p>
                                               <p><strong>Mobile:</strong> {member?.mobileNumber || "N/A"}</p>
                                               <p><strong>Savings/Month:</strong> {savingsAmount}</p>
-                                              <p><strong>Savings Handed:</strong> {"N/A"}</p>
+                                              <p className="flex gap-2"><strong>Savings Handed:</strong>
+                                                {matchedWithdrawData.map((withdraw) => {
+                                                  if (withdraw.groupId && withdraw.groupId._id === loan.groupId._id) {
+                                                    return (
+                                                      <React.Fragment key={withdraw._id}>
+                                                        {withdraw.memberList.length > 0 && (
+                                                          // <div>
+                                                          <p>
+                                                            {withdraw.memberList[0]?.withdrawAmount || "N/A"}
+                                                          </p>
+                                                          // </div>
+                                                        )}
+                                                      </React.Fragment>
+                                                    );
+                                                  }
+                                                  return null; // Return null if no matching groupId found
+                                                })}
+                                              </p>
                                             </div>
                                           </div>
                                         </div>
@@ -524,11 +590,11 @@ const AdminGroupsList = () => {
                                               </tbody>
                                             </table>
                                             <button
-                                            onClick={() => handlesavinginvoice(group, loan, member, savingsData[group._id], loan.termMonths)}
-                                            className="bg-blue-500 py-1 px-3 text-gray-100 rounded-md mt-3 transition-all duration-150 hover:scale-102 hover:text-white"
-                                          >
-                                            Print Saving Invoice
-                                          </button>
+                                              onClick={() => handlesavinginvoice(group, loan, member, savingsData[group._id], loan.termMonths)}
+                                              className="bg-blue-500 py-1 px-3 text-gray-100 rounded-md mt-3 transition-all duration-150 hover:scale-102 hover:text-white"
+                                            >
+                                              Print Saving Invoice
+                                            </button>
                                           </div>
                                         )}
                                       </div>
