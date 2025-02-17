@@ -608,21 +608,29 @@ const collectionController = {
         return res.status(404).json({ message: "No matching collections found for this loanId" });
       }
 
-      // Update totalSavingsCollected to 0 for all matched collections
+      // Update totalSavingsCollected to 0 and reset savingsAmount in payments
       await Collection.updateMany(
-        { _id: { $in: matchingCollections.map(c => c._id) } },
-        { $set: { totalSavingsCollected: 0 } }
+        { _id: { $in: matchingCollections.map(c => c._id) }, "payments.loanId": loanId },
+        { 
+          $set: { 
+            "payments.$[elem].savingsAmount": 0, 
+            totalSavingsCollected: 0 
+          } 
+        },
+        { arrayFilters: [{ "elem.loanId": loanId }] } // Filters payments within collections
       );
 
       res.status(200).json({
-        message: "Total savings collected reset to 0 for matching collections",
+        message: "Total savings collected and savings amounts in payments reset to 0",
         updatedCollections: matchingCollections.length,
       });
+
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Server error" });
     }
   },
+
 };
 
 module.exports = collectionController;
