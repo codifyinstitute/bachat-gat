@@ -130,7 +130,10 @@ const WithdrawSavings = () => {
       console.error("Invalid collection data or empty payments array");
       return;
     }
-    const totsaving = selectedCollectionData.totalSavingsCollected * selectedCollectionData.payments.length || 'N/A';
+    const totsaving = selectedCollectionData.totalSavingsCollected|| 'N/A';
+    // console.log(selectedCollectionData.totalSavingsCollected)
+    // console.log(selectedCollectionData.payments.length )
+    // console.log(collections)
     const data = {
       loanId: selectedLoan,
       groupId: selectedGroup,
@@ -170,24 +173,26 @@ const WithdrawSavings = () => {
     })
       .then((response) => {
         alert('Withdrawal Successful');
-        axios.put(`http://localhost:5000/api/collection/resetsavingamount/${selectedGroup}/${selectedLoan}`, {
-          headers: {
-            Authorization: `Bearer ${crptoken}`,
-            'Content-Type': 'application/json',
-          },
-        })
-          .then((resetResponse) => {
-            console.log('Saving amount reset successfully');
-          })
-          .catch((error) => {
-            console.error('Error resetting saving amount:', error);
-          });
+        // axios.put(`http://localhost:5000/api/collection/resetsavingamount/${selectedGroup}/${selectedLoan}`, {
+        //   headers: {
+        //     Authorization: `Bearer ${crptoken}`,
+        //     'Content-Type': 'application/json',
+        //   },
+        // })
+        //   .then((resetResponse) => {
+        //     alert.log('Saving amount reset successfully');
+        //   })
+        //   .catch((error) => {
+        //     alert('Error resetting saving amount:', error);
+        //   });
       })
       .catch((error) => {
-        alert('Error withdrawing savings', error);
+        if(error){
+          alert('Already withdrawn the saving amount');
+        }else{
+          alert(`Error withdrawing saving ${error}`);
+        }
       });
-    // Log the data or send it to your API
-    // console.log(data);
   };
 
 
