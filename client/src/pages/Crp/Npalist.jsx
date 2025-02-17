@@ -218,7 +218,7 @@ const GroupsList = () => {
                     {memberDetails.map((member) => {
                       // Filter loans that the member is part of
                       const memberLoans = loans
-                        .filter((loan) => loan.repaymentSchedules.some(schedule => schedule.memberId._id === member._id));
+                        .filter((loan) => loan.repaymentSchedules.some(schedule => schedule.memberId?._id === member?._id));
 
                       // Create a Set to store unique installments for this member
                       const uniqueInstallments = new Set();

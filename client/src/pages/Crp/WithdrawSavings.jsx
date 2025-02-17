@@ -13,6 +13,8 @@ const WithdrawSavings = () => {
   const [selectedCollection, setSelectedCollection] = useState("");
   const [groupMembers, setGroupMembers] = useState([]); // State to store group members' details
   const [loanBankDetails, setLoanBankDetails] = useState(null); // State to store loan bank details
+  const [loanTermMonths, setLoanTermMonths] = useState(null); // State for storing termMonths
+
   const [showSavingInvoice, setShowSavingInvoice] = useState(false);
   const [savingInvoiceData, setSavingInvoiceData] = useState({
     date: "",
@@ -54,23 +56,26 @@ const WithdrawSavings = () => {
           },
         })
         .then((response) => {
+          // Filter loans to only those that are "closed" and belong to the selected group
           const closedLoans = response.data.filter(
             (loan) =>
-              loan.status === "closed" &&
-              loan.groupId?._id === selectedGroup
+              loan.status === "closed" && loan.groupId?._id === selectedGroup
           );
-
+  
           if (closedLoans.length > 0) {
-            setLoanBankDetails(closedLoans[0].bankDetails); // Assuming `bankDetails` is part of the loan document
+            // Assuming the loan object has bankDetails and termMonths
+            setLoanBankDetails(closedLoans[0].bankDetails); // Store bank details
+            setLoanTermMonths(closedLoans[0].termMonths);  // Store termMonths
           }
-
-          setLoans(closedLoans); // Set loans data for the selected group
+  
+          setLoans(closedLoans); // Set the loans data for the selected group
         })
         .catch((error) => {
           console.error("Error fetching loans:", error);
         });
     }
   }, [selectedGroup, crptoken]);
+  
 
   // Fetch collections when a loan is selected
   useEffect(() => {
@@ -128,23 +133,28 @@ const WithdrawSavings = () => {
 
   const handleWithdraw = () => {
     // Collect the necessary data
-
+  
     const isConfirmed = window.confirm("Do you want to withdraw the savings?");
     if (!isConfirmed) {
       console.log("Withdrawal canceled by user.");
       return; // Stop the function if user cancels
     }
+  
     // Ensure selectedCollection exists and payments are available
     const selectedCollectionData = collections.find(collection => collection._id === selectedCollection);
-
+  
     if (!selectedCollectionData || !selectedCollectionData.payments || selectedCollectionData.payments.length === 0) {
       console.error("Invalid collection data or empty payments array");
       return;
     }
-    const totsaving = selectedCollectionData.totalSavingsCollected * selectedCollectionData.payments.length || 'N/A';
-    console.log(selectedCollectionData.totalSavingsCollected)
-    console.log(selectedCollectionData.payments.length)
-    console.log(collections)
+  
+    console.log("loan", loanTermMonths);
+  
+    // Use the loan's termMonths to calculate the totalSavingsAmount
+    const totalSavingsAmount = selectedCollectionData.totalSavingsCollected * loanTermMonths || 'N/A';
+    
+    console.log("totalSavingsAmount", totalSavingsAmount);
+  
     const data = {
       loanId: selectedLoan,
       groupId: selectedGroup,
@@ -152,22 +162,25 @@ const WithdrawSavings = () => {
       groupName: groups.find(group => group._id === selectedGroup)?.name,
       loanStatus: 'closed', // Assuming the loan is active when making the withdrawal
       withdrawStatus: 'yes',
-      totalSavingAmount: totsaving || 'N/A',
-
+      totalSavingAmount: totalSavingsAmount, // Calculated total savings amount
+  
       memberList: groupMembers.map((memberObj) => {
         const { member } = memberObj;
-
+  
         // Find the corresponding collection
         const selectedCollectionData = collections.find(collection => collection._id === selectedCollection);
-
+  
         // Filter the payments for the current member
         const memberPayments = selectedCollectionData?.payments.filter(payment => payment.installmentNumber * payment.savingsAmount) || [];
-
+  
+        console.log("first", memberPayments);
+  
         // Calculate the total withdraw amount for the current member by multiplying savingsAmount with installmentNumber
         const withdrawAmount = memberPayments.reduce((total, payment) => {
-          return total + (payment.savingsAmount * payment.installmentNumber); // Multiply savingsAmount by installmentNumber
+          console.log("smt", payment.savingsAmount)
+          return total = (payment.savingsAmount * loanTermMonths); // Multiply savingsAmount by installmentNumber
         }, 0);
-
+  
         return {
           memberId: member._id,
           name: member.name,
@@ -193,7 +206,7 @@ const WithdrawSavings = () => {
         //   },
         // })
         //   .then((resetResponse) => {
-        //     alert.log('Saving amount reset successfully');
+        //     alert('Saving amount reset successfully');
         //   })
         //   .catch((error) => {
         //     alert('Error resetting saving amount:', error);
@@ -207,6 +220,7 @@ const WithdrawSavings = () => {
         }
       });
   };
+  
 
 
 
