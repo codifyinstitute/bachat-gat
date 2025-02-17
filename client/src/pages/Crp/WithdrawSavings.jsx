@@ -130,10 +130,10 @@ const WithdrawSavings = () => {
       console.error("Invalid collection data or empty payments array");
       return;
     }
-    const totsaving = selectedCollectionData.totalSavingsCollected|| 'N/A';
-    // console.log(selectedCollectionData.totalSavingsCollected)
-    // console.log(selectedCollectionData.payments.length )
-    // console.log(collections)
+    const totsaving = selectedCollectionData.totalSavingsCollected * selectedCollectionData.payments.length || 'N/A';
+    console.log(selectedCollectionData.totalSavingsCollected)
+    console.log(selectedCollectionData.payments.length )
+    console.log(collections)
     const data = {
       loanId: selectedLoan,
       groupId: selectedGroup,
