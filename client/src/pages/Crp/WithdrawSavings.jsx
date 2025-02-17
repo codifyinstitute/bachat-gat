@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import SavingInvoice from "../../components/GroupSavingInvoice";
+import { toWords } from "number-to-words";
 
 const WithdrawSavings = () => {
   // State hooks
@@ -11,6 +13,15 @@ const WithdrawSavings = () => {
   const [selectedCollection, setSelectedCollection] = useState("");
   const [groupMembers, setGroupMembers] = useState([]); // State to store group members' details
   const [loanBankDetails, setLoanBankDetails] = useState(null); // State to store loan bank details
+  const [showSavingInvoice, setShowSavingInvoice] = useState(false);
+  const [savingInvoiceData, setSavingInvoiceData] = useState({
+    date: "",
+    amount: "",
+    amountInWords: "",
+    groupName: "",
+    termMonth: "",
+    loanId: ""
+  });
 
   // Fetch groups created by CRP
   const crptoken = localStorage.getItem("crp_token");
@@ -119,10 +130,10 @@ const WithdrawSavings = () => {
     // Collect the necessary data
 
     const isConfirmed = window.confirm("Do you want to withdraw the savings?");
-  if (!isConfirmed) {
-    console.log("Withdrawal canceled by user.");
-    return; // Stop the function if user cancels
-  }
+    if (!isConfirmed) {
+      console.log("Withdrawal canceled by user.");
+      return; // Stop the function if user cancels
+    }
     // Ensure selectedCollection exists and payments are available
     const selectedCollectionData = collections.find(collection => collection._id === selectedCollection);
 
@@ -132,7 +143,7 @@ const WithdrawSavings = () => {
     }
     const totsaving = selectedCollectionData.totalSavingsCollected * selectedCollectionData.payments.length || 'N/A';
     console.log(selectedCollectionData.totalSavingsCollected)
-    console.log(selectedCollectionData.payments.length )
+    console.log(selectedCollectionData.payments.length)
     console.log(collections)
     const data = {
       loanId: selectedLoan,
@@ -141,7 +152,7 @@ const WithdrawSavings = () => {
       groupName: groups.find(group => group._id === selectedGroup)?.name,
       loanStatus: 'closed', // Assuming the loan is active when making the withdrawal
       withdrawStatus: 'yes',
-      totalSavingAmount: totsaving|| 'N/A',
+      totalSavingAmount: totsaving || 'N/A',
 
       memberList: groupMembers.map((memberObj) => {
         const { member } = memberObj;
@@ -165,6 +176,7 @@ const WithdrawSavings = () => {
         };
       })
     };
+    console.log(data)
     axios.post('http://localhost:5000/api/withdraw/', data, {
       headers: {
         Authorization: `Bearer ${crptoken}`,
@@ -173,6 +185,7 @@ const WithdrawSavings = () => {
     })
       .then((response) => {
         alert('Withdrawal Successful');
+        handlesavinginvoice(data.totalSavingAmount,data.groupName,3,data.loanId)
         // axios.put(`http://localhost:5000/api/collection/resetsavingamount/${selectedGroup}/${selectedLoan}`, {
         //   headers: {
         //     Authorization: `Bearer ${crptoken}`,
@@ -187,9 +200,9 @@ const WithdrawSavings = () => {
         //   });
       })
       .catch((error) => {
-        if(error){
+        if (error) {
           alert('Already withdrawn the saving amount');
-        }else{
+        } else {
           alert(`Error withdrawing saving ${error}`);
         }
       });
@@ -202,6 +215,35 @@ const WithdrawSavings = () => {
   // Helper function to truncate long IDs
   const truncateId = (id) => {
     return id.length > 8 ? id.substring(0, 8) + "..." : id;
+  };
+
+  const convertNumberToWords = (number) => {
+    const [intPart, decimalPart] = number.toString().split(".");
+    let words = toWords(parseInt(intPart));
+    words = words.charAt(0).toUpperCase() + words.slice(1);
+    words += decimalPart ? ` Rupees and ${toWords(parseInt(decimalPart))} Paise` : " Rupees Only";
+    return words;
+  };
+
+  const handlesavinginvoice = (amount, group, interestMonth, loanid) => {
+    const currentDate = new Date().toLocaleDateString();
+
+
+
+    setSavingInvoiceData({
+      date: currentDate,
+      amount: amount || "N/A",
+      amountInWords: amount ? convertNumberToWords(amount) : "N/A",
+      groupName: group,
+      termMonth: interestMonth || "N/A",
+      loanId: loanid || "N/A"
+    });
+
+  };
+
+  console.log(savingInvoiceData)
+  const closeSavingInvoice = () => {
+    setShowSavingInvoice(false);
   };
 
   return (
@@ -311,6 +353,19 @@ const WithdrawSavings = () => {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+        {showSavingInvoice && (
+          <div className="fixed inset-0 bg-gray-100 flex justify-center items-center z-50">
+            <div className="relative bg-white p-4 rounded-lg">
+              <button
+                onClick={closeSavingInvoice}
+                className="absolute top-8 right-2 bg-red-500 text-white px-3 py-1 rounded"
+              >
+                X
+              </button>
+              <SavingInvoice data={savingInvoiceData} />
             </div>
           </div>
         )}

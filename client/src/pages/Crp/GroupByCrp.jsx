@@ -176,7 +176,7 @@ const AdminGroupsList = () => {
       }
       const data = await response.json();
 
-      setWithdrawData(data); 
+      setWithdrawData(data);
       const matchedWithdraws = data.map((withdrawItem) => {
         const matchingGroup = groups.find((group) => group._id === withdrawItem.groupId._id);
         if (matchingGroup) {
@@ -268,10 +268,16 @@ const AdminGroupsList = () => {
     return words;
   };
 
-  const handlesavinginvoice = (group, loanid, member, savingAmount, interestMonth) => {
-    const currentDate = new Date().toLocaleDateString();
+  const handlesavinginvoice = (group, loanid, member, savingAmount, interestMonth, withdrawstatus) => {
 
-    console.log(loanid._id)
+    console.log(withdrawstatus)
+    if (savingAmount === null || savingAmount === undefined || isNaN(savingAmount)) {
+      alert("saving amount not available, initialize the collection first");
+      return
+    }
+
+    
+    const currentDate = new Date().toLocaleDateString();
 
     const memberSchedule = loanid.repaymentSchedules.find(schedule =>
       schedule.memberId._id === member._id
@@ -279,6 +285,11 @@ const AdminGroupsList = () => {
 
     if (!memberSchedule) {
       alert("Member not found in repayment schedules.");
+      return;
+    }
+
+    if(!withdrawstatus=='yes' || withdrawstatus === null || withdrawstatus === undefined){
+      alert('withdraw not happened yet!')
       return;
     }
 
@@ -540,11 +551,9 @@ const AdminGroupsList = () => {
                                                     return (
                                                       <React.Fragment key={withdraw._id}>
                                                         {withdraw.memberList.length > 0 && (
-                                                          // <div>
                                                           <p>
                                                             {withdraw.memberList[0]?.withdrawAmount || "N/A"}
                                                           </p>
-                                                          // </div>
                                                         )}
                                                       </React.Fragment>
                                                     );
@@ -590,7 +599,19 @@ const AdminGroupsList = () => {
                                               </tbody>
                                             </table>
                                             <button
-                                              onClick={() => handlesavinginvoice(group, loan, member, savingsData[group._id], loan.termMonths)}
+                                              onClick={() => {
+                                                const matchingWithdraw = matchedWithdrawData.find(
+                                                  withdraw => withdraw.groupId && withdraw.groupId._id === loan.groupId._id
+                                                );
+                                                handlesavinginvoice(
+                                                  group,
+                                                  loan,
+                                                  member,
+                                                  savingsData[group._id],
+                                                  loan.termMonths,
+                                                  matchingWithdraw ? matchingWithdraw.withdrawStatus : null
+                                                );
+                                              }}
                                               className="bg-blue-500 py-1 px-3 text-gray-100 rounded-md mt-3 transition-all duration-150 hover:scale-102 hover:text-white"
                                             >
                                               Print Saving Invoice

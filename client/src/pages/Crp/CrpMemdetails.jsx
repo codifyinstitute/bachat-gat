@@ -9,6 +9,8 @@ const ImageModal = ({ imageUrl, onClose }) => {
     if (imageUrl) {
       const img = new Image();
       img.src = imageUrl;
+      if(img.width<100) img.width=200
+      if(img.height<100) img.height=200
       img.onload = () => {
         setDimensions({
           width: img.width,
@@ -115,6 +117,7 @@ const CrpMemberDetails = () => {
   };
 
   const getFullImageUrl = (imagePath) => {
+    if(imagePath=="https://dummyimage.com/300") return "https://dummyimage.com/500"
     if (!imagePath) return "";
     const relativePath = imagePath
       .replace(/\\/g, "/")
