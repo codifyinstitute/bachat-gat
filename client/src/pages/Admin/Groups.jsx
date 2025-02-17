@@ -3,6 +3,8 @@ import axios from "axios";
 import { Trash2, ChevronDown, ChevronRight } from "lucide-react";
 import LatePayment from '../../components/LatePayment';
 import dayjs from "dayjs";
+import SavingInvoice from "../../components/SavingInvoice";
+import { toWords } from "number-to-words";
 
 const AdminGroupsList = () => {
   const [loansData, setLoansData] = useState([]);
@@ -17,6 +19,17 @@ const AdminGroupsList = () => {
   const [deleteError, setDeleteError] = useState(null);
   const [savingsData, setSavingsData] = useState({});
   const [crpData, setCrpData] = useState([]); // State to store CRP data
+    const [showSavingInvoice, setShowSavingInvoice] = useState(false);
+    const [savingInvoiceData, setSavingInvoiceData] = useState({
+      date: "",
+      membername: "",
+      amount: "",
+      amountInWords: "",
+      savingAmount: "",
+      groupName: "",
+      termMonth: "",
+      loanId:""
+    });
 
 
   const fetchSavingsData = async (groups) => {
@@ -202,6 +215,60 @@ const AdminGroupsList = () => {
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
+
+  const convertNumberToWords = (number) => {
+    const [intPart, decimalPart] = number.toString().split(".");
+    let words = toWords(parseInt(intPart));
+    words = words.charAt(0).toUpperCase() + words.slice(1);
+    words += decimalPart ? ` Rupees and ${toWords(parseInt(decimalPart))} Paise` : " Rupees Only";
+    return words;
+  };
+
+  const handlesavinginvoice = (group, loanid, member, savingAmount, interestMonth) => {
+    const currentDate = new Date().toLocaleDateString();
+
+    console.log(loanid._id)
+
+    const memberSchedule = loanid.repaymentSchedules.find(schedule =>
+      schedule.memberId._id === member._id
+    );
+
+    if (!memberSchedule) {
+      alert("Member not found in repayment schedules.");
+      return;
+    }
+
+    // Check if all installments are paid
+    const allPaid = memberSchedule.installments.every(installment => installment.status === "paid");
+
+    if (!member || !member.name) {
+      alert("Member name is missing!");
+      return;
+    }
+
+    setSavingInvoiceData({
+      date: currentDate,
+      membername: member.name,
+      amount: savingAmount || "N/A",
+      amountInWords: savingAmount ? convertNumberToWords(savingAmount * interestMonth) : "N/A",
+      savingAmount: savingAmount * interestMonth || "N/A",
+      groupName: group.name,
+      termMonth: interestMonth || "N/A",
+      loanId: loanid._id || "N/A"
+    });
+
+    if (allPaid) {
+      setShowSavingInvoice(true);
+    }else{
+      alert('member has not paid all installments')
+    }
+
+  };
+
+  console.log(savingInvoiceData)
+  const closeSavingInvoice = () => {
+    setShowSavingInvoice(false);
+  };
 
   return (
     <div className="container mx-auto p-4 w-full">
@@ -434,6 +501,12 @@ const AdminGroupsList = () => {
                                                 ))}
                                               </tbody>
                                             </table>
+                                            <button
+                                            onClick={() => handlesavinginvoice(group, loan, member, savingsData[group._id], loan.termMonths)}
+                                            className="bg-blue-500 py-1 px-3 text-gray-100 rounded-md mt-3 transition-all duration-150 hover:scale-102 hover:text-white"
+                                          >
+                                            Print Saving Invoice
+                                          </button>
                                           </div>
                                         )}
                                       </div>
@@ -453,6 +526,19 @@ const AdminGroupsList = () => {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+      {showSavingInvoice && (
+        <div className="fixed inset-0 bg-gray-100 flex justify-center items-center z-50">
+          <div className="relative bg-white p-4 rounded-lg">
+            <button
+              onClick={closeSavingInvoice}
+              className="absolute top-8 right-2 bg-red-500 text-white px-3 py-1 rounded"
+            >
+              X
+            </button>
+            <SavingInvoice data={savingInvoiceData} />
+          </div>
         </div>
       )}
     </div>
